@@ -540,7 +540,7 @@ git commit -m "feat: build offline learning workspace"
 - Create: `README.md`
 - Modify: `docs/superpowers/plans/2026-09-26-beginner-ml-roadmap.md`
 
-- [ ] **Step 1: Write README**
+- [x] **Step 1: Write README**
 
 Document:
 
@@ -553,13 +553,13 @@ python3 -m http.server 8010
 
 Explain project scope, directory ownership, offline behavior and how to add a chapter.
 
-- [ ] **Step 2: Start the server**
+- [x] **Step 2: Start the server**
 
 Run: `python3 -m http.server 8010`
 
 Expected: server listens on `http://127.0.0.1:8010/`.
 
-- [ ] **Step 3: Verify HTTP resources**
+- [x] **Step 3: Verify HTTP resources**
 
 Run:
 
@@ -571,7 +571,7 @@ curl -f http://127.0.0.1:8010/vendor/katex/katex.min.js
 
 Expected: all requests return HTTP 200.
 
-- [ ] **Step 4: Run browser acceptance**
+- [x] **Step 4: Run browser acceptance**
 
 At 1440x1000 and 390x844:
 
@@ -584,11 +584,11 @@ At 1440x1000 and 390x844:
 - Open and close each mobile drawer.
 - Confirm no clipped text, overlap, horizontal page overflow, failed resources, or console errors.
 
-- [ ] **Step 5: Capture verification screenshots**
+- [x] **Step 5: Capture verification screenshots**
 
 Save desktop and mobile screenshots under `artifacts/` and inspect them visually.
 
-- [ ] **Step 6: Complete plan checkboxes and commit**
+- [x] **Step 6: Complete plan checkboxes and commit**
 
 ```bash
 git add README.md artifacts docs/superpowers/plans/2026-09-26-beginner-ml-roadmap.md

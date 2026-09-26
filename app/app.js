@@ -397,7 +397,10 @@ function initialize() {
     } else {
       currentSectionId = route.sectionId;
       renderChapterContext(getChapter(route.chapterId));
-      scrollToSection(route.sectionId, readScrollPosition());
+      scrollToSection(
+        route.sectionId,
+        route.sectionId ? readScrollPosition() : 0,
+      );
       if (focusReader) {
         requestAnimationFrame(() => elements.readingPane.focus());
       }
@@ -519,6 +522,21 @@ function initialize() {
     scrollFrame = requestAnimationFrame(updateTocHighlight);
   }
 
+  function restoreInitialRoutePosition() {
+    const expectedHash = location.hash;
+    const restore = () => {
+      if (location.hash !== expectedHash) return;
+      const route = parseRoute(expectedHash);
+      if (!route || route.chapterId !== renderedChapterId) return;
+      scrollToSection(route.sectionId, 0);
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(restore));
+    if (document.fonts?.ready) {
+      void document.fonts.ready.then(() => requestAnimationFrame(restore));
+    }
+  }
+
   document.addEventListener("click", (event) => {
     const target = event.target.closest("[data-action], [data-chapter-link], [data-section-link]");
     if (!target) return;
@@ -610,6 +628,9 @@ function initialize() {
   window.addEventListener("hashchange", () =>
     applyRoute({ focusReader: true }),
   );
+  window.addEventListener("pageshow", restoreInitialRoutePosition, {
+    once: true,
+  });
   window.addEventListener("scroll", scheduleTocHighlight, { passive: true });
   elements.readingPane.addEventListener("scroll", scheduleTocHighlight, {
     passive: true,

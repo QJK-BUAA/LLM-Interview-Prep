@@ -362,6 +362,11 @@ progress::-moz-progress-bar {
   color: var(--muted);
 }
 
+.course-search input::-webkit-search-cancel-button {
+  display: none;
+  appearance: none;
+}
+
 .course-search input:focus {
   border-color: var(--brand);
   outline: 3px solid color-mix(in srgb, var(--brand) 16%, transparent);
@@ -644,6 +649,7 @@ progress::-moz-progress-bar {
 
 .lesson-sections {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 34px;
   margin-top: 42px;
 }
@@ -651,6 +657,7 @@ progress::-moz-progress-bar {
 .lesson-section {
   --section-accent: var(--brand);
   --section-tint: var(--brand-soft);
+  min-width: 0;
   scroll-margin-top: 28px;
   border-top: 1px solid var(--border);
   border-left: 4px solid var(--section-accent);
@@ -805,6 +812,8 @@ progress::-moz-progress-bar {
 
 .code-block {
   position: relative;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   margin: 18px 0;
   overflow: auto;
