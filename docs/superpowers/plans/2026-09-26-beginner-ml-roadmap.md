@@ -292,7 +292,7 @@ git commit -m "content: teach deep learning foundations"
 - Create: `content/chapter-12.js`
 - Modify: `content/catalog.js`
 
-- [ ] **Step 1: Write chapters 08-12**
+- [x] **Step 1: Write chapters 08-12**
 
 Cover:
 
@@ -302,13 +302,13 @@ Cover:
 - 11: numeric formats, parameter/gradient/optimizer/activation memory, mixed precision, checkpointing, ZeRO/FSDP, tensor/pipeline/data parallelism, FlashAttention, KV Cache, prefill/decode and throughput/latency.
 - 12: low-rank intuition, LoRA matrices and initialization, rank/alpha/dropout/target modules, merging, QLoRA/NF4/double quantization/paged optimizer, DoRA/AdaLoRA/rsLoRA and method selection.
 
-- [ ] **Step 2: Validate the part**
+- [x] **Step 2: Validate the part**
 
 Run: `node scripts/validate-content.mjs --range 08-12`
 
 Expected: 5 chapters pass and all prerequisite links resolve.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add content/chapter-{08,09,10,11,12}.js content/catalog.js
