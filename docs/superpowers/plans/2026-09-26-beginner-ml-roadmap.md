@@ -323,7 +323,7 @@ git commit -m "content: add transformer and llm systems path"
 - Create: `content/chapter-15.js`
 - Modify: `content/catalog.js`
 
-- [ ] **Step 1: Write chapters 13-15**
+- [x] **Step 1: Write chapters 13-15**
 
 Cover:
 
@@ -331,13 +331,13 @@ Cover:
 - 14: tabular Q-Learning update, SARSA contrast, exploration, function approximation, DQN loss, replay buffer, target network, deadly triad, Double/Dueling DQN and why value-based methods poorly fit LLM token spaces.
 - 15: log-derivative trick, REINFORCE, baseline as control variate, actor-critic, TD residual, GAE bias-variance trade-off, entropy bonus and token-level policy-gradient mapping.
 
-- [ ] **Step 2: Validate the part**
+- [x] **Step 2: Validate the part**
 
 Run: `node scripts/validate-content.mjs --range 13-15`
 
 Expected: 3 chapters pass; formulas define state, action, return, policy, value, advantage and likelihood ratio consistently.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add content/chapter-{13,14,15}.js content/catalog.js
