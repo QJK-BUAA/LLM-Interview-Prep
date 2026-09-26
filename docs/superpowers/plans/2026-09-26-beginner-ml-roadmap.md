@@ -449,17 +449,17 @@ git commit -m "feat: persist local learning progress"
 - Create: `tests/renderer.test.mjs`
 - Copy: `vendor/katex/`
 
-- [ ] **Step 1: Write renderer tests**
+- [x] **Step 1: Write renderer tests**
 
 Test HTML escaping, fenced code preservation, table rendering, math placeholders, flow/matrix/comparison diagrams, glossary annotation, interview-mode filtering and quiz answer disclosure markup.
 
-- [ ] **Step 2: Verify failure**
+- [x] **Step 2: Verify failure**
 
 Run: `node --test tests/renderer.test.mjs`
 
 Expected: FAIL because renderer exports are missing.
 
-- [ ] **Step 3: Implement pure rendering functions**
+- [x] **Step 3: Implement pure rendering functions**
 
 Export:
 
@@ -473,11 +473,11 @@ export function renderChapter(chapter, state) {}
 
 Do not interpolate unescaped source content into attributes. KaTeX failures return `<code class="math-fallback">...</code>`.
 
-- [ ] **Step 4: Add glossary**
+- [x] **Step 4: Add glossary**
 
 Include concise definitions for at least 60 recurring terms, including tensor, gradient, logit, token, policy, trajectory, return, advantage, critic, on-policy, off-policy, KL, RLVR, OPD, OPSD and privileged information.
 
-- [ ] **Step 5: Copy local KaTeX assets**
+- [x] **Step 5: Copy local KaTeX assets**
 
 Run:
 
@@ -486,7 +486,7 @@ mkdir -p vendor
 cp -R ../ml-notes/static/katex vendor/katex
 ```
 
-- [ ] **Step 6: Test and commit**
+- [x] **Step 6: Test and commit**
 
 Run: `npm test`
 
