@@ -3,6 +3,9 @@ import chapter01 from "./chapter-01.js";
 import chapter02 from "./chapter-02.js";
 import chapter03 from "./chapter-03.js";
 import chapter04 from "./chapter-04.js";
+import chapter05 from "./chapter-05.js";
+import chapter06 from "./chapter-06.js";
+import chapter07 from "./chapter-07.js";
 
 export const CHAPTERS = Object.freeze([
   chapter00,
@@ -10,6 +13,9 @@ export const CHAPTERS = Object.freeze([
   chapter02,
   chapter03,
   chapter04,
+  chapter05,
+  chapter06,
+  chapter07,
 ]);
 
 export function getChapter(idOrSlug) {

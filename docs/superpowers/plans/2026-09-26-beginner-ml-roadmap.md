@@ -259,7 +259,7 @@ git commit -m "content: add beginner foundations"
 - Create: `content/chapter-07.js`
 - Modify: `content/catalog.js`
 
-- [ ] **Step 1: Write chapters 05-07**
+- [x] **Step 1: Write chapters 05-07**
 
 Cover:
 
@@ -269,13 +269,13 @@ Cover:
 
 Use shape tables in each architecture and distinguish optimizer clipping from PPO clipping.
 
-- [ ] **Step 2: Validate the part**
+- [x] **Step 2: Validate the part**
 
 Run: `node scripts/validate-content.mjs --range 05-07`
 
 Expected: 3 chapters pass all teaching-contract checks.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add content/chapter-05.js content/chapter-06.js content/chapter-07.js content/catalog.js
