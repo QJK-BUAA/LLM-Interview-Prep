@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="从机器学习基础到 2026 年 LLM 后训练的 21 章离线学习路线"
+    >
+    <meta name="theme-color" content="#ffffff">
+    <title>ML Roadmap | 机器学习与 LLM 后训练</title>
+    <link rel="stylesheet" href="./vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="./app/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#chapter-root">跳到正文</a>
+
+    <header class="app-header">
+      <button
+        class="icon-button mobile-only"
+        type="button"
+        data-action="open-courses"
+        aria-label="打开课程目录"
+        title="打开课程目录"
+        aria-controls="course-nav"
+        aria-expanded="false"
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+
+      <a class="brand" href="#00" aria-label="ML Roadmap 首页">
+        <span class="brand-mark" aria-hidden="true">ML</span>
+        <span class="brand-copy">
+          <strong>ML Roadmap</strong>
+          <small>从地基到后训练</small>
+        </span>
+      </a>
+
+      <div class="overall-progress" aria-label="总体学习进度">
+        <div class="progress-label">
+          <span>总进度</span>
+          <output id="overall-progress-label">0 / 189</output>
+        </div>
+        <progress id="overall-progress" max="189" value="0">0%</progress>
+      </div>
+
+      <div class="mode-switch" role="group" aria-label="阅读模式">
+        <button
+          type="button"
+          data-action="set-mode"
+          data-mode="learn"
+          aria-pressed="true"
+        >
+          学习
+        </button>
+        <button
+          type="button"
+          data-action="set-mode"
+          data-mode="interview"
+          aria-pressed="false"
+        >
+          面试
+        </button>
+      </div>
+
+      <button
+        class="icon-button"
+        id="theme-toggle"
+        type="button"
+        data-action="toggle-theme"
+        aria-label="切换到深色主题"
+        title="切换到深色主题"
+      >
+        <span aria-hidden="true">◐</span>
+      </button>
+
+      <button
+        class="icon-button toc-toggle"
+        type="button"
+        data-action="open-toc"
+        aria-label="打开本章目录"
+        title="打开本章目录"
+        aria-controls="chapter-sidebar"
+        aria-expanded="false"
+      >
+        <span aria-hidden="true">☷</span>
+      </button>
+    </header>
+
+    <div class="workspace">
+      <nav
+        class="course-sidebar drawer"
+        id="course-nav"
+        aria-label="课程目录"
+      >
+        <div class="drawer-heading">
+          <div>
+            <p class="eyebrow">完整路线</p>
+            <h2>21 章课程</h2>
+          </div>
+          <button
+            class="icon-button drawer-close mobile-only"
+            type="button"
+            data-action="close-drawers"
+            aria-label="关闭课程目录"
+            title="关闭"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+
+        <div class="course-search" role="search">
+          <label class="visually-hidden" for="course-search-input">
+            搜索课程全文
+          </label>
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            id="course-search-input"
+            type="search"
+            placeholder="搜索标题、术语或正文"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button
+            class="search-clear"
+            type="button"
+            data-action="clear-search"
+            aria-label="清除搜索"
+            title="清除搜索"
+            hidden
+          >
+            ×
+          </button>
+        </div>
+        <p class="search-status" id="search-status" aria-live="polite"></p>
+        <div class="course-list" id="course-list"></div>
+      </nav>
+
+      <main class="reading-pane" id="reading-pane" tabindex="-1">
+        <div id="chapter-root">
+          <div class="loading-state" role="status">正在载入课程…</div>
+        </div>
+      </main>
+
+      <aside
+        class="chapter-sidebar drawer"
+        id="chapter-sidebar"
+        aria-label="本章导航"
+      >
+        <div class="drawer-heading">
+          <div>
+            <p class="eyebrow">当前章节</p>
+            <h2 id="chapter-sidebar-title">本章目录</h2>
+          </div>
+          <button
+            class="icon-button drawer-close"
+            type="button"
+            data-action="close-drawers"
+            aria-label="关闭本章目录"
+            title="关闭"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div id="chapter-context"></div>
+      </aside>
+    </div>
+
+    <button
+      class="drawer-backdrop"
+      type="button"
+      data-action="close-drawers"
+      aria-label="关闭侧边栏"
+      tabindex="-1"
+    ></button>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <noscript>
+      <p class="noscript-message">此知识库需要启用 JavaScript 才能读取章节。</p>
+    </noscript>
+    <script defer src="./vendor/katex/katex.min.js"></script>
+    <script type="module" src="./app/app.js"></script>
+  </body>
+</html>

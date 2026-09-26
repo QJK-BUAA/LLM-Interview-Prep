@@ -504,19 +504,19 @@ git commit -m "feat: render lessons diagrams and formulas"
 - Create: `app/app.js`
 - Create: `app/styles.css`
 
-- [ ] **Step 1: Build the semantic shell**
+- [x] **Step 1: Build the semantic shell**
 
 Use `header`, `nav`, `main`, `article`, and `aside`. Provide icon buttons with `aria-label` and `title`, a search input with label, a two-state segmented mode control, a stable progress meter and mobile drawers.
 
-- [ ] **Step 2: Implement controller behavior**
+- [x] **Step 2: Implement controller behavior**
 
 Load the catalog, parse `#chapter/section`, render grouped navigation, filter search results, render the selected chapter, wire section completion, preserve scroll restoration, copy code, theme, mode, drawers and invalid-route recovery.
 
-- [ ] **Step 3: Implement responsive styling**
+- [x] **Step 3: Implement responsive styling**
 
 Use three columns above 1180px, two columns from 760px to 1179px, and one column with drawers below 760px. Add distinct styles for intuition, examples, derivations, pitfalls, comparisons, interviews and quizzes. Keep cards at 8px radius or less.
 
-- [ ] **Step 4: Run static checks**
+- [x] **Step 4: Run static checks**
 
 Run:
 
@@ -527,7 +527,7 @@ npm run validate
 
 Expected: all tests pass and 21 chapters validate.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add index.html app/app.js app/styles.css
