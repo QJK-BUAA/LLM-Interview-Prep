@@ -409,7 +409,7 @@ git commit -m "content: complete llm post-training curriculum"
 - Create: `app/store.js`
 - Create: `tests/store.test.mjs`
 
-- [ ] **Step 1: Write state tests**
+- [x] **Step 1: Write state tests**
 
 Test defaults, invalid JSON recovery, unknown chapter removal, section toggling, mode normalization, and storage write failures.
 
@@ -420,17 +420,17 @@ test("falls back when stored JSON is invalid", () => {
 });
 ```
 
-- [ ] **Step 2: Verify failure**
+- [x] **Step 2: Verify failure**
 
 Run: `node --test tests/store.test.mjs`
 
 Expected: FAIL because `app/store.js` is missing.
 
-- [ ] **Step 3: Implement state module**
+- [x] **Step 3: Implement state module**
 
 Export `DEFAULT_STATE`, `loadState`, `saveState`, `toggleSection`, `setMode`, `setTheme`, and `getProgress`. Keep an in-memory fallback when the Storage API throws.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 Run: `npm test`
 
