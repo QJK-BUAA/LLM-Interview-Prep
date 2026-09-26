@@ -354,17 +354,17 @@ git commit -m "content: build reinforcement learning foundations"
 - Create: `content/chapter-20.js`
 - Modify: `content/catalog.js`
 
-- [ ] **Step 1: Write PPO and GRPO family chapters**
+- [x] **Step 1: Write PPO and GRPO family chapters**
 
 Chapter 16 covers reward modeling, four-model RLHF, importance sampling, TRPO motivation, PPO penalty/clip, GAE, KL roles, training loop and failure modes.
 
 Chapter 17 covers GRPO group baseline, critic removal, token/sequence aggregation, RLVR, zero-variance groups, DAPO, Dr.GRPO, GSPO, RLOO, REINFORCE++, clipping and length bias.
 
-- [ ] **Step 2: Write preference optimization**
+- [x] **Step 2: Write preference optimization**
 
 Chapter 18 derives DPO from KL-regularized reward maximization and Bradley-Terry preference likelihood. It then compares IPO, KTO, ORPO, SimPO, online/iterative DPO and step-level variants without presenting all variants as interchangeable.
 
-- [ ] **Step 3: Write the OPD and OPSD chapter**
+- [x] **Step 3: Write the OPD and OPSD chapter**
 
 Chapter 19 must include the full design requirements:
 
@@ -377,11 +377,11 @@ OPSD: student trajectory -> same model + privileged context (on-policy, dense)
 
 Derive the per-token teacher-student objective, explain KL direction, show training pseudocode, compare compute/memory, and cover information leakage, teacher mismatch, long-CoT destabilization, Purified OPSD, RLSD, H2SD and Lightning OPD with primary-source links.
 
-- [ ] **Step 4: Write the 2026 synthesis**
+- [x] **Step 4: Write the 2026 synthesis**
 
 Chapter 20 organizes methods by data origin, feedback granularity, teacher requirement, exploration, credit assignment, online/offline status, compute cost and failure mode. Include a method-selection decision tree and at least 20 interview questions spanning chapters 13-20.
 
-- [ ] **Step 5: Validate all content**
+- [x] **Step 5: Validate all content**
 
 Run: `npm run validate`
 
@@ -396,7 +396,7 @@ OPD coverage: PASS
 OPSD coverage: PASS
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add content/chapter-{16,17,18,19,20}.js content/catalog.js
