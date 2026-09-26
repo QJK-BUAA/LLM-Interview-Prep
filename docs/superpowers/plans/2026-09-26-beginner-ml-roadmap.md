@@ -100,7 +100,7 @@ export const REQUIRED_SECTION_TYPES = [
 - Create: `content/schema.js`
 - Create: `tests/schema.test.mjs`
 
-- [ ] **Step 1: Write the failing schema tests**
+- [x] **Step 1: Write the failing schema tests**
 
 ```js
 import test from "node:test";
@@ -159,13 +159,13 @@ test("rejects missing teaching layers and short quizzes", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and verify failure**
+- [x] **Step 2: Run the test and verify failure**
 
 Run: `node --test tests/schema.test.mjs`
 
 Expected: FAIL because `content/schema.js` does not exist.
 
-- [ ] **Step 3: Implement the schema and package scripts**
+- [x] **Step 3: Implement the schema and package scripts**
 
 Implement `validateChapter(chapter)` to check metadata, unique section IDs, all required types, three or more quiz questions, valid diagram nodes, absolute HTTP(S) source URLs, and non-empty body text.
 
@@ -182,13 +182,13 @@ Implement `validateChapter(chapter)` to check metadata, unique section IDs, all 
 }
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `npm test`
 
 Expected: all schema tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add package.json content/schema.js tests/schema.test.mjs
@@ -206,7 +206,7 @@ git commit -m "test: define chapter content contract"
 - Create: `content/catalog.js`
 - Create: `scripts/validate-content.mjs`
 
-- [ ] **Step 1: Add catalog validation before chapter content**
+- [x] **Step 1: Add catalog validation before chapter content**
 
 The script imports `CHAPTERS`, calls `validateChapter` for every chapter, and checks:
 
@@ -220,13 +220,13 @@ assert.deepEqual(CHAPTERS.map((chapter) => chapter.id), [
 
 Without `--range`, it also requires exactly 21 ordered chapter IDs. With `--range 00-04`, it validates only the requested existing chapters and deliberately skips the final count check. Both modes reject duplicate slugs, duplicate section IDs, missing prerequisite IDs, placeholder markers, and chapters with fewer than 1,800 Chinese characters.
 
-- [ ] **Step 2: Verify validation fails**
+- [x] **Step 2: Verify validation fails**
 
 Run: `npm run validate`
 
 Expected: FAIL because the 21 chapters are not present.
 
-- [ ] **Step 3: Write chapters 00-04**
+- [x] **Step 3: Write chapters 00-04**
 
 Write every chapter against the shared contract. Include:
 
@@ -238,13 +238,13 @@ Write every chapter against the shared contract. Include:
 
 Each chapter must use a distinct hand-calculable numeric example and define every symbol before use.
 
-- [ ] **Step 4: Run targeted checks**
+- [x] **Step 4: Run targeted checks**
 
 Run: `node scripts/validate-content.mjs --range 00-04`
 
 Expected: chapters 00-04 pass; global count remains incomplete until later tasks.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add content/chapter-0*.js content/catalog.js scripts/validate-content.mjs
