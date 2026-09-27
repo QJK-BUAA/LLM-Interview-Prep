@@ -1,0 +1,466 @@
+{
+  "chapters": [
+    {
+      "id": "00",
+      "title": "学习地图",
+      "sections": 9,
+      "han": 2325,
+      "quiz": 3,
+      "sources": 4,
+      "prerequisites": []
+    },
+    {
+      "id": "01",
+      "title": "Python、张量与 Shape",
+      "sections": 9,
+      "han": 1530,
+      "quiz": 3,
+      "sources": 2,
+      "prerequisites": [
+        "00"
+      ]
+    },
+    {
+      "id": "02",
+      "title": "线性代数与微积分",
+      "sections": 9,
+      "han": 1692,
+      "quiz": 3,
+      "sources": 2,
+      "prerequisites": [
+        "01"
+      ]
+    },
+    {
+      "id": "03",
+      "title": "概率、统计与信息论",
+      "sections": 9,
+      "han": 1720,
+      "quiz": 3,
+      "sources": 3,
+      "prerequisites": [
+        "02"
+      ]
+    },
+    {
+      "id": "04",
+      "title": "机器学习任务、训练流程与评估",
+      "sections": 9,
+      "han": 1856,
+      "quiz": 3,
+      "sources": 3,
+      "prerequisites": [
+        "03"
+      ]
+    },
+    {
+      "id": "05",
+      "title": "神经网络、计算图与反向传播",
+      "sections": 9,
+      "han": 1556,
+      "quiz": 3,
+      "sources": 2,
+      "prerequisites": [
+        "02",
+        "03"
+      ]
+    },
+    {
+      "id": "06",
+      "title": "优化、初始化、归一化与正则化",
+      "sections": 9,
+      "han": 1666,
+      "quiz": 3,
+      "sources": 3,
+      "prerequisites": [
+        "05"
+      ]
+    },
+    {
+      "id": "07",
+      "title": "CNN、RNN、LSTM 与序列建模",
+      "sections": 9,
+      "han": 1765,
+      "quiz": 3,
+      "sources": 3,
+      "prerequisites": [
+        "05",
+        "06"
+      ]
+    },
+    {
+      "id": "08",
+      "title": "Tokenization 与 Embedding",
+      "sections": 9,
+      "han": 1933,
+      "quiz": 4,
+      "sources": 4,
+      "prerequisites": [
+        "01",
+        "03",
+        "05"
+      ]
+    },
+    {
+      "id": "09",
+      "title": "Transformer 从零到完整前向过程",
+      "sections": 9,
+      "han": 1512,
+      "quiz": 4,
+      "sources": 3,
+      "prerequisites": [
+        "01",
+        "05",
+        "08"
+      ]
+    },
+    {
+      "id": "10",
+      "title": "现代 LLM 组件",
+      "sections": 9,
+      "han": 1825,
+      "quiz": 4,
+      "sources": 8,
+      "prerequisites": [
+        "06",
+        "09"
+      ]
+    },
+    {
+      "id": "11",
+      "title": "训练显存、并行与推理系统",
+      "sections": 9,
+      "han": 2128,
+      "quiz": 4,
+      "sources": 5,
+      "prerequisites": [
+        "06",
+        "09",
+        "10"
+      ]
+    },
+    {
+      "id": "12",
+      "title": "LoRA、QLoRA 与参数高效微调",
+      "sections": 9,
+      "han": 1630,
+      "quiz": 4,
+      "sources": 5,
+      "prerequisites": [
+        "02",
+        "06",
+        "11"
+      ]
+    },
+    {
+      "id": "13",
+      "title": "MDP、回报、价值函数与贝尔曼方程",
+      "sections": 9,
+      "han": 1774,
+      "quiz": 4,
+      "sources": 3,
+      "prerequisites": [
+        "03",
+        "04"
+      ]
+    },
+    {
+      "id": "14",
+      "title": "Q-Learning、SARSA 与 DQN",
+      "sections": 9,
+      "han": 1629,
+      "quiz": 4,
+      "sources": 4,
+      "prerequisites": [
+        "05",
+        "13"
+      ]
+    },
+    {
+      "id": "15",
+      "title": "REINFORCE、Actor-Critic 与 GAE",
+      "sections": 9,
+      "han": 1578,
+      "quiz": 4,
+      "sources": 4,
+      "prerequisites": [
+        "02",
+        "03",
+        "13",
+        "14"
+      ]
+    },
+    {
+      "id": "16",
+      "title": "PPO、奖励模型与经典 RLHF",
+      "sections": 9,
+      "han": 1814,
+      "quiz": 4,
+      "sources": 5,
+      "prerequisites": [
+        "11",
+        "15"
+      ]
+    },
+    {
+      "id": "17",
+      "title": "GRPO、DAPO、Dr.GRPO 与 RLOO",
+      "sections": 9,
+      "han": 2060,
+      "quiz": 4,
+      "sources": 6,
+      "prerequisites": [
+        "15",
+        "16"
+      ]
+    },
+    {
+      "id": "18",
+      "title": "DPO 与偏好优化家族",
+      "sections": 9,
+      "han": 1635,
+      "quiz": 4,
+      "sources": 7,
+      "prerequisites": [
+        "03",
+        "08",
+        "16"
+      ]
+    },
+    {
+      "id": "19",
+      "title": "OPD、OPSD 与跨阶段蒸馏",
+      "sections": 9,
+      "han": 2234,
+      "quiz": 6,
+      "sources": 8,
+      "prerequisites": [
+        "03",
+        "15",
+        "17",
+        "18"
+      ]
+    },
+    {
+      "id": "20",
+      "title": "VAPO、CISPO、GSPO 与 SAPO",
+      "sections": 9,
+      "han": 3676,
+      "quiz": 6,
+      "sources": 14,
+      "prerequisites": [
+        "15",
+        "16",
+        "17"
+      ]
+    },
+    {
+      "id": "21",
+      "title": "后训练数据工程：获取、验证、课程与回灌",
+      "sections": 9,
+      "han": 5085,
+      "quiz": 6,
+      "sources": 18,
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20"
+      ]
+    },
+    {
+      "id": "22",
+      "title": "工业案例 I：DeepSeek、Qwen 与 Seed",
+      "sections": 9,
+      "han": 5146,
+      "quiz": 7,
+      "sources": 15,
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21"
+      ]
+    },
+    {
+      "id": "23",
+      "title": "工业案例 II：Kimi、MiniMax、GLM 与闭源模型",
+      "sections": 9,
+      "han": 5624,
+      "quiz": 8,
+      "sources": 17,
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22"
+      ]
+    },
+    {
+      "id": "24",
+      "title": "跨模型经验、技术演进与方法选择",
+      "sections": 9,
+      "han": 2827,
+      "quiz": 5,
+      "sources": 6,
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23"
+      ]
+    },
+    {
+      "id": "25",
+      "title": "Agentic RL：从生成答案到环境交互",
+      "sections": 9,
+      "han": 4224,
+      "quiz": 6,
+      "sources": 4,
+      "prerequisites": [
+        "15",
+        "16",
+        "17"
+      ]
+    },
+    {
+      "id": "26",
+      "title": "Agentic 奖励设计与训练稳定性",
+      "sections": 9,
+      "han": 5777,
+      "quiz": 8,
+      "sources": 15,
+      "prerequisites": [
+        "17",
+        "20",
+        "25"
+      ]
+    },
+    {
+      "id": "27",
+      "title": "探索与信用分配",
+      "sections": 9,
+      "han": 4886,
+      "quiz": 6,
+      "sources": 12,
+      "prerequisites": [
+        "15",
+        "17",
+        "25",
+        "26"
+      ]
+    },
+    {
+      "id": "28",
+      "title": "环境合成与训练系统",
+      "sections": 9,
+      "han": 5215,
+      "quiz": 7,
+      "sources": 16,
+      "prerequisites": [
+        "11",
+        "17",
+        "23",
+        "25",
+        "26",
+        "27"
+      ]
+    },
+    {
+      "id": "29",
+      "title": "Agentic RL 全景、路线判断与综合面试",
+      "sections": 9,
+      "han": 2946,
+      "quiz": 5,
+      "sources": 7,
+      "prerequisites": [
+        "24",
+        "25",
+        "26",
+        "27",
+        "28"
+      ]
+    }
+  ],
+  "sourceDocuments": 37,
+  "anchors": 61,
+  "han": 81268,
+  "questions": 138,
+  "parts": [
+    {
+      "name": "起点",
+      "chapters": [
+        "00"
+      ]
+    },
+    {
+      "name": "数学与机器学习地基",
+      "chapters": [
+        "01",
+        "02",
+        "03",
+        "04"
+      ]
+    },
+    {
+      "name": "深度学习地基",
+      "chapters": [
+        "05",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "name": "LLM 主线",
+      "chapters": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "12"
+      ]
+    },
+    {
+      "name": "强化学习地基",
+      "chapters": [
+        "13",
+        "14",
+        "15"
+      ]
+    },
+    {
+      "name": "LLM 后训练",
+      "chapters": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24"
+      ]
+    },
+    {
+      "name": "Agentic RL",
+      "chapters": [
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ]
+    }
+  ]
+}

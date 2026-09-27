@@ -1,0 +1,6961 @@
+{
+  "timestamp": "2026-09-27T10:06:28.706Z",
+  "viewports": [
+    {
+      "courseLabel": "30 章课程",
+      "nav": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "results": [
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 15,
+          "headerOverlap": false,
+          "id": "00",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "00",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 54,
+          "headerOverlap": false,
+          "id": "01",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "01",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 39,
+          "headerOverlap": false,
+          "id": "02",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "02",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 38,
+          "headerOverlap": false,
+          "id": "03",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "03",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 9,
+          "headerOverlap": false,
+          "id": "04",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "04",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 33,
+          "headerOverlap": false,
+          "id": "05",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "05",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 22,
+          "headerOverlap": false,
+          "id": "06",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "06",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 30,
+          "headerOverlap": false,
+          "id": "07",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "07",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 30,
+          "headerOverlap": false,
+          "id": "08",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "08",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 65,
+          "headerOverlap": false,
+          "id": "09",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "09",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 21,
+          "headerOverlap": false,
+          "id": "10",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "10",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 18,
+          "headerOverlap": false,
+          "id": "11",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "11",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 46,
+          "headerOverlap": false,
+          "id": "12",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "12",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 47,
+          "headerOverlap": false,
+          "id": "13",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "13",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 33,
+          "headerOverlap": false,
+          "id": "14",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "14",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 31,
+          "headerOverlap": false,
+          "id": "15",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "15",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 16,
+          "headerOverlap": false,
+          "id": "16",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "16",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 28,
+          "headerOverlap": false,
+          "id": "17",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "17",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 23,
+          "headerOverlap": false,
+          "id": "18",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "18",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 23,
+          "headerOverlap": false,
+          "id": "19",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "19",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 12,
+          "fallback": 0,
+          "formulaCount": 90,
+          "headerOverlap": false,
+          "id": "20",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "20",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 11,
+          "fallback": 0,
+          "formulaCount": 39,
+          "headerOverlap": false,
+          "id": "21",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "21",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 35,
+          "headerOverlap": false,
+          "id": "22",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "rendered": "22",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 44,
+          "headerOverlap": false,
+          "id": "23",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "rendered": "23",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 19,
+          "headerOverlap": false,
+          "id": "24",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 5,
+          "readerOverflow": false,
+          "rendered": "24",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 50,
+          "headerOverlap": false,
+          "id": "25",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "25",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 62,
+          "headerOverlap": false,
+          "id": "26",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "rendered": "26",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 56,
+          "headerOverlap": false,
+          "id": "27",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "27",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 50,
+          "headerOverlap": false,
+          "id": "28",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "rendered": "28",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 17,
+          "headerOverlap": false,
+          "id": "29",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 5,
+          "readerOverflow": false,
+          "rendered": "29",
+          "sections": 9
+        }
+      ],
+      "totalProgress": 270,
+      "viewport": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "courseLabel": "30 章课程",
+      "nav": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "results": [
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 15,
+          "headerOverlap": false,
+          "id": "00",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "00",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 54,
+          "headerOverlap": false,
+          "id": "01",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "01",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 39,
+          "headerOverlap": false,
+          "id": "02",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "02",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 38,
+          "headerOverlap": false,
+          "id": "03",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "03",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 9,
+          "headerOverlap": false,
+          "id": "04",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "04",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 33,
+          "headerOverlap": false,
+          "id": "05",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "05",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 22,
+          "headerOverlap": false,
+          "id": "06",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "06",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 30,
+          "headerOverlap": false,
+          "id": "07",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "07",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 30,
+          "headerOverlap": false,
+          "id": "08",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "08",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 65,
+          "headerOverlap": false,
+          "id": "09",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "09",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 21,
+          "headerOverlap": false,
+          "id": "10",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "10",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 18,
+          "headerOverlap": false,
+          "id": "11",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "11",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 46,
+          "headerOverlap": false,
+          "id": "12",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "12",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 47,
+          "headerOverlap": false,
+          "id": "13",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "13",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 33,
+          "headerOverlap": false,
+          "id": "14",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "14",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 31,
+          "headerOverlap": false,
+          "id": "15",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "15",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 16,
+          "headerOverlap": false,
+          "id": "16",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "16",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 28,
+          "headerOverlap": false,
+          "id": "17",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "17",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 23,
+          "headerOverlap": false,
+          "id": "18",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "18",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 23,
+          "headerOverlap": false,
+          "id": "19",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "19",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 12,
+          "fallback": 0,
+          "formulaCount": 90,
+          "headerOverlap": false,
+          "id": "20",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "20",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 11,
+          "fallback": 0,
+          "formulaCount": 39,
+          "headerOverlap": false,
+          "id": "21",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "21",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 35,
+          "headerOverlap": false,
+          "id": "22",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "rendered": "22",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 44,
+          "headerOverlap": false,
+          "id": "23",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "rendered": "23",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 19,
+          "headerOverlap": false,
+          "id": "24",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 5,
+          "readerOverflow": false,
+          "rendered": "24",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 50,
+          "headerOverlap": false,
+          "id": "25",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "25",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 62,
+          "headerOverlap": false,
+          "id": "26",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "rendered": "26",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 56,
+          "headerOverlap": false,
+          "id": "27",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "27",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 50,
+          "headerOverlap": false,
+          "id": "28",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "rendered": "28",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 17,
+          "headerOverlap": false,
+          "id": "29",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 5,
+          "readerOverflow": false,
+          "rendered": "29",
+          "sections": 9
+        }
+      ],
+      "totalProgress": 270,
+      "viewport": [
+        900,
+        900
+      ]
+    },
+    {
+      "courseLabel": "30 章课程",
+      "nav": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "results": [
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 15,
+          "headerOverlap": false,
+          "id": "00",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "00",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 54,
+          "headerOverlap": false,
+          "id": "01",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "01",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 39,
+          "headerOverlap": false,
+          "id": "02",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "02",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 38,
+          "headerOverlap": false,
+          "id": "03",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "03",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 9,
+          "headerOverlap": false,
+          "id": "04",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "04",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 33,
+          "headerOverlap": false,
+          "id": "05",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "05",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 22,
+          "headerOverlap": false,
+          "id": "06",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "06",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 30,
+          "headerOverlap": false,
+          "id": "07",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 3,
+          "readerOverflow": false,
+          "rendered": "07",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 30,
+          "headerOverlap": false,
+          "id": "08",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "08",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 65,
+          "headerOverlap": false,
+          "id": "09",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "09",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 21,
+          "headerOverlap": false,
+          "id": "10",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "10",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 18,
+          "headerOverlap": false,
+          "id": "11",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "11",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 46,
+          "headerOverlap": false,
+          "id": "12",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "12",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 47,
+          "headerOverlap": false,
+          "id": "13",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "13",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 33,
+          "headerOverlap": false,
+          "id": "14",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "14",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 31,
+          "headerOverlap": false,
+          "id": "15",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "15",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 16,
+          "headerOverlap": false,
+          "id": "16",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "16",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 28,
+          "headerOverlap": false,
+          "id": "17",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "17",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 23,
+          "headerOverlap": false,
+          "id": "18",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 4,
+          "readerOverflow": false,
+          "rendered": "18",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 23,
+          "headerOverlap": false,
+          "id": "19",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "19",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 12,
+          "fallback": 0,
+          "formulaCount": 90,
+          "headerOverlap": false,
+          "id": "20",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "20",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 11,
+          "fallback": 0,
+          "formulaCount": 39,
+          "headerOverlap": false,
+          "id": "21",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "21",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 35,
+          "headerOverlap": false,
+          "id": "22",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "rendered": "22",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 44,
+          "headerOverlap": false,
+          "id": "23",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "rendered": "23",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 19,
+          "headerOverlap": false,
+          "id": "24",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 5,
+          "readerOverflow": false,
+          "rendered": "24",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 50,
+          "headerOverlap": false,
+          "id": "25",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "25",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 62,
+          "headerOverlap": false,
+          "id": "26",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "rendered": "26",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 56,
+          "headerOverlap": false,
+          "id": "27",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "rendered": "27",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 50,
+          "headerOverlap": false,
+          "id": "28",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "rendered": "28",
+          "sections": 9
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 17,
+          "headerOverlap": false,
+          "id": "29",
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 5,
+          "readerOverflow": false,
+          "rendered": "29",
+          "sections": 9
+        }
+      ],
+      "totalProgress": 270,
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  ],
+  "console": {
+    "success": true,
+    "data": {
+      "messages": []
+    },
+    "error": null
+  },
+  "network": [
+    {
+      "url": "http://127.0.0.1:8010/?acceptance=v2",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=900",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=900",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?fix=jump",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?reload=jump",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 304,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?quiz=v2",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 304,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=900",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=900",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 304,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=900",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=900",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?audit=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/?capture=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8010/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8010/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    }
+  ],
+  "layoutPassed": true
+}

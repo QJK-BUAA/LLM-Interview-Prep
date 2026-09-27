@@ -27,38 +27,38 @@ User approved the design and explicitly requested immediate implementation. No a
 
 ## Task 1: Freeze evidence and establish coverage
 
-- [ ] Compare local upstream SHA and all 37 markdown paths to the approved spec; retain file hashes.
-- [ ] Verify key definitions using original papers: DAPO 2503.14476, VAPO 2504.05118, MiniMax-M1 2506.13585, GSPO 2507.18071, SAPO 2511.20347.
-- [ ] Verify industrial/Agentic references where used. Do not repeat unverified scores, affiliation, “first”, or universal convergence claims.
-- [ ] Save a correction ledger with source claim, verified replacement, primary URL and evidence excerpt. Cover CISPO/GSPO, RM vs critic, clipping gradient, MoE IS support, pass@k, industrial costs, and author predictions.
+- [x] Compare local upstream SHA and all 37 markdown paths to the approved spec; retain file hashes.
+- [x] Verify key definitions using original papers: DAPO 2503.14476, VAPO 2504.05118, MiniMax-M1 2506.13585, GSPO 2507.18071, SAPO 2511.20347.
+- [x] Verify industrial/Agentic references where used. Do not repeat unverified scores, affiliation, “first”, or universal convergence claims.
+- [x] Save a correction ledger with source claim, verified replacement, primary URL and evidence excerpt. Cover CISPO/GSPO, RM vs critic, clipping gradient, MoE IS support, pass@k, industrial costs, and author predictions.
 
 ## Task 2: Write chapters 20–24
 
 All chapter modules export the existing object contract. Use `String.raw` for math and `~~~python` fences.
 
-- [ ] **20**: VAPO critic initialization, decoupled/length-adaptive GAE and positive NLL; CISPO clipped detached token IS weights; GSPO normalized sequence ratio; SAPO soft gates. Hand-calculate clipping for positive/negative advantages and distinguish derivative w.r.t. ratio from log probability. Explain Routing Replay as complementary engineering, not mathematically obsolete.
-- [ ] **21**: six SFT acquisition families, RL query/reward/environment axes, success-rate vs pass@k, contamination and quality filters, mixtures/curricula and SFT–RL feedback. Include Self-Instruct, Evol-Instruct, OSS-Instruct, SelfCodeAlign, SkillMix, CodecLM, STaR, LSP, SGALM, SWE-smith, GASP, DoReMi, FineWeb and Seed-Coder in substantive teaching.
-- [ ] **22**: DeepSeek R1/V3/V3.2, Qwen2.5/3/3.5, Seed DAPO/VAPO/1.5/2.0/Coder. Compare task, stages, data, reward, constraints and evidence boundary; explain model-specific reported outcomes without mixing benchmarks/cost denominators.
-- [ ] **23**: Kimi K1.5/K2/K2.5, MiniMax 01/M1/M2/M2.5/M2.7, GLM-5 and closed-source public alignment. Teach partial rollout, long2short, MuonClip, mode fusion/interleaving, Forge and cross-stage distillation. Mark blog-only information and unspecified internals.
-- [ ] **24**: move useful original chapter 20 synthesis here; eight-dimensional selection, seven-algorithm comparison, corrected historical evolution, six proposed common practices, five challenges and nine author viewpoints as testable hypotheses. Preserve 20 integrated interview questions.
-- [ ] Validate each owned module independently with `validateChapter`, ≥1,800 Chinese characters and actual numeric/code/quiz content.
+- [x] **20**: VAPO critic initialization, decoupled/length-adaptive GAE and positive NLL; CISPO clipped detached token IS weights; GSPO normalized sequence ratio; SAPO soft gates. Hand-calculate clipping for positive/negative advantages and distinguish derivative w.r.t. ratio from log probability. Explain Routing Replay as complementary engineering, not mathematically obsolete.
+- [x] **21**: six SFT acquisition families, RL query/reward/environment axes, success-rate vs pass@k, contamination and quality filters, mixtures/curricula and SFT–RL feedback. Include Self-Instruct, Evol-Instruct, OSS-Instruct, SelfCodeAlign, SkillMix, CodecLM, STaR, LSP, SGALM, SWE-smith, GASP, DoReMi, FineWeb and Seed-Coder in substantive teaching.
+- [x] **22**: DeepSeek R1/V3/V3.2, Qwen2.5/3/3.5, Seed DAPO/VAPO/1.5/2.0/Coder. Compare task, stages, data, reward, constraints and evidence boundary; explain model-specific reported outcomes without mixing benchmarks/cost denominators.
+- [x] **23**: Kimi K1.5/K2/K2.5, MiniMax 01/M1/M2/M2.5/M2.7, GLM-5 and closed-source public alignment. Teach partial rollout, long2short, MuonClip, mode fusion/interleaving, Forge and cross-stage distillation. Mark blog-only information and unspecified internals.
+- [x] **24**: move useful original chapter 20 synthesis here; eight-dimensional selection, seven-algorithm comparison, corrected historical evolution, six proposed common practices, five challenges and nine author viewpoints as testable hypotheses. Preserve 20 integrated interview questions.
+- [x] Validate each owned module independently with `validateChapter`, ≥1,800 Chinese characters and actual numeric/code/quiz content.
 
 ## Task 3: Write chapters 25–29
 
-- [ ] **25**: environment, state/observation/history, token vs tool actions, multi-turn trajectory, four challenges, response-only masking, a complete toy agent episode and return calculation.
-- [ ] **26**: IGPO, CM2, SeeUPO, ARLArena/SAMPO, VCPO. Also explain EDGE-GRPO, ReGFT, PF-PPO, ZeroSearch, DARS, ProRL, GMPO, OTB and Dr. MAS, with primary references and limitations. ESS numeric example; separate baseline validity from sampling/reweighting.
-- [ ] **27**: EMPO², LUFFY, GiGPO, ELPO, ProxMO plus TreePO, LADDER, SGE, SSRL, Step-GRPO, ARPO and VinePPO. Teach state grouping, weighted baseline, memory transfer and error-localization uncertainty. Hand-calculate a step baseline and avoid claiming correlation proves causality.
-- [ ] **28**: task+environment+verifier+trajectory pipeline; SWE F2P/P2P, Terminal/Search synthesis; async freshness, TITO, IcePop, deterministic attention/routing, partial rollout, prefix sharing, Agent Swarm/PARL; ABE/AWM/ASTRA/GEM. Code checks version/ID/mask consistency.
-- [ ] **29**: complete algorithm map, three technical routes, industry/ecosystem evidence and original author predictions without invented census percentages; decisions, failure diagnosis, comprehensive interview questions and capstone assessment.
-- [ ] Validate chapter modules and all claimed primary sources before integration.
+- [x] **25**: environment, state/observation/history, token vs tool actions, multi-turn trajectory, four challenges, response-only masking, a complete toy agent episode and return calculation.
+- [x] **26**: IGPO, CM2, SeeUPO, ARLArena/SAMPO, VCPO. Also explain EDGE-GRPO, ReGFT, PF-PPO, ZeroSearch, DARS, ProRL, GMPO, OTB and Dr. MAS, with primary references and limitations. ESS numeric example; separate baseline validity from sampling/reweighting.
+- [x] **27**: EMPO², LUFFY, GiGPO, ELPO, ProxMO plus TreePO, LADDER, SGE, SSRL, Step-GRPO, ARPO and VinePPO. Teach state grouping, weighted baseline, memory transfer and error-localization uncertainty. Hand-calculate a step baseline and avoid claiming correlation proves causality.
+- [x] **28**: task+environment+verifier+trajectory pipeline; SWE F2P/P2P, Terminal/Search synthesis; async freshness, TITO, IcePop, deterministic attention/routing, partial rollout, prefix sharing, Agent Swarm/PARL; ABE/AWM/ASTRA/GEM. Code checks version/ID/mask consistency.
+- [x] **29**: complete algorithm map, three technical routes, industry/ecosystem evidence and original author predictions without invented census percentages; decisions, failure diagnosis, comprehensive interview questions and capstone assessment.
+- [x] Validate chapter modules and all claimed primary sources before integration.
 
 ## Task 4: Bridge old chapters, catalog, glossary and source manifest
 
-- [ ] Add Pre/Mid/Post/Agentic route to 00, consistency bridge to 11, reward boundaries to 16, DAPO details to 17, industrial DPO placement to 18, cross-stage OPD to 19.
-- [ ] Add new imports to `content/catalog.js` in 00–29 order; every prerequisite must occur earlier.
-- [ ] Add glossary terms for new algorithms, TITO, ESS, partial rollout, RM/critic, environment/observation and rollout policy versions.
-- [ ] Build all 37 source manifest entries with `path`, `sha256`, `chapters`, and `coverage` entries containing `chapterId`, `sectionId`, `terms`; source-only mentions do not count as body coverage.
-- [ ] Write failing manifest tests, observe failure, then implement validation. Example independent assertions:
+- [x] Add Pre/Mid/Post/Agentic route to 00, consistency bridge to 11, reward boundaries to 16, DAPO details to 17, industrial DPO placement to 18, cross-stage OPD to 19.
+- [x] Add new imports to `content/catalog.js` in 00–29 order; every prerequisite must occur earlier.
+- [x] Add glossary terms for new algorithms, TITO, ESS, partial rollout, RM/critic, environment/observation and rollout policy versions.
+- [x] Build all 37 source manifest entries with `path`, `sha256`, `chapters`, and `coverage` entries containing `chapterId`, `sectionId`, `terms`; source-only mentions do not count as body coverage.
+- [x] Write failing manifest tests, observe failure, then implement validation. Example independent assertions:
 
 ```js
 assert.equal(SOURCE_DOCUMENTS.length, 37);
@@ -75,23 +75,29 @@ for (const doc of SOURCE_DOCUMENTS) {
 }
 ```
 
-- [ ] Upgrade validation to 30/270, code fences, prerequisite order, manifest coverage; check all new search terms in body text.
+- [x] Upgrade validation to 30/270, code fences, prerequisite order, manifest coverage; check all new search terms in body text.
 
 ## Task 5: State migration and application integration
 
-- [ ] Write migration tests in a new file using a key-aware Map storage: preserve 00/19 and settings from v1, discard old 20 progress, prefer v2 over v1, keep new 20/29 progress on v2 reload, malformed/throwing storage falls back safely.
-- [ ] Observe tests fail against v1 store.
-- [ ] Use `STORAGE_KEY = "ml-roadmap-state-v2"` and `LEGACY_STORAGE_KEY = "ml-roadmap-state-v1"`. Read v2 first; only when absent read legacy, normalize legacy to version 2 and omit legacy chapter 20. Persist migrated data to v2 without modifying legacy backup.
-- [ ] Set course label with `CHAPTERS.length`; progress uses `getProgress(state)`; remove all hardcoded UI 21/189.
-- [ ] Display upstream document links per chapter with attribution; make branch/cycle diagrams reflect actual links if renderer currently flattens them.
-- [ ] Run `npm test`, `npm run validate`, `git diff --check`; update baseline store expectations to v2/270.
+- [x] Write migration tests in a new file using a key-aware Map storage: preserve 00/19 and settings from v1, discard old 20 progress, prefer v2 over v1, keep new 20/29 progress on v2 reload, malformed/throwing storage falls back safely.
+- [x] Observe tests fail against v1 store.
+- [x] Use `STORAGE_KEY = "ml-roadmap-state-v2"` and `LEGACY_STORAGE_KEY = "ml-roadmap-state-v1"`. Read v2 first; only when absent read legacy, normalize legacy to version 2 and omit legacy chapter 20. Persist migrated data to v2 without modifying legacy backup.
+- [x] Set course label with `CHAPTERS.length`; progress uses `getProgress(state)`; remove all hardcoded UI 21/189.
+- [x] Display upstream document links per chapter with attribution; make branch/cycle diagrams reflect actual links if renderer currently flattens them.
+- [x] Run `npm test`, `npm run validate`, `git diff --check`; update baseline store expectations to v2/270.
 
 ## Task 6: Documentation, browser acceptance and completion audit
 
-- [ ] Update README for 30 chapters, routes, v2 migration, upstream commit, coverage and verification commands; include upstream MIT attribution.
-- [ ] Start local Python server on 8010; verify HTTP 200 for HTML, app, catalog, all chapters and KaTeX/fonts.
-- [ ] At 1440×1000, 900×900 and 390×844 verify all 30 chapter renders, math, diagram links, bounds and console/network. Save structured results and inspected screenshots under `artifacts/`.
-- [ ] Use native browser actions for search, navigation, learn/interview switch, folding, code copy, completion/reload, theme, both drawers and invalid route recovery. Inspect code/formula/table scrolling locally without hiding page overflow.
-- [ ] Verify source document path set against frozen upstream; inspect coverage beyond keyword counts. Re-run tests only after fixes.
-- [ ] Confirm old `ml-notes` has no new modification timestamps, all plan items completed, final git diff clean; commit meaningful increments then final verification.
-- [ ] Mark goal complete only after every design requirement is proved by current evidence.
+- [x] Update README for 30 chapters, routes, v2 migration, upstream commit, coverage and verification commands; include upstream MIT attribution.
+- [x] Start local Python server on 8010; verify HTTP 200 for HTML, app, catalog, all chapters and KaTeX/fonts.
+- [x] At 1440×1000, 900×900 and 390×844 verify all 30 chapter renders, math, diagram links, bounds and console/network. Save structured results and inspected screenshots under `artifacts/`.
+- [x] Use native browser actions for search, navigation, learn/interview switch, folding, code copy, completion/reload, theme, both drawers and invalid route recovery. Inspect code/formula/table scrolling locally without hiding page overflow.
+- [x] Verify source document path set against frozen upstream; inspect coverage beyond keyword counts. Re-run tests only after fixes.
+- [x] Confirm old `ml-notes` has no new modification timestamps, all plan items completed, final git diff clean; commit meaningful increments then final verification.
+- [x] Mark goal complete only after every design requirement is proved by current evidence.
+
+Completion evidence: `artifacts/README.md`, content/search/example/HTTP JSON reports,
+full 30-chapter expanded-content browser layout results at all three viewports,
+native interaction results, and inspected screenshots. Content implementation:
+`634dee9`. The existing schema API remains unchanged; catalog validation enforces
+the expanded course requirements.

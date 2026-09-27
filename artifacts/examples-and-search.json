@@ -1,0 +1,185 @@
+{
+  "examples": [
+    {
+      "chapter": "20",
+      "section": "code",
+      "status": 0,
+      "stdout": "ratio/A/PPO/CISPO: 1.5 2 0.0 2.4\nratio/A/PPO/CISPO: 1.5 -2 -3.0 -2.4\nratio/A/PPO/CISPO: 0.5 2 1.0 1.6\nratio/A/PPO/CISPO: 0.5 -2 0.0 -1.6\nGSPO token coefficients: 0.5, 0.5\nterminal MC targets: [1.0, 1.0, 1.0]\nall gradient and boundary checks passed",
+      "stderr": ""
+    },
+    {
+      "chapter": "21",
+      "section": "code",
+      "status": 0,
+      "stdout": "success/pass@2/pass@8: 0.25 0.4642857142857143 1.0\naccepted/rejected: 2 6\nresponse token shares: {'math': 0.2, 'code': 0.8}\ntoy excess-loss weights: [0.3543, 0.6457]",
+      "stderr": ""
+    },
+    {
+      "chapter": "22",
+      "section": "code",
+      "status": 0,
+      "stdout": "active: ['C', 'B']\nB advantages: [-0.577, -0.577, -0.577, 1.732]\nteaching rollout tokens: 261816320\nmixed reward: 0.72\nV3 post / total: 0.179%",
+      "stderr": ""
+    },
+    {
+      "chapter": "23",
+      "section": "code",
+      "status": 0,
+      "stdout": "new_a CISPO: 0.6 OPD: 0.693\nnew_b CISPO: 0.4 OPD: -0.693\nideal latency speedup: 1.875",
+      "stderr": ""
+    },
+    {
+      "chapter": "24",
+      "section": "code",
+      "status": 0,
+      "stdout": "A 2000000 20\nB 3000000 35\npaired p: 0.629058837890625",
+      "stderr": ""
+    },
+    {
+      "chapter": "25",
+      "section": "code",
+      "status": 0,
+      "stdout": "returns: [0.62, 0.8, 1.0]\nactor mask: [0, 1, 0, 1, 0, 1]",
+      "stderr": ""
+    },
+    {
+      "chapter": "26",
+      "section": "code",
+      "status": 0,
+      "stdout": "{'ess': 1.71428571, 'ess_ratio': 0.42857143, 'lr_factor': 0.65465367, 'learning_rate': 6.55e-06, 'negative_low_fraction': 0.0}",
+      "stderr": ""
+    },
+    {
+      "chapter": "27",
+      "section": "code",
+      "status": 0,
+      "stdout": "anchor: 0.5333\nsoft: 0.78 advantage: 0.22\nfour failed probes: 0.4096",
+      "stderr": ""
+    },
+    {
+      "chapter": "28",
+      "section": "code",
+      "status": 0,
+      "stdout": "trace checks passed; IcePop term = 1.44\ndirect ratio = 1.5 ; masked weight = 0",
+      "stderr": ""
+    },
+    {
+      "chapter": "29",
+      "section": "code",
+      "status": 0,
+      "stdout": "answer rate: 0.75\njoint success: 0.5\naverage tool calls: 11.5\nmean latency: 50",
+      "stderr": ""
+    }
+  ],
+  "search": {
+    "OPD": [
+      "00",
+      "18",
+      "19",
+      "21",
+      "22",
+      "23",
+      "24",
+      "29"
+    ],
+    "OPSD": [
+      "00",
+      "19",
+      "23",
+      "24"
+    ],
+    "VAPO": [
+      "17",
+      "20",
+      "21",
+      "22",
+      "24",
+      "29"
+    ],
+    "CISPO": [
+      "17",
+      "20",
+      "23",
+      "24"
+    ],
+    "GSPO": [
+      "03",
+      "17",
+      "20",
+      "22",
+      "23",
+      "24",
+      "26"
+    ],
+    "SAPO": [
+      "17",
+      "20",
+      "22",
+      "24"
+    ],
+    "DeepSeek-V3.2": [
+      "22"
+    ],
+    "Kimi K2.5": [
+      "23",
+      "28"
+    ],
+    "Qwen3.5": [
+      "22"
+    ],
+    "GLM-5": [
+      "00",
+      "11",
+      "19",
+      "23",
+      "24",
+      "28",
+      "29"
+    ],
+    "TITO": [
+      "11",
+      "23",
+      "28",
+      "29"
+    ],
+    "Agentic RL": [
+      "00",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29"
+    ],
+    "SeeUPO": [
+      "26",
+      "29"
+    ],
+    "EMPO²": [
+      "27",
+      "29"
+    ],
+    "IGPO": [
+      "25",
+      "26",
+      "27",
+      "29"
+    ],
+    "GiGPO": [
+      "27",
+      "29"
+    ],
+    "ELPO": [
+      "27",
+      "29"
+    ],
+    "ProxMO": [
+      "27",
+      "29"
+    ]
+  },
+  "pass": true
+}
