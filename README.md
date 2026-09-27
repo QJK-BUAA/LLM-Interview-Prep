@@ -1,6 +1,6 @@
 # ML Roadmap
 
-一个从零基础机器学习延伸到 2026 年 LLM 后训练的中文学习工作台。项目包含 21 章重新编写的课程正文，不依赖前端框架或构建工具，KaTeX 与字体均保存在仓库内。
+一个从零基础机器学习延伸到 LLM 后训练与 Agentic RL 的中文学习工作台。项目包含 30 章、270 个教学区块，不依赖前端框架或构建工具，KaTeX 与字体均保存在仓库内。
 
 ## 开始使用
 
@@ -19,7 +19,7 @@ python3 -m http.server 8010
 
 ## 内容范围
 
-课程按依赖关系组织为六个阶段：
+课程按依赖关系组织为七个阶段：
 
 | 范围 | 主题 |
 | --- | --- |
@@ -28,9 +28,18 @@ python3 -m http.server 8010
 | 05-07 | 神经网络、反向传播、优化器、CNN、RNN 与 LSTM |
 | 08-12 | Tokenization、Transformer、现代 LLM 组件、训练与推理系统、PEFT |
 | 13-15 | MDP、价值方法、策略梯度、Actor-Critic 与 GAE |
-| 16-20 | RLHF、PPO、GRPO、RLVR、DPO、OPD、OPSD 与 2026 前沿 |
+| 16-24 | RLHF、GRPO/DAPO、DPO、OPD/OPSD、VAPO/CISPO/GSPO/SAPO、数据工程、工业案例与选型 |
+| 25-29 | Agentic RL 基础、奖励稳定性、探索与信用分配、环境/异步系统、全景与综合面试 |
 
-每章都包含直觉、可手算例子、机制图、公式拆解、代码实验、常见误区、方法对比、面试表达和至少三道自测题。第 19 章完整讲解 OPD 与 OPSD，第 20 章用于方法选择和综合面试复习。
+每章都包含直觉、可手算例子、机制图、公式拆解、代码实验、常见误区、方法对比、面试表达和至少三道自测题。第 19 章讲 OPD、OPSD 与跨阶段蒸馏，第 24、29 章分别汇总后训练和 Agentic RL 的选型与面试。零基础读者按 00–29 学习；已有 Transformer 基础可从 13 章进入后训练；Agent 方向在 13、15、17、21 章基础上进入 25–29。
+
+## 来源与改编
+
+本轮完整学习并重新组织 [Xavier 的 LLM Post-Training 与 Agentic RL 研究](https://github.com/XavierZhang2002/agentic-rl-analysis) 的 37 份 Markdown，固定提交为 `66ae4423b36270ef50a288fb1bb2e1b31c46c329`。感谢 Xavier / Agentic RL Analysis Contributors。
+
+[来源映射](content/source-manifest.js) 逐篇记录目标章节和正文位置，[原文快照索引](docs/research/source-inventory.json) 保留文件 SHA-256 与标题。每章末尾“本章扩展阅读”可打开相应源文档。原论文定义、报告结果、教学例子与作者观点分开说明；纠错证据保存在 [research](docs/research/) 中。MIT 许可说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+来源固定于上述提交，原始论文核验截至 2026-09-27；个别后续官方报告用于纠正源文档已经过时的披露状态。这些记录不是模型实验复现，也不以不同报告的分数构造跨模型优劣排名。
 
 ## 学习功能
 
@@ -63,12 +72,14 @@ ml-roadmap/
 ├── content/
 │   ├── schema.js              # 章节数据契约
 │   ├── catalog.js             # 有序章节目录
-│   └── chapter-00.js ... chapter-20.js
+│   ├── source-manifest.js      # 37 份源文档到正文的覆盖关系
+│   ├── source-revision.js      # 固定提交与源文件哈希
+│   └── chapter-00.js ... chapter-29.js
 ├── vendor/katex/              # 本地公式运行库、样式与字体
 ├── scripts/validate-content.mjs
 ├── tests/
 ├── artifacts/                 # 浏览器验收截图
-└── docs/superpowers/          # 设计文档与实施计划
+└── docs/                     # superpowers 设计/计划；research 核验记录
 ```
 
 模块边界是单向的：`catalog` 提供内容，`renderer` 生成安全 HTML，`app` 负责交互，`store` 负责状态。课程正文不写进控制器，状态模块也不接触 DOM。
@@ -79,11 +90,13 @@ ml-roadmap/
 2. 保留九种必需 section：`intuition`、`example`、`diagram`、`derivation`、`code`、`pitfall`、`comparison`、`interview`、`quiz`。
 3. 保证 section ID 在章内唯一，自测不少于三题，来源使用绝对 HTTP(S) URL。
 4. 在 `content/catalog.js` 中按学习顺序导入并加入章节。
-5. 若扩展当前 00-20 的固定课程规模，同步调整 `scripts/validate-content.mjs` 中的预期 ID 序列。
+5. 若扩展当前 00-29 的固定课程规模，同步调整 `scripts/validate-content.mjs` 和目录测试中的预期 ID 序列；目录标题与进度总数从 catalog 自动计算。
 6. 运行 `npm test` 和 `npm run validate`，再在浏览器中检查路由、公式、搜索和响应式布局。
 
-`npm run validate` 会拒绝缺少教学层、前置章节失效、重复 ID、占位标记或正文不足 1,800 个中文字符的章节。
+`npm run validate` 会拒绝缺少教学层或代码、前置章节失效或后置、重复 ID、占位标记、字数不足、来源映射缺失和正文锚点失效。关键字匹配是防退化门禁；教学准确性另以原文核验记录和内容检查为准。
 
 ## 状态与重置
 
-本地状态使用键 `ml-roadmap-state-v1`。需要重置学习进度时，可在浏览器开发者工具中删除该键并刷新页面。应用在 Storage API 不可用时会自动退化为当前页面会话内的内存状态。
+本地状态使用键 `ml-roadmap-state-v2`。首次打开自动从 v1 迁移 00–19 章完成记录、模式与主题；旧第 20 章更换了主题，其完成标记会清除。原综合选型内容移至第 24 章，旧 slug 链接仍能定位该内容。v1 原始数据保留作备份，已有 v2 状态时不会重复迁移。
+
+需要彻底重置时，在浏览器开发者工具中同时删除 `ml-roadmap-state-v2` 和 `ml-roadmap-state-v1` 后刷新。只删除 v2 会再次从 v1 备份迁移。Storage API 不可用时退化为当前页面会话内的内存状态。

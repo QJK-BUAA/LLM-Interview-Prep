@@ -1,9 +1,10 @@
 import { CHAPTERS } from "../content/catalog.js";
 
-export const STORAGE_KEY = "ml-roadmap-state-v1";
+export const STORAGE_KEY = "ml-roadmap-state-v2";
+export const LEGACY_STORAGE_KEY = "ml-roadmap-state-v1";
 
 export const DEFAULT_STATE = Object.freeze({
-  version: 1,
+  version: 2,
   currentChapter: "00",
   mode: "learn",
   theme: "light",
@@ -22,7 +23,7 @@ const chapterById = new Map(
 
 function cloneState(state) {
   return {
-    version: 1,
+    version: 2,
     currentChapter: state.currentChapter,
     mode: state.mode,
     theme: state.theme,
@@ -51,6 +52,8 @@ function normalizeState(candidate) {
     !Array.isArray(candidate.completed)
   ) {
     for (const chapter of CHAPTERS) {
+      // Chapter 20 has a new subject; 21–29 did not exist in the old course.
+      if (candidate.version === 1 && Number(chapter.id) >= 20) continue;
       const storedIds = candidate.completed[chapter.id];
       if (!Array.isArray(storedIds)) continue;
 
@@ -68,7 +71,7 @@ function normalizeState(candidate) {
   }
 
   return {
-    version: 1,
+    version: 2,
     currentChapter: chapterById.has(candidate.currentChapter)
       ? candidate.currentChapter
       : "00",
@@ -94,8 +97,13 @@ export function loadState(storage = defaultStorage()) {
   }
 
   let serialized;
+  let migrating = false;
   try {
     serialized = storage.getItem(STORAGE_KEY);
+    if (serialized === null) {
+      serialized = storage.getItem(LEGACY_STORAGE_KEY);
+      migrating = serialized !== null;
+    }
   } catch {
     return cloneState(memoryFallback);
   }
@@ -105,8 +113,14 @@ export function loadState(storage = defaultStorage()) {
   }
 
   try {
-    const state = normalizeState(JSON.parse(serialized));
+    const parsed = JSON.parse(serialized);
+    const state = normalizeState(
+      migrating && parsed && typeof parsed === "object"
+        ? { ...parsed, version: 1 }
+        : parsed,
+    );
     memoryFallback = cloneState(state);
+    if (migrating) saveState(state, storage);
     return state;
   } catch {
     memoryFallback = freshDefaultState();

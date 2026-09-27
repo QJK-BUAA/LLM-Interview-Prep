@@ -2,12 +2,12 @@ const chapter = {
   id: "19",
   slug: "opd-opsd",
   part: "LLM 后训练",
-  title: "OPD 与 OPSD：同策略蒸馏和自蒸馏",
+  title: "OPD、OPSD 与跨阶段蒸馏",
   subtitle: "在学生自己的轨迹上获得逐 token 教师信号",
   level: "前沿",
   duration: 175,
   prerequisites: ["03", "15", "17", "18"],
-  tags: ["OPD", "OPSD", "Distillation", "RLSD", "Purified OPSD", "H2SD"],
+  tags: ["OPD", "OPSD", "Distillation", "RLSD", "Purified OPSD", "H2SD", "GLM-5", "Cross-Stage Distillation"],
   objectives: [
     "从 exposure bias 与稀疏奖励解释 OPD 的动机",
     "推导 student rollout 上的逐 token KL 目标",
@@ -28,7 +28,9 @@ RLVR 用学生自己的 rollout，解决了数据来源问题，但最终答案�
 
 OPD（On-Policy Distillation）结合两者：学生先生成自己的回答，外部教师再在学生实际访问的每个前缀上输出完整词表分布。数据是 on-policy，监督是 dense token-level。教师不需要生成整条替代答案，而是在学生犯错的现场回答“下一步我会怎样分配概率”。
 
-OPSD（On-Policy Self-Distillation）进一步让同一个模型承担两种角色。student context 只有问题，privileged teacher context 额外含验证答案、参考推理或环境反馈。模型参数来源相同，但条件信息不同，教师分布因而更有信息。它省去独立大教师，不代表没有教师前向，也不代表额外信息可以在部署时使用。`,
+OPSD（On-Policy Self-Distillation）进一步让同一个模型承担两种角色。student context 只有问题，privileged teacher context 额外含验证答案、参考推理或环境反馈。模型参数来源相同，但条件信息不同，教师分布因而更有信息。它省去独立大教师，不代表没有教师前向，也不代表额外信息可以在部署时使用。
+
+GLM-5 的 Cross-Stage Distillation（跨阶段蒸馏）解决另一个问题：连续完成推理、Agent 和通用对齐训练后，后阶段可能削弱前阶段能力。它保存前序阶段的最终 checkpoint 作为教师，在相应训练题目上让当前学生生成轨迹，再从教师与学生的 token log-prob 差构造优势。这仍是 OPD，但不要求教师看到 reference answer，不能与“同参数、不同特权上下文”的 OPSD 混称。`,
     },
     {
       id: "example",
@@ -121,7 +123,15 @@ $$D_{\mathrm{KL}}(p_T\|p_S)
 
 更强地要求学生覆盖教师分配概率的各模式；教师交叉熵与它只差不依赖学生的教师熵。论文对“forward/reverse”的命名偶有视角差异，最可靠做法是直接写出左右分布。
 
-on-policy 指外层状态 $y_{<t}$ 由学生采样；内部 KL 可以对全词表求和，也可只用 sampled token 构造策略梯度式近似。全词表更密集但需要教师 logits，词表大时通信和显存昂贵。`,
+on-policy 指外层状态 $y_{<t}$ 由学生采样；内部 KL 可以对全词表求和，也可只用 sampled token 构造策略梯度式近似。全词表更密集但需要教师 logits，词表大时通信和显存昂贵。上式按采样前缀计算局部 KL 时，常把前缀当作固定训练数据；若声称优化整条序列的精确 KL，则必须同时说明外层采样分布的梯度处理，二者不能直接混同。
+
+GLM-5 报告第 3.5 节采用逐 token 的教师差值，记教师推理引擎概率为 $\pi_T^{\mathrm{infer}}$、学生训练引擎概率为 $\pi_\theta^{\mathrm{train}}$：
+
+$$\hat A_{i,t}=\operatorname{sg}\left[
+\log\pi_T^{\mathrm{infer}}(y_{i,t}|x,y_{i,<t})
+-\log\pi_\theta^{\mathrm{train}}(y_{i,t}|x,y_{i,<t})\right]$$
+
+$\operatorname{sg}$ 表示不沿这一权重反向传播；梯度来自策略目标中的 log-prob 或 ratio。教师给某 token 概率 0.4、学生给 0.2 时，权重为 $\log2\approx0.693$；反过来是 -0.693。它不再依赖组内均值，因此该报告可用 group size=1，而不是把一条样本放进标准 GRPO 的中心化公式。多域混合比例、教师能力和训推概率对齐仍要控制；恢复程度必须由前序任务的独立评估证明。`,
     },
     {
       id: "code",
@@ -183,6 +193,7 @@ for problems, references in loader:
 | RLSD | verifier 决定方向，教师差异调幅 | 防止教师反向覆盖成功推理 | 2026 预印本，依可靠 verifier |
 | H²SD | 成功/失败轨迹使用不同 teacher context 与更新 | 成功保方向、失败做纠正 | 2026 预印本的混合方案 |
 | Lightning OPD | 预计算 SFT rollout 上的教师 log-prob | 移除在线 teacher server | 依 teacher consistency 与离线近似 |
+| Cross-Stage Distillation | 前序阶段 checkpoint 教师 | 缓解顺序 RL 的能力遗忘 | GLM-5 的阶段组合与评估实例 |
 
 **选择树：** 有可靠大教师且 tokenizer 对齐，优先把标准 OPD 作为密集上界；无大教师但有高质量 reference，可试 OPSD，同时做无 reference、错 reference 与长预算对照；有可靠 verifier 且担心 teacher 改坏成功轨迹，优先比较 RLSD/H²SD 类“奖励定方向、教师做信用”；teacher 在线成本是瓶颈且 SFT 数据确由同一教师生成，可评估 Lightning OPD；长 CoT 出现反思坍缩，再考虑 Purified OPSD 或更稀疏 privileged context。
 
@@ -209,6 +220,10 @@ for problems, references in loader:
       body: "每题都回答轨迹来源、监督粒度和教师要求。",
       questions: [
         {
+          q: "GLM-5 跨阶段 OPD 为什么可以用 group size=1，它就是 OPSD 吗？",
+          a: "优势直接来自教师和学生的逐 token log-prob 差，不需要组相对奖励估计。教师是前序 checkpoint，不必加入参考答案，因此它不等同于特权上下文 OPSD。",
+        },
+        {
           q: "把外部教师生成的完整答案缓存后做交叉熵，为什么不是标准 OPD？",
           a: "轨迹来自教师而非当前学生，学生自己的错误前缀没有被教师评分，因此属于 off-policy sequence distillation/SFT 类。",
         },
@@ -232,6 +247,11 @@ for problems, references in loader:
     },
   ],
   sources: [
+    {
+      label: "GLM-5: On-Policy Cross-Stage Distillation, §3.5",
+      url: "https://arxiv.org/html/2602.15763v1#S3.SS5",
+      evidence: "原始技术报告：前序 checkpoint 教师、逐 token log-ratio 优势、group size=1",
+    },
     {
       label: "On-Policy Distillation of Language Models",
       url: "https://arxiv.org/abs/2306.13649",

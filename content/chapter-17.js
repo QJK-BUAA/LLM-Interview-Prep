@@ -2,7 +2,7 @@ const chapter = {
   id: "17",
   slug: "grpo-rlvr-family",
   part: "LLM 后训练",
-  title: "GRPO、RLVR 与 Critic-Free 策略优化",
+  title: "GRPO、DAPO、Dr.GRPO 与 RLOO",
   subtitle: "用组内比较替代价值模型，并看清稳定性改进",
   level: "进阶",
   duration: 155,
@@ -21,13 +21,13 @@ const chapter = {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：同一道题内做相对排名",
-      body: String.raw`PPO 的 critic 要与大语言模型相近规模，训练和部署到 rollout 集群都很昂贵。GRPO（Group Relative Policy Optimization）对同一个 prompt 一次采样 $G$ 条回答，用组内奖励均值或标准差构造 baseline，不再训练独立价值模型。
+      body: String.raw`经典 LLM PPO 的独立 critic 常采用相近规模骨干，增加训练资源，但其规模并非算法强制要求。GRPO（Group Relative Policy Optimization）对同一个 prompt 一次采样 $G$ 条回答，用组内奖励均值或标准差构造 baseline，不再训练独立价值模型。
 
 例如数学题的验证器只能给最终答案 0/1。若一组中有对有错，正确回答的相对优势为正，错误回答为负，策略便提高正确轨迹 token 的概率。RLVR（Reinforcement Learning with Verifiable Rewards）指使用可自动验证奖励的强化学习范式，GRPO 是其中一种优化器，二者不是同义词。
 
 critic-free 不等于没有 baseline，也不等于没有方差。组均值来自有限样本；组越小越噪，同组回答高度相似时有效样本更少。若全组都对或都错，奖励方差为零，标准化优势没有区分信号，这类 prompt 可能被浪费。
 
-后续改进针对不同故障：DAPO 调整 clipping、动态采样、token 聚合和超长处理；Dr.GRPO 分析并移除特定归一化导致的长度偏差；GSPO 把 importance ratio 和 clipping 提升到序列级；RLOO 使用 leave-one-out baseline；REINFORCE++ 则使用更全局的归一化与稳定技巧。它们不能只按发布日期排成单一升级链。`,
+后续改进针对不同故障：DAPO 调整 clipping、动态采样、token 聚合和超长处理；Dr.GRPO 分析并移除特定归一化导致的长度偏差；GSPO 把 importance ratio 和 clipping 提升到序列级；RLOO 使用 leave-one-out baseline；REINFORCE++ 则使用更全局的归一化与稳定技巧。它们不能只按发布日期排成单一升级链。VAPO、CISPO、GSPO 和 SAPO 的完整比较放在第 20 章，本章先建立组采样、归一化和 DAPO 四项改进的基础。`,
     },
     {
       id: "example",
@@ -103,7 +103,13 @@ $$r_i^{\mathrm{seq}}(\theta)=
 
 然后在序列级 clipping、rewarding 与优化，使 importance unit 与序列级奖励更一致。它不是简单地把所有 token ratio 做算术平均。
 
-Dr.GRPO 的核心批评是特定 advantage 标准差和按响应长度归一化会引入偏差；其配方移除这些项并用固定归一化尺度。具体实现应以论文和代码版本为准，不能把名称泛化为所有“改良 GRPO”。`,
+Dr.GRPO 的核心批评是特定 advantage 标准差和按响应长度归一化会引入偏差；其配方移除这些项并用固定归一化尺度。具体实现应以论文和代码版本为准，不能把名称泛化为所有“改良 GRPO”。
+
+**DAPO 的四项配方。** Clip-Higher 使用不同上下界 $1-\epsilon_{\mathrm{low}}$ 和 $1+\epsilon_{\mathrm{high}}$，例如论文配方的 0.2 与 0.28 给正优势动作更宽的上侧空间。它仍是有符号的 PPO min 目标，并非所有越界 token 都停止更新。Dynamic Sampling 在采样后过滤全对、全错组，补足有区分度的 batch；代价应包含被丢弃 rollout 的计算。
+
+设两条回答长为 2 和 8，序列平均会给每个短回答 token 权重 $1/(2\times2)=1/4$，长回答 token 权重 $1/(2\times8)=1/16$；按全体 10 个 token 平均则每个权重都是 $1/10$。这改变的是 loss 聚合，不是把序列终局奖励变成了精确的 token 信用。
+
+Overlong Reward Shaping 在最大长度 $L_{\max}$ 前保留宽度 $L_{\mathrm{cache}}$ 的缓冲区：缓冲区前奖励修正为 0，区间内按超出缓冲起点的比例降到 -1。必须区分真实结束与因长度上限截断，不能把“未完成”自动当成语义错误。DAPO 公开配方移除了显式 reference KL，但这是推理任务的实验选择，不能推广为所有多域训练都该去掉 KL。`,
     },
     {
       id: "code",

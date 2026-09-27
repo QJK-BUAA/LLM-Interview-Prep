@@ -1,0 +1,392 @@
+const chapter = {
+  id: "22",
+  slug: "industrial-deepseek-qwen-seed",
+  part: "LLM 后训练",
+  title: "工业案例 I：DeepSeek、Qwen 与 Seed",
+  subtitle: "把模型发布读成任务、数据、反馈与计算预算的工程选择",
+  level: "进阶",
+  duration: 180,
+  prerequisites: ["16", "17", "18", "19", "20", "21"],
+  tags: [
+    "DeepSeek-R1", "DeepSeek-V3", "DeepSeek-V3.2", "Qwen2.5", "Qwen3",
+    "Qwen3.5", "DAPO", "VAPO", "Seed1.5-Thinking", "Seed2.0", "Seed-Coder",
+  ],
+  objectives: [
+    "用任务、阶段、数据、奖励、系统约束和证据边界阅读工业报告",
+    "解释 DeepSeek 的纯 RL 探索、多阶段训练与专家蒸馏各自解决什么",
+    "手算 Qwen 式查询方差筛选，并区分查询数量与 rollout 计算量",
+    "比较 DAPO、VAPO 与 Seed 系列对长推理训练的不同处理",
+    "识别跨版本、跨评测协议及跨成本分母比较中的错误",
+  ],
+  summary:
+    "工业后训练不是把 PPO 换成某个新缩写。DeepSeek 展示探索与蒸馏的分工，Qwen 展示查询筛选、模式融合与大小模型迁移，Seed 展示长序列奖励、价值校准和数据工程。只有同时核对训练阶段、评测预算与公开证据，模型之间的比较才有意义。",
+  sections: [
+    {
+      id: "intuition",
+      type: "intuition",
+      title: "先建立直觉：同一所学校，不同的课程与考试",
+      body: String.raw`把预训练底座看作已有阅读积累的学生。SFT 是示范解题与回答格式，离线偏好学习是比较两份已有答案，在线 RL 是学生自己答题后收到反馈，蒸馏则是把老师的经验迁移给另一名学生。工业配方的差别首先在于“准备参加什么考试、能获得什么反馈”，而不只是优化器名称。
+
+阅读本章时固定六个问题：目标是推理还是通用助手？先后经历哪些阶段？题目和轨迹由谁产生？正确性、偏好与安全由谁判断？生成、训练和环境的成本在哪里？哪些结论来自报告，哪些只是我们的工程解释？下面标注的数值都是对应报告的结果，不代表本项目复现。
+
+## DeepSeek-V3 与 R1：通用能力和推理探索不是同一个问题
+
+DeepSeek-V3 的后训练包含 SFT 与 GRPO。数学、代码等可验证任务能用规则奖励，开放问答还需要模型反馈。它先培养领域专家，让专家生成训练数据，并兼顾正确率与输出长度，再把能力转移给通用模型。因此，“V3 只抄一个 R1 老师、没有自己的专家训练”不是报告描述。
+
+来源还强调 Self-Rewarding 与 Multi-Token Prediction（MTP）。前者提醒我们模型也能参与回答判分，但 judge 的表现不能证明训练反馈完全客观或无需人类数据。MTP 是预测多个未来 token 的辅助训练目标，V3 的预测模块还可用于投机解码：先提出候选，再由主模型验证接受，从而减少串行调用。它属于训练表示与推理效率设计，不能算成 GRPO 的奖励改进；实际接受率和加速取决于模型、任务与部署。
+
+DeepSeek-R1-Zero 直接从已经预训练的 V3-Base 做推理 RL，主要依赖可验证反馈。这里的 Zero 指没有先做那一轮冷启动 SFT，不是从随机参数学会语言。作者观察到检查、回溯等行为，同时也发现可读性与语言混杂问题；观察到行为变化，不等于证明 RL 可以无条件创造任何新知识。
+
+R1 报告也记录了过程奖励模型（PRM）和蒙特卡洛树搜索（MCTS）的未成功尝试。PRM 难在中间步骤定义、标签质量、策略分布变化与评分漏洞；MCTS 在语言空间还面对分支数和价值估计成本。这些负面经验值得用来设计对照，却不是“PRM 永远无用”或“树搜索不可能用于语言模型”的结论。推理时 reranking 与训练时持续优化同一个过程评分器也不是同一场景。
+
+正式 R1 用四步解决这些问题：少量高质量长思维链做冷启动 SFT；推理 RL 扩展能力；拒绝采样筛出推理轨迹，并混入非推理数据再做 SFT；最后进行兼顾推理、帮助性与安全的 RL。学生模型的 R1-Distill 则用约 800k 样本做 SFT，不能把教师的全部 RL 成本和算法直接写到每个学生身上。报告中 R1 的 AIME 2024 pass@1 为 79.8，表中 V3 为 39.2；后者不是 V3-Base。
+
+## DeepSeek-V3.2：专家先学，再用混合 RL 协调
+
+V3.2 主流程是 specialist distillation 与 mixed RL：八类领域的专家提供训练数据，通用模型学习后，再在推理、Agent 和一般任务的混合分布上优化。专家蒸馏是迁移输出能力，不是直接平均专家参数。混合 RL 要防止数学奖励提高时，写作或工具能力反而退化。
+
+Speciale 是偏向推理的实验变体，使用仅推理数据和较弱长度惩罚，不是标准 V3.2 必经的第三阶段。报告 Table 3 的 AIME 2025 pass@1：V3.2 Thinking 为 93.1、平均约 16k 输出 token；Speciale 为 96.0、约 23k。更高分同时使用了更长输出，不能把差异全部归功于一种优化器；竞赛的 Speciale 结果也不能搬给通用版本。
+
+它还暴露了规模化 RL 的概率一致性问题：Keep Routing 保存采样时的 MoE 专家路径；Keep Sampling Mask 保存 top-p/top-k 的采样掩码，使概率比较具有一致的动作支持集；配合 KL 估计修正与异常轨迹过滤。即使使用序列级目标，也不会自动消除这些工程差异。
+
+## Qwen2.5：先整理偏好，再把在线计算花到有区分度的题上
+
+Qwen2.5 的报告包含超过百万 SFT 样本、约 150k 离线 DPO 偏好对，以及在线 GRPO。SFT 建立任务与格式覆盖，DPO 消化已有偏好，GRPO 用当前模型的回答继续获取反馈。在线阶段优先选择响应奖励方差较大的查询，因为同一题出现好坏不同的回答时，组相对学习更容易获得方向。
+
+奖励标注考虑真实、帮助、简洁、相关、无害和去偏等标准，但六个标准不等于公开证明 RM 有六个输出头。长上下文能力涉及预训练、SFT 及不同型号的专门配置，不能把所有 Qwen2.5 型号画成“GRPO 后统一再做一次 128K 微调”。
+
+## Qwen3 与 Qwen3.5：从会思考到知道何时思考、如何行动
+
+Qwen3 的四阶段为长 CoT 冷启动、推理 RL、思考模式融合 SFT、通用 RL。模式融合不是删掉推理能力，而是让一个模型兼容 thinking 与 non-thinking，并能在用户给定思考预算、停止思考指令等条件下作答。最后的通用 RL 还需照顾遵循指令、格式与偏好，不能只看数学验证器。
+
+报告用 3,995 个 query-verifier 对开展 Qwen3-235B-A22B 的 reasoning RL，在 170 步中将该阶段 AIME 2024 从 70.1 提高到 85.1。一个查询可以被重复生成很多次，所以“只有几千题”不等于“只有几千次前向”。小模型的 strong-to-weak distillation 结合离线输出蒸馏和 on-policy 教师分布监督；报告中约十分之一 GPU-hours 是相对完整四阶段方法的特定设置，不是所有蒸馏都能省九成成本。
+
+Qwen3.5 首发 397B-A17B 是原生视觉语言模型，结合 Gated Delta Networks 线性注意力与稀疏 MoE，官方发布介绍了多模态、多轮 Agent RL。**本章这部分依据官方博客，公开信息有限。** 架构说明不能证明具体 checkpoint 一定使用 GSPO、SAPO 或某种 critic；托管服务的窗口配置也不能套给全部开权重版本。GSPO 与 SAPO 有各自原论文，应作为独立方法阅读，不能因出自同一团队就补全所有产品的训练配方。
+
+## DAPO 与 VAPO：同样做长推理，不同的信用分配选择
+
+DAPO 是 Decoupled Clip and Dynamic sAmpling Policy Optimization。四项核心改动是提高上裁剪界的 Clip-Higher、动态采样、token 级损失归一化和超长奖励塑形。动态采样移除组内奖励全同、相对优势为零的组，再补充有效组；token 归一化改变长短回答在梯度中的权重；软长度惩罚减轻在截断边界突然扣分带来的噪声，不是验证器认定未完成答案“部分正确”。
+
+报告以 Qwen2.5-32B Base 达到 AIME 2024 的 50 分，评测为重复 32 次的 avg@32，温度 1.0、top-p 0.7。它不是 best-of-32，更不能直接与使用另一底座、预算或选答规则的数字排名。
+
+VAPO 是 Value-model-based Augmented Proximal Policy Optimization，选择引入价值模型估计未来回报。奖励模型判断已生成回答的质量，critic 预测当前前缀继续生成能得到多少回报，两者目标不同。VAPO 冻结初始策略采样，以 Monte Carlo return 校准 critic，再使用解耦 GAE、长度自适应 GAE、正例 NLL 和 DAPO 类技术。当前报告摘要的 Qwen2.5-32B AIME 2024 为 60.4。这个未用 SFT 的实验支持该设置下的有效性，不证明 actor-critic 在所有规模都胜出。
+
+## Seed1.5-Thinking：反馈与流式系统一起设计
+
+Seed1.5-Thinking 最终模型为 200B 总参数、20B 激活参数，报告 AIME 2024 为 86.7。它区分可验证任务的 verifier、需要推理判断的 thinking verifier，以及通用偏好的成对生成式 RM；不同任务不能机械共用一种评分器。动态调整数据分布、流式 rollout 和价值模型校准共同服务于长推理训练，慢样本、奖励延迟与数据难度都会影响训练吞吐和稳定性。
+
+理解消融要先认清底座：报告的 DAPO 73%、VAPO 79% 来自有限步数的 Seed-150B-MoE 消融，不是最终 200B 模型的两种训练结果。RFT 提前饱和的实验也不意味着拒绝采样永远有害，因为同一报告的冷启动数据构造本身就使用拒绝采样。初始化、使用阶段和后续探索空间是不同变量。
+
+## Seed-Coder 与 Seed2.0：数据工程和产品演进不能混写
+
+Seed-Coder 的 8B Base、Instruct、Reasoning 面向不同使用方式。模型参与代码质量打分和筛选，同时仍有去重、语法过滤等数据工程；“模型自选数据”不代表无需质量控制。Instruct 采用 SFT+DPO，Reasoning 采用长 CoT GRPO，并吸收提高上裁剪、超长过滤、token-wise loss 等 DAPO 类技术。报告不是用 Seed-Coder 验证 VAPO，也不能从它移除 KL 的设置推导所有通用助手都该去掉 KL。
+
+Seed2.0 官方发布包含 Pro、Lite、Mini 与 Code，强调复杂指令、多模态和长程 Agent 任务。2026 年 6 月底已有公开模型卡，因此截至本章核验日不能再说“没有公开论文”。本章核对了官方发布和模型卡摘要、元数据，未据此声称掌握完整后训练方案。产品能力、模型卡结果与可复现训练细节是三种信息层级，不据型号延续猜测它必然沿用 VAPO。`,
+    },
+    {
+      id: "example",
+      type: "example",
+      title: "手算：三组查询，哪组值得继续采样？",
+      body: String.raw`以下数字是教学例子，不是 Qwen 的内部训练日志。每题采四个回答，正确奖励为 1、错误为 0：
+
+| 查询 | 四个奖励 | 平均奖励 | 总体方差 |
+|---|---|---:|---:|
+| A | 1, 1, 1, 1 | 1.00 | 0 |
+| B | 0, 0, 0, 1 | 0.25 | 0.1875 |
+| C | 0, 1, 0, 1 | 0.50 | 0.25 |
+
+对 B，平均数是 $0.25$，总体方差是 $(3\times0.25^2+0.75^2)/4=0.1875$，标准差约 $0.433$。暂不加数值稳定项，四个标准化优势约为 $[-0.577,-0.577,-0.577,1.732]$。C 的四个优势则是 $[-1,1,-1,1]$。A 的奖励完全相同，组相对奖励项没有区分信号；这不等于 KL、熵或其他辅助项也都没有梯度。
+
+按奖励方差排序会优先 C，再选 B。工程上不能只做这一条规则：某题的高方差可能来自不稳定的验证器，长期忽略 A 也可能损害已掌握能力。应先校验反馈，再结合任务配额、难度和保留集表现分配采样。
+
+再看“少量查询”的成本。假设 3,995 个查询每题采 16 次、每次平均生成 4,096 token，仅一轮就有：
+
+$$3995\times16\times4096=261{,}816{,}320$$
+
+即约 2.62 亿生成 token；多轮复用、训练反向、教师判分和无效样本尚未计算。这里的 16 与 4,096 是教学假设，不能当作 Qwen3 原始超参数。
+
+最后练习审计真实成本表：V3 报告的正式训练合计为 2,788K H800 GPU-hours，其中后训练为 5K，所以后训练占合计 $5000/2788000\approx0.179\%$。按每 GPU-hour 2 美元折算，后训练为 1 万美元、合计为 557.6 万美元。这是 V3 表内估算，不含全部前期研究与消融，也不是 R1 RL 的价格。`,
+    },
+    {
+      id: "diagram",
+      type: "diagram",
+      title: "图解：主模型与高预算变体是分支，不是流水线末级",
+      body: String.raw`下图是 V3.2 报告中两种配置的概念关系，不声称二者逐步共享相同 checkpoint。标准路线用专家蒸馏获得多领域能力，再由 mixed RL 协调；Speciale 路线把数据与长度约束向高预算推理倾斜。不能把箭头画成“通用版再必须变成 Speciale”，否则学生会误以为所有用户请求都要支付长推理成本。
+
+同样地，R1 教师与 R1-Distill 学生是能力迁移关系，不是每个学生重复教师全部训练；Qwen3 的模式融合则是在同一模型内支持不同推理预算。读 pipeline 时先问箭头传递的是参数、训练数据、教师概率还是环境反馈，这四种边有不同成本和统计含义。
+
+这一图也提示实验设计：要证明专家蒸馏有效，应固定底座和后续预算；要证明长度约束有效，应报告准确率与输出长度的共同变化。只展示最后一个模型名称无法回答这些问题。`,
+      diagram: {
+        kind: "flow",
+        nodes: [
+          "V3.2 报告：两种配置",
+          "标准：专家蒸馏",
+          "标准：混合领域 RL",
+          "V3.2 通用版",
+          "分支：仅推理 RL、较弱长度惩罚",
+          "Speciale 高预算变体",
+        ],
+        links: [[0, 1], [1, 2], [2, 3], [0, 4], [4, 5]],
+      },
+    },
+    {
+      id: "derivation",
+      type: "derivation",
+      title: "数学视角：查询信号、任务混合与成本分母",
+      body: String.raw`设问题为 $q$，同题采样数为 $G$，第 $i$ 个回答奖励为 $r_i$。定义组均值 $\bar r$、总体方差 $v(q)$、稳定常数 $\epsilon>0$ 与标准化优势 $\hat A_i$：
+
+$$\bar r=\frac1G\sum_{i=1}^{G}r_i,\qquad
+v(q)=\frac1G\sum_{i=1}^{G}(r_i-\bar r)^2,\qquad
+\hat A_i=\frac{r_i-\bar r}{\sqrt{v(q)}+\epsilon}.$$
+
+方差筛选选择当前策略能产生差异反馈的查询；DAPO 的动态采样进一步处理组内奖励全同的情况。两者都依赖采样估计，不等于知道题目的真实学习价值。只用四次采样估计难度，置信度可能很低。
+
+对于混合任务，令领域编号为 $d$，共 $D$ 个领域；$w_d$ 为非负任务权重，且总和为 1；$\mathcal D_d$ 为该领域的问题分布；$y$ 为策略 $\pi_\theta$ 在问题 $x$ 上生成的回答；$\theta$ 为可训练参数。一个用于理解配比的教学目标是：
+
+$$J(\theta)=\sum_{d=1}^{D}w_d\,
+\mathbb E_{x\sim\mathcal D_d,\ y\sim\pi_\theta(\cdot\mid x)}
+[R_d(x,y)].$$
+
+$R_d$ 是领域奖励，不要求不同领域共用同一 judge。若数学、代码、通用三域权重为 $[0.6,0.3,0.1]$，平均奖励为 $[0.8,0.5,0.9]$，加权值为 $0.6\times0.8+0.3\times0.5+0.1\times0.9=0.72$。这只是可计算的目标示例，不是任一公司的公开权重。
+
+若数学每条生成 10k token、通用每条只有 1k，按轨迹平均和按 token 平均会得到不同的实际梯度权重。因此“配比 60%”必须说明按问题、轨迹、token 还是消耗的计算计数。奖励尺度、长度归一化和 batch 拼接规则也会改变优化效果，不能只检查采样器的百分比。
+
+再令 $C$ 表示统一口径的计算成本，可用 GPU-hours 或货币，但同一式中不可混用单位。教学性分项账本为：
+
+$$C_{\mathrm{total}}=
+C_{\mathrm{rollout}}+C_{\mathrm{actor}}+
+C_{\mathrm{critic}}+C_{\mathrm{judge}}+
+C_{\mathrm{teacher}}+C_{\mathrm{environment}}+
+C_{\mathrm{overhead}}.$$
+
+各项分别是生成、策略训练、价值模型、奖励判分、蒸馏教师、工具环境，以及通信、调度和空闲开销；同一项工作只能计入一个桶。没有 critic 时对应项可为零，但判分、生成和等待不会随之消失。actor-critic 多多少成本取决于模型大小、共享方式、序列长度和并行配置，不存在通用“固定多 25% 显存”的结论。
+
+若 $C_{\mathrm{post}}$ 是后训练成本，$C_{\mathrm{pre}}$ 是预训练成本，则 $C_{\mathrm{post}}/C_{\mathrm{pre}}$ 与 $C_{\mathrm{post}}/C_{\mathrm{total}}$ 是不同占比。V3.2 报告后训练计算预算超过预训练成本的 10%，只能作为该报告口径下的投入观察，不能与 V3 的合计占比直接拼成严格的投资回报曲线。`,
+    },
+    {
+      id: "code",
+      type: "code",
+      title: "代码实验：先审计查询与账本，再选择优化器",
+      body: String.raw`这个仅依赖 Python 标准库的实验复现手算，输出有效查询、组优势、假设生成量与 V3 表内占比。它是数据审计，不是可训练的工业 GRPO，也不模拟验证器偏差或多机调度。
+
+~~~python
+from math import isclose, sqrt
+from statistics import mean
+
+def group_stats(rewards, eps=1e-8):
+    if not rewards:
+        raise ValueError("a group must not be empty")
+    avg = mean(rewards)
+    variance = mean([(value - avg) ** 2 for value in rewards])
+    advantages = [
+        (value - avg) / (sqrt(variance) + eps)
+        for value in rewards
+    ]
+    return variance, advantages
+
+groups = {
+    "A": [1, 1, 1, 1],
+    "B": [0, 0, 0, 1],
+    "C": [0, 1, 0, 1],
+}
+stats = {name: group_stats(values) for name, values in groups.items()}
+ranked = sorted(groups, key=lambda name: stats[name][0], reverse=True)
+active = [name for name in ranked if stats[name][0] > 0]
+assert active == ["C", "B"]
+assert isclose(stats["B"][0], 0.1875)
+assert stats["A"][1] == [0.0] * 4
+assert isclose(sum(stats["B"][1]), 0.0, abs_tol=1e-12)
+
+# Teaching assumptions, not Qwen3 rollout hyperparameters.
+generated_tokens = 3995 * 16 * 4096
+assert generated_tokens == 261_816_320
+weights, rewards = [0.6, 0.3, 0.1], [0.8, 0.5, 0.9]
+assert isclose(sum(weights), 1.0)
+mixed_reward = sum(w * r for w, r in zip(weights, rewards))
+assert isclose(mixed_reward, 0.72)
+
+# DeepSeek-V3 Table 1, all values in H800 GPU-hours.
+costs = {"pretrain": 2_664_000, "context": 119_000, "post": 5_000}
+post_fraction = costs["post"] / sum(costs.values())
+assert isclose(sum(costs.values()), 2_788_000)
+print("active:", active)
+print("B advantages:", [round(a, 3) for a in stats["B"][1]])
+print("teaching rollout tokens:", generated_tokens)
+print("mixed reward:", round(mixed_reward, 2))
+print("V3 post / total:", f"{100 * post_fraction:.3f}%")
+~~~
+
+预期有效查询顺序是 C、B，B 的优势约为 -0.577、-0.577、-0.577、1.732，最后一行是 0.179%。把 B 的最后一个奖励改为 0，会使该组退出有效列表；这表示目前组相对反馈不足，不能据此判定这道题永远没有学习价值。
+
+进入真实系统前还要保存查询来源、verifier 版本、采样策略版本、token 数和任务类别。否则你可能把奖励服务更新后的分数变化误判成策略学习，把长样本变多误判成优化器变慢。`,
+    },
+    {
+      id: "pitfall",
+      type: "pitfall",
+      title: "常见误区：把报告读成算法广告",
+      body: String.raw`**把 benchmark 名称当成完整协议。** AIME 2024 与 AIME 2025 题目不同；avg@32 是多次独立回答的平均正确率，不是选出一次正确就算通过的 pass@32。温度、最大长度、工具、是否投票和 verifier 都应对齐。R1、DAPO、VAPO 的数值在这里解释各自报告，不构成受控横向实验。
+
+**把消融模型写成最终模型。** V3 报告的 MATH-500 蒸馏对照 74.6 到 83.2 来自 V2.5 底座；Seed1.5 的 DAPO/VAPO 对照来自 150B 消融。更换底座后不能保留同一个因果解释。
+
+**把方法名称当作配方身份证。** GSPO 是 Group Sequence Policy Optimization，SAPO 是 Soft Adaptive Policy Optimization；前者的长度归一化序列比和后者的平滑门控不等于“Qwen 系列所有模型都使用”。Seed-Coder 的原报告明确为 GRPO 加 DAPO 类技术，不能改写为 VAPO。
+
+**把奖励模型当价值模型。** RM 评分最终回答，critic 估计给定前缀的预期回报。用 RM 权重初始化 critic 仍可能目标错配，VAPO 的校准恰好说明不能仅看网络结构相似。
+
+**把长度变长当作推理必然进步。** 过强长度惩罚可能截断有效探索，完全没有约束也可能鼓励冗余。应画固定预算下的正确率，并检查相同正确率对应的延迟；单看平均 CoT 长度无法区分有效检查与奖励投机。
+
+**把公开状态冻结在旧文章的日期。** Seed2.0 已有后续模型卡；Qwen3.5 本章所用材料仍是官方博客。先写核验日期与文献类型，再说公开了什么。上游作者的“后训练永不饱和”“actor-critic 必将复兴”属于观点，需要固定底座、数据和预算的消融才能检验。`,
+    },
+    {
+      id: "comparison",
+      type: "comparison",
+      title: "比较表：先选任务与反馈，再借鉴训练阶段",
+      body: String.raw`| 案例 | 阶段与数据主线 | 奖励和系统约束 | 可迁移经验与边界 |
+|---|---|---|---|
+| DeepSeek-V3 | 领域专家产数，SFT，再 GRPO | 规则与模型反馈，控制长度 | 蒸馏与 RL 互补；表内成本不等于全部研发 |
+| R1 / R1-Zero | Zero 探索纯 RL；R1 冷启动、RL、混合 SFT、RL | 可验证推理加通用对齐 | 需要分开比较探索、可读性与学生蒸馏 |
+| V3.2 / Speciale | 标准为专家蒸馏、mixed RL；Speciale 是分支 | 保留路由和采样掩码，分支弱化长度惩罚 | 概率一致性独立于优化器名称 |
+| Qwen2.5 | SFT、离线 DPO、在线 GRPO | 按响应奖励方差筛查询 | 数据量、查询难度与反馈质量要共同监控 |
+| Qwen3 | 冷启动、推理 RL、模式融合、通用 RL | 思考预算，大小模型蒸馏 | 少量查询不代表少量生成或更新计算 |
+| Qwen3.5 | 官方披露原生多模态与 Agent RL 方向 | 线性注意力加稀疏 MoE | 博客信息有限，不猜具体优化器与 critic |
+| DAPO / VAPO | 前者强调组相对信号；后者加入价值校准 | 长序列、熵、GAE 与有效采样 | 是否加入 critic 应比较质量与总成本 |
+| Seed1.5-Thinking | 冷启动、分任务反馈、动态 RL 数据 | 流式生成与价值校准 | 最终 200B 与 150B 消融不能混用 |
+| Seed-Coder | 代码筛选；Instruct 用 SFT+DPO；Reasoning 用 GRPO | 编译测试与 DAPO 类优化 | 自选数据仍需去重、过滤和独立评测 |
+| Seed2.0 | 通用 Agent 与 Code 产品线 | 复杂指令、多模态、长程任务 | 已有模型卡；本章未核验完整训练细节 |
+
+**教学性决策顺序：** 对有可靠测试的数学或代码任务，先建立 RLVR 基线并核验反馈；全同奖励组很多时，检查题目难度与动态采样；长程信用不足时，再评估价值模型及其校准成本；目标是小模型低延迟部署时，比较离线蒸馏与 OPD；通用助手或多模态 Agent 则必须补齐偏好、安全、工具与预算评测。
+
+这不是算法胜负榜。一个团队能生成高质量专家数据，另一个团队只有可靠单元测试，最合适的起点会不同。真正可移植的是诊断问题的方法，而不是把某篇论文的所有开关一并复制。`,
+    },
+    {
+      id: "interview",
+      type: "interview",
+      title: "面试表达：从模型名称回到可验证的训练选择",
+      body: String.raw`**30 秒回答：**“工业后训练要拆成任务、数据、反馈、阶段和系统约束。DeepSeek 用 R1 探索推理，再以多阶段训练与专家蒸馏兼顾通用能力；Qwen 把离线偏好、在线查询筛选、模式融合和大小模型迁移组合起来；Seed 从 DAPO 的长序列稳定性扩展到 VAPO 的价值校准，并把奖励、数据和 rollout 系统一起设计。比较结果必须固定底座、评测预算和成本口径。”
+
+**为什么不能说 R1-Zero 证明 SFT 没用？** 它从强预训练底座出发，回答的是推理 RL 能否起效。正式 R1 又用 SFT 修复可读性、整合数据与兼顾通用任务；问题不同，结论并不矛盾。
+
+**为什么高方差查询更有价值？** 在组相对目标中，同题有好有坏就有可学习的相对方向。但样本少、judge 不稳也会产生高方差，因此要与反馈质量和领域覆盖一起看。
+
+**为什么 VAPO 的 critic 不直接用 RM？** 终局答案质量与前缀的期望回报是不同目标。应在当前策略轨迹上用回报校准，再讨论 GAE 与优势估计，而不是仅复制权重。
+
+**如何解释后训练预算快速上升？** 先区分预训练分母、总训练分母和 RL 租赁成本，再拆生成、训练、判分、环境及空闲开销。预算上升可能来自更难任务或更长 rollout，不能单靠一张成本表证明算法效率变差或收益永远增长。
+
+**报告只公布产品能力怎么办？** 保留已公开的架构、任务与结果，明确未披露优化器和数据比例。提出实验假设可以，不能将其写成厂商已完成的训练事实。`,
+    },
+    {
+      id: "quiz",
+      type: "quiz",
+      title: "自测：数字、阶段和归因各检查一次",
+      body: "回答时先指出证据属于哪个模型、哪一阶段和哪一种评测协议。",
+      questions: [
+        {
+          q: "奖励为 [0, 0, 0, 1] 的组，其均值、总体方差和成功样本优势约为多少？",
+          a: "均值 0.25，方差 0.1875，标准差约 0.433；忽略稳定常数，成功样本优势为 0.75/0.433，约 1.732。前三个失败样本各约 -0.577。",
+        },
+        {
+          q: "R1-Zero 的 Zero 与 R1-Distill 的 Distill 分别意味着什么？",
+          a: "Zero 指从已预训练底座直接做推理 RL、没有那轮冷启动 SFT，不是随机初始化。Distill 学生使用教师整理的数据训练，不能推定每个学生都重复教师的大规模 RL。",
+        },
+        {
+          q: "为什么不能把 Speciale 的竞赛结果直接写成标准 V3.2 的能力？",
+          a: "Speciale 是偏推理、弱长度约束的独立变体，任务混合和推理预算不同。应注明具体 checkpoint、竞赛协议与输出预算，而不是把它画成通用版的必经阶段。",
+        },
+        {
+          q: "V3 的后训练 5K GPU-hours 占正式训练合计 2,788K 的多少？它能说明 R1 RL 成本吗？",
+          a: "约 0.179%。它是 V3 报告表内后训练占合计的比例，既不是除以预训练的比例，也不是 R1 的 RL 成本，不包含全部前期研发。",
+        },
+        {
+          q: "Seed-Coder Reasoning 用 VAPO，Seed1.5 的 73/79 是最终 200B 对照，这两句话对吗？",
+          a: "都不对。Seed-Coder 报告采用 GRPO 加 DAPO 类技巧；Seed1.5 的 DAPO 73、VAPO 79 来自有限步数的 Seed-150B-MoE 消融，不是最终 200B 模型。",
+        },
+        {
+          q: "Qwen3 的 3,995 个查询是否意味着只生成了 3,995 条回答？",
+          a: "不是。每题可多次 rollout，多个训练步骤还会重复采样。必须计入生成 token、训练反向、教师或 RM 以及无效组补采，查询数只是数据维度。",
+        },
+        {
+          q: "从 Qwen3.5 的 MoE 架构或 Seed2.0 的产品名，能推断其训练必用 GSPO 或 VAPO 吗？",
+          a: "不能。架构与家族名称不决定优化器；需要对应 checkpoint 的原始训练披露。本章 Qwen3.5 依据官方博客，Seed2.0 依据发布及后续模型卡摘要，均不补猜未披露细节。",
+        },
+      ],
+    },
+  ],
+  sources: [
+    {
+      label: "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via RL",
+      url: "https://arxiv.org/html/2501.12948",
+      evidence: "原始报告：R1-Zero、R1 四阶段、约 800k 蒸馏数据及 AIME 2024 结果",
+    },
+    {
+      label: "DeepSeek-V3 Technical Report",
+      url: "https://arxiv.org/html/2412.19437",
+      evidence: "原始报告：专家数据、SFT/GRPO；Table 1 成本归属，Table 9 为 V2.5 底座消融",
+    },
+    {
+      label: "DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models",
+      url: "https://arxiv.org/html/2512.02556",
+      evidence: "原始报告：专家蒸馏、mixed RL、Speciale 分支、Keep Routing/Keep Sampling Mask 及 Tables 3–4",
+    },
+    {
+      label: "Qwen2.5 Technical Report",
+      url: "https://arxiv.org/html/2412.15115",
+      evidence: "原始报告：SFT、DPO、在线 GRPO 与基于响应分数方差的查询选择",
+    },
+    {
+      label: "Qwen3 Technical Report",
+      url: "https://arxiv.org/html/2505.09388",
+      evidence: "原始报告：四阶段、3,995 query-verifier 对、阶段性 AIME 2024 结果、模式融合与大小模型蒸馏",
+    },
+    {
+      label: "Qwen3.5: Towards Native Multimodal Agents",
+      url: "https://www.alibabacloud.com/blog/qwen3-5-towards-native-multimodal-agents_602894",
+      evidence: "官方博客转载，公开信息有限：首发模型架构、多模态与 Agent RL 方向；不据此推定算法超参数",
+    },
+    {
+      label: "Group Sequence Policy Optimization",
+      url: "https://arxiv.org/html/2507.18071",
+      evidence: "方法原论文：正式名称与长度归一化序列比；不代表全部 Qwen checkpoint 的统一配方",
+    },
+    {
+      label: "Soft Adaptive Policy Optimization",
+      url: "https://arxiv.org/html/2511.20347",
+      evidence: "方法原论文：平滑门控及其经验条件；不把局部近似写成普遍包含关系",
+    },
+    {
+      label: "DAPO: An Open-Source LLM Reinforcement Learning System at Scale",
+      url: "https://arxiv.org/html/2503.14476",
+      evidence: "原始报告：四项技术，Qwen2.5-32B Base，AIME 2024 avg@32 及采样协议",
+    },
+    {
+      label: "VAPO: Efficient and Reliable Reinforcement Learning for Advanced Reasoning Tasks",
+      url: "https://arxiv.org/html/2504.05118",
+      evidence: "原始报告：Value-Pretraining、Decoupled-GAE、长度自适应与正例 NLL，摘要结果 60.4",
+    },
+    {
+      label: "Seed1.5-Thinking: Advancing Superb Reasoning Models with Reinforcement Learning",
+      url: "https://arxiv.org/html/2504.13914",
+      evidence: "原始报告：200B/20B 最终模型、反馈分工、流式 rollout；150B 算法消融与 RFT 条件",
+    },
+    {
+      label: "Seed-Coder: Let the Code Model Curate Data for Itself",
+      url: "https://arxiv.org/html/2506.03524",
+      evidence: "原始报告：8B 三版本、模型辅助筛数、Instruct SFT+DPO、Reasoning GRPO 加 DAPO 类优化",
+    },
+    {
+      label: "Seed2.0 Official Launch",
+      url: "https://seed.bytedance.com/en/blog/seed-2-0-official-launch",
+      evidence: "2026-02 官方发布，公开信息有限：Pro/Lite/Mini/Code、复杂指令与 Agent 产品定位",
+    },
+    {
+      label: "Seed2.0 Model Card, v1",
+      url: "https://arxiv.org/abs/2607.00248v1",
+      evidence: "2026-06-30 已提交模型卡；本次核对摘要与元数据，不声称核验了全文训练细节",
+    },
+    {
+      label: "agentic-rl-analysis: 工业模型文档，固定提交 66ae4423",
+      url: "https://github.com/xavierzhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch2",
+      evidence: "二级学习材料：2.1、2.3、2.6 全文阅读；与原始报告冲突之处以证据账本勘误",
+    },
+  ],
+};
+
+export default chapter;

@@ -1,4 +1,5 @@
 import { annotateGlossary, GLOSSARY } from "./glossary.js";
+import { sourcesForChapter } from "../content/source-manifest.js";
 
 const INTERVIEW_SECTION_TYPES = new Set([
   "pitfall",
@@ -283,18 +284,19 @@ export function renderDiagram(diagram) {
     );
   }
 
+  const connected = new Set(links.flat());
+  const rows = links.map(([from, to]) =>
+    `<div class="flow-edge" data-from="${from}" data-to="${to}">` +
+    `<div class="flow-node">${escapeHtml(nodes[from])}</div>` +
+    `<span class="flow-arrow" aria-hidden="true">→</span>` +
+    `<div class="flow-node">${escapeHtml(nodes[to])}</div></div>`,
+  ).join("");
+  const isolated = nodes.map((node, index) => connected.has(index) ? "" :
+    `<div class="flow-node flow-isolated">${escapeHtml(node)}</div>`).join("");
   return (
     `<figure class="diagram diagram--flow" ` +
     `aria-label="${escapeHtml(diagramAriaLabel(normalized))}">` +
-    `<div class="flow-track">${nodes
-      .map(
-        (node, index) =>
-          `${index > 0 ? '<span class="flow-arrow" aria-hidden="true">→</span>' : ""}` +
-          `<div class="flow-node" data-node-index="${index}">${escapeHtml(
-            node,
-          )}</div>`,
-      )
-      .join("")}</div></figure>`
+    `<div class="flow-edges">${rows}${isolated}</div></figure>`
   );
 }
 
@@ -315,7 +317,7 @@ function renderQuiz(section, options) {
         (question, index) =>
           `<li class="quiz-item"><p class="quiz-question">` +
           `<span class="quiz-number">${index + 1}</span>` +
-          `${renderInlineMarkdown(question.q, options)}</p>` +
+          `<span class="quiz-text">${renderInlineMarkdown(question.q, options)}</span></p>` +
           `<details class="quiz-answer"><summary>查看答案</summary>` +
           `${renderMarkdown(question.a, options)}</details></li>`,
       )
@@ -361,6 +363,13 @@ export function renderChapter(chapter, state = {}) {
   const seenTerms = new Set();
   const markdownOptions = { glossary: true, seenTerms };
   const progress = Math.round((completed.size / chapter.sections.length) * 100);
+  const sourceDocs = sourcesForChapter(chapter.id);
+  const readingLinks = sourceDocs.length
+    ? `<details class="source-map"><summary>本章扩展阅读（${sourceDocs.length} 篇）</summary>` +
+      `<p>改编自 Xavier / Agentic RL Analysis Contributors 的调研；课程中的原论文引用用于核验定义与结论。</p><ul>` +
+      sourceDocs.map(source => `<li><a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.topics)}</a></li>`).join("") +
+      `</ul></details>`
+    : "";
 
   return (
     `<article class="chapter" data-chapter-id="${escapeHtml(chapter.id)}">` +
@@ -396,7 +405,7 @@ export function renderChapter(chapter, state = {}) {
           `rel="noreferrer">${escapeHtml(source.label)}</a>` +
           `<span>${escapeHtml(source.evidence)}</span></li>`,
       )
-      .join("")}</ol></footer></article>`
+      .join("")}</ol>${readingLinks}</footer></article>`
   );
 }
 

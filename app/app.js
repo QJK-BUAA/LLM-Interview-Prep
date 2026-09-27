@@ -104,6 +104,7 @@ function chapterSearchLabel(chapter) {
 }
 
 function initialize() {
+  document.querySelector("#course-count").textContent = `${CHAPTERS.length} 章课程`;
   const elements = {
     chapterRoot: document.querySelector("#chapter-root"),
     readingPane: document.querySelector("#reading-pane"),
@@ -592,7 +593,6 @@ function initialize() {
       persist(setTheme(state, state.theme === "dark" ? "light" : "dark"));
       applyTheme();
     } else if (action === "toggle-section") {
-      const position = readScrollPosition();
       persist(
         toggleSection(
           state,
@@ -600,10 +600,18 @@ function initialize() {
           target.dataset.sectionId,
         ),
       );
-      renderCurrentChapter({
-        sectionId: null,
-        restorePosition: position,
-      });
+      const complete = (state.completed[target.dataset.chapterId] ?? []).includes(target.dataset.sectionId);
+      target.setAttribute("aria-pressed", String(complete));
+      target.title = complete ? "标记为未完成" : "标记为已完成";
+      target.querySelector("span:last-child").textContent = complete ? "已完成" : "完成";
+      target.closest(".lesson-section").classList.toggle("is-complete", complete);
+      const progress = getProgress(state, state.currentChapter);
+      const meter = elements.chapterRoot.querySelector(".chapter-progress");
+      meter.setAttribute("aria-label", `本章进度 ${progress.percentage}%`);
+      meter.querySelector("span").style.width = `${progress.percentage}%`;
+      renderChapterContext(getChapter(state.currentChapter));
+      renderCourseNavigation();
+      renderOverallProgress();
     } else if (action === "copy-code") {
       void copyCode(target);
     } else if (action === "retry-render") {

@@ -61,7 +61,7 @@ test("normalizes modes and removes unknown chapters and sections", () => {
   );
 
   assert.deepEqual(loadState(storage), {
-    version: 1,
+    version: 2,
     currentChapter: "00",
     mode: "learn",
     theme: "light",
@@ -100,7 +100,7 @@ test("calculates chapter and catalog progress from valid sections", () => {
 
   assert.deepEqual(chapter, { completed: 2, total: 9, percentage: 22 });
   assert.equal(overall.completed, 2);
-  assert.equal(overall.total, 189);
+  assert.equal(overall.total, 270);
   assert.equal(overall.percentage, 1);
 });
 

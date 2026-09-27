@@ -165,7 +165,9 @@ print(chosen_ratio, rejected_ratio, logit, loss)
 
 IPO 的动机之一是避免 logistic 目标在可分数据上持续扩大 margin；KTO 面向只有好/坏单样本而无严格配对的数据；ORPO 把 chosen 的监督学习和偏好 odds 结合；SimPO 让隐式 reward 与生成时常用的平均 log probability 对齐并加入 margin。它们的假设不同，不应统称为“换个 loss 就一样”。
 
-偏好优化适合难以写标量 verifier、但能稳定比较两个答案的任务。数学最终答案可直接验证时，RLVR 能在线探索；若已有大量高质量静态偏好对、在线生成昂贵，DPO 家族更直接。`,
+偏好优化适合难以写标量 verifier、但能稳定比较两个答案的任务。数学最终答案可直接验证时，RLVR 能在线探索；若已有大量高质量静态偏好对、在线生成昂贵，DPO 家族更直接。
+
+**工业 Pipeline 中的 DPO。** Qwen2.5 报告把离线偏好优化和在线 RL 分阶段使用；MiniMax-01 把短、长上下文的 SFT 与 DPO 分开组织，以适配不同的数据分布。它们说明 DPO 可负责某个阶段的行为校准，不代表所有模型都应按同一顺序训练。第 22、23 章会比较这些配方。若给长文摘要标注“更完整”，给短问答标注“更简洁”，必须把任务上下文带入偏好对；否则一个总长度偏好可能互相冲突。评估应按长度与任务分桶，不能仅看合并后的 pairwise accuracy。`,
     },
     {
       id: "interview",
@@ -205,6 +207,16 @@ IPO 的动机之一是避免 logistic 目标在可分数据上持续扩大 margi
     },
   ],
   sources: [
+    {
+      label: "Qwen2.5 Technical Report",
+      url: "https://arxiv.org/abs/2412.15115",
+      evidence: "离线与在线偏好阶段的工业实例",
+    },
+    {
+      label: "MiniMax-01: Scaling Foundation Models with Lightning Attention",
+      url: "https://arxiv.org/abs/2501.08313",
+      evidence: "短长上下文后训练配方；不是普适顺序",
+    },
     {
       label: "Direct Preference Optimization",
       url: "https://arxiv.org/abs/2305.18290",

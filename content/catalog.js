@@ -19,6 +19,15 @@ import chapter17 from "./chapter-17.js";
 import chapter18 from "./chapter-18.js";
 import chapter19 from "./chapter-19.js";
 import chapter20 from "./chapter-20.js";
+import chapter21 from "./chapter-21.js";
+import chapter22 from "./chapter-22.js";
+import chapter23 from "./chapter-23.js";
+import chapter24 from "./chapter-24.js";
+import chapter25 from "./chapter-25.js";
+import chapter26 from "./chapter-26.js";
+import chapter27 from "./chapter-27.js";
+import chapter28 from "./chapter-28.js";
+import chapter29 from "./chapter-29.js";
 
 export const CHAPTERS = Object.freeze([
   chapter00,
@@ -42,6 +51,15 @@ export const CHAPTERS = Object.freeze([
   chapter18,
   chapter19,
   chapter20,
+  chapter21,
+  chapter22,
+  chapter23,
+  chapter24,
+  chapter25,
+  chapter26,
+  chapter27,
+  chapter28,
+  chapter29,
 ]);
 
 export function getChapter(idOrSlug) {

@@ -27,7 +27,9 @@ const chapter = {
 
 经典实现常同时涉及四个模型角色：policy/actor 生成并更新；reference 提供不更新的基准概率；reward model 对完整回答评分；value/critic 预测每个前缀的未来回报。它们可共享部分权重或分时部署，但逻辑职责必须分开。
 
-PPO 的“proximal”不是保证永不退化，而是用旧策略采样后，对新旧动作概率比做截断，限制一次数据复用期间的激进更新。训练稳定还依赖奖励尺度、优势估计、KL 系数、数据分布和实现细节。`,
+PPO 的“proximal”不是保证永不退化，而是用旧策略采样后，对新旧动作概率比做截断，限制一次数据复用期间的激进更新。训练稳定还依赖奖励尺度、优势估计、KL 系数、数据分布和实现细节。
+
+RLHF 与 RLVR 描述奖励来源，PPO 与 GRPO 描述更新算法。PPO 可以使用可验证的奖励而不训练神经奖励模型；GRPO 也能接收学习型 RM 的分数。去掉 critic 和去掉 reward model 是两项独立设计。开放式写作、对话和安全规范难用唯一标准答案评价，可以用人类偏好、Constitutional AI 的规则批评与修订、或 rubric 分维度反馈，但都需要检查评审偏差。`,
     },
     {
       id: "example",
@@ -155,7 +157,9 @@ for prompts in prompt_loader:
 
 **误区五：高 reward 的所有 token 都同样正确。** 终局标量无法定位因果步骤，格式 token 也可能一起被强化。过程奖励可增加粒度，但评审误差同样会扩散。
 
-**误区六：训练不崩就代表稳定。** entropy 缓慢坍缩、回答长度漂移、KL 增长、能力遗忘和隐藏 reward hacking 都可能在 loss 正常时发生。`,
+**误区六：训练不崩就代表稳定。** entropy 缓慢坍缩、回答长度漂移、KL 增长、能力遗忘和隐藏 reward hacking 都可能在 loss 正常时发生。
+
+**误区七：限制 RM 的使用步数就解决奖励作弊。** 减少暴露时间可能限制过优化，但某个报告的训练步数不能作为所有项目的固定阈值。应画出代理奖励和独立质量随训练的曲线；二者分离时检查奖励漏洞、数据覆盖和 checkpoint。规则验证器同样会受不完整测试与解析错误影响，奖励函数是否可微并不是 reward hacking 的判据。`,
     },
     {
       id: "comparison",
@@ -211,6 +215,11 @@ PPO 相对 REINFORCE 的主要新增负担是 critic、old policy 逻辑与多�
     },
   ],
   sources: [
+    {
+      label: "Constitutional AI: Harmlessness from AI Feedback",
+      url: "https://arxiv.org/abs/2212.08073",
+      evidence: "规则驱动批评、修订与 AI 偏好反馈的原始工作",
+    },
     {
       label: "Proximal Policy Optimization Algorithms",
       url: "https://arxiv.org/abs/1707.06347",

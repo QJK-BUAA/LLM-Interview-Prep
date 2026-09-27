@@ -67,7 +67,7 @@
 
 html {
   background: var(--page);
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -592,6 +592,7 @@ progress::-moz-progress-bar {
   color: var(--text);
   font-size: 34px;
   line-height: 1.22;
+  text-wrap: balance;
 }
 
 .chapter-subtitle {
@@ -969,12 +970,15 @@ tbody tr:last-child td {
   background: var(--surface);
 }
 
-.flow-track {
-  display: flex;
-  width: max-content;
-  min-width: 100%;
+.flow-edges {
+  display: grid;
+  gap: 10px;
+}
+
+.flow-edge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
   align-items: stretch;
-  justify-content: center;
   gap: 9px;
 }
 
@@ -982,7 +986,7 @@ tbody tr:last-child td {
 .comparison-node,
 .matrix-cell {
   display: grid;
-  min-width: 112px;
+  min-width: 0;
   min-height: 54px;
   place-items: center;
   padding: 9px 11px;
@@ -994,6 +998,7 @@ tbody tr:last-child td {
   font-weight: 650;
   line-height: 1.4;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .flow-arrow {
@@ -1066,6 +1071,10 @@ tbody tr:last-child td {
   font-weight: 650;
 }
 
+.quiz-text {
+  min-width: 0;
+}
+
 .quiz-number {
   display: grid;
   width: 26px;
@@ -1113,6 +1122,21 @@ tbody tr:last-child td {
 
 .chapter-sources li span {
   display: block;
+}
+
+.source-map {
+  margin-top: 24px;
+  font-size: 13px;
+}
+
+.source-map summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 650;
+}
+
+.source-map ul {
+  padding-left: 20px;
 }
 
 #chapter-context {
@@ -1467,6 +1491,10 @@ tbody tr:last-child td {
     padding: 18px 16px 14px;
   }
 
+  .lesson-section {
+    scroll-margin-top: calc(var(--header-height) + 20px);
+  }
+
   .section-header h2 {
     font-size: 18px;
   }
@@ -1487,10 +1515,6 @@ tbody tr:last-child td {
 
   .diagram {
     padding: 14px;
-  }
-
-  .flow-track {
-    justify-content: flex-start;
   }
 
   .quiz-answer {

@@ -1,0 +1,433 @@
+const chapter = {
+  id: "23",
+  slug: "industrial-kimi-minimax-glm",
+  part: "LLM 后训练",
+  title: "工业案例 II：Kimi、MiniMax、GLM 与闭源模型",
+  subtitle: "长程 Agent 的训练对象不仅是答案，还包括轨迹、工具与调度",
+  level: "进阶",
+  duration: 190,
+  prerequisites: ["16", "17", "18", "19", "20", "21", "22"],
+  tags: [
+    "Kimi K1.5", "Kimi K2", "Kimi K2.5", "Partial Rollout", "MuonClip",
+    "MiniMax-01", "MiniMax-M1", "MiniMax-M2", "MiniMax-M2.5", "MiniMax-M2.7",
+    "CISPO", "Forge", "GLM-5", "TITO", "OPD", "Deliberative Alignment",
+  ],
+  objectives: [
+    "解释 Kimi 的 partial rollout、long2short、MuonClip 与 PARL 分别解决什么",
+    "区分 MiniMax 各代的长上下文、CISPO 和 Agent 训练系统",
+    "手算被裁剪 IS 权重的梯度系数、轨迹掩码与并行关键路径",
+    "用 GLM-5 解释 interleaved thinking、TITO 和跨阶段 OPD",
+    "区分闭源公司的已公开对齐方法与未披露的完整产品配方",
+  ],
+  summary:
+    "从 Kimi 的分片与并行，到 MiniMax 的 CISPO 和 Forge，再到 GLM-5 的轨迹一致性与跨阶段蒸馏，工业 Agent RL 的关键是让反馈、生成、训练和环境相互对齐。闭源公司的公开安全方法同样值得学习，但不能据此补猜整套能力训练方案。",
+  sections: [
+    {
+      id: "intuition",
+      type: "intuition",
+      title: "先建立直觉：从批改答卷到验收一个工程项目",
+      body: String.raw`单轮题目像交一张答卷：模型输出一次，验证器给一个结果。Agent 任务更像交付项目：先读需求，再调用搜索、终端或编辑器，观察结果后修正方案，最终还要检查产物。长短任务交错、工具会失败、状态会变化，训练系统不能只存一段最终答案。
+
+本章沿用任务、阶段、数据、奖励、系统、证据六个阅读维度。特别注意三个名字常被混为一谈：奖励 judge 判断回答或产物，价值 critic 预测前缀的未来回报，MuonClip 则属于优化器稳定化，三者不是同一种“打分与裁剪”。
+
+## Kimi K1.5：长推理能否训练，短回答如何保留能力
+
+Kimi K1.5 从已有语言与多模态能力出发，以长 CoT 监督与长上下文 RL 扩展数学、代码等能力。报告使用 online policy mirror descent 的变体和结果反馈，并涉及 CoT RM；没有独立 value 网络不等于没有模型判分或数据筛选。
+
+Partial Rollout 把超长生成切成片段：本轮未完成的轨迹保存起来，下轮继续生成。它降低长样本对同步批次的阻塞，但不自动减少总生成 token，也不让旧片段变成当前策略的样本。系统必须记录片段边界、行为策略版本、缓存与奖励归属。
+
+long2short 关注另一件事：如何把长推理能力转成较低延迟的短回答。报告比较模型合并、选最短正确轨迹的拒绝采样、DPO 和带长度惩罚的 RL。k1.5-short w/ RL 在 AIME 2024 的 8 次运行平均 pass@1 为 60.8、平均 3,272 token，长 CoT 版本报告为 77.5。它展示的是准确率与预算的取舍，不是证明所有答案越短越好。
+
+## Kimi K2：先稳定大模型，再构造可验证工具任务
+
+Kimi K2 的 MuonClip 主要服务于预训练稳定性。其 QK-Clip 观察每个注意力头在当前 batch 中的最大 attention logit，超过阈值后缩放 query/key 投影相关权重。Q 与 K 分别是查询与键；这里关注送入 softmax 的信号，不是检查 Q/K 的谱范数，也不是裁剪 RL 中新旧策略概率比。MHA 与 MLA 的实际缩放部件不同，不能把一个简化例子直接当作另一种架构的实现。15.5T token 无 loss spike 是报告的那次训练结果，不是普遍保证。
+
+Agent 数据从工具和领域规格出发，构造角色、任务与明确 rubric，再在有状态的工具模拟中生成轨迹，经 judge 筛选后训练；RL 混合真实和合成环境。rubric 是“什么算完成”的可检查标准，不是让模型给自己随意加分。Self-Critique Rubric Reward 还依赖 SFT 初始化的判断能力和开源、内部偏好数据，因此不是完全无人类监督。这里做成对偏好判断的 critic 也不能直接等同 PPO 的价值网络。
+
+## Kimi K2.5：跨模态迁移和 Agent Swarm 是两条轴
+
+K2.5 的 early fusion 消融改变视觉数据进入预训练的时间和比例，不是把视觉 embedding 放到浅层还是深层。Zero-Vision SFT 指某阶段不使用视觉 SFT 样本；模型此前见过图文预训练数据，之后还有视觉 RL，不能理解成“从未看过图片却会视觉推理”。
+
+Agent Swarm 的 PARL 训练编排器拆分任务、调用多个子 Agent 并整合结果。报告冻结子 Agent，只更新编排器，把子 Agent 返回当作环境观察；奖励既看最终结果，也用鼓励有效并行的辅助项，并逐渐退火辅助奖励。如果只奖励子 Agent 数量，模型可能制造无用分工，所以有效完成与整体时延都要检查。
+
+报告的最多 4.5 倍延迟改善属于 wide-search 设置，不是所有任务。Toggle 的约 25–30% token 节省实验则在 K2 Thinking 上评估，不能把它当成每个 K2.5 请求的固定收益。模态能力、协调能力和推理预算要分开归因。
+
+## MiniMax-01：长上下文能力需要阶段性保养
+
+MiniMax-Text-01 以 Lightning Attention 与 softmax attention 的混合设计控制长上下文成本。后训练分短 SFT、长 SFT、短 DPO、长 DPO、短 online RL 五阶段；报告长阶段序列长度为 1,032,192，短阶段为 8,192。最后的在线 RL 并不是每条都在百万 token 上训练。
+
+奖励覆盖正确性、真实性、帮助性与无害性，长短阶段交替处理质量与上下文能力的取舍。Vision-01 另有多模态配方，不能将 Text-01 的所有阶段原样套用。理论上更省计算的注意力也不保证所有长程检索、多跳任务都与全注意力等价。
+
+## MiniMax-M1：把长推理的算法、数值与账本分开看
+
+M1 在混合注意力基础上经历 7.5T token 的继续预训练、冷启动 SFT 和 CISPO RL。CISPO 是 Clipped IS-weight Policy Optimization：裁剪逐 token 的重要性采样权重并停止对权重求导，再用它加权当前 token 的 log-prob。它不是 GSPO，也不是“几何平均序列裁剪”。某 token 的权重触及上限后，log-prob 项仍可能有梯度。
+
+报告 Table 2 的 M1-80k AIME 2024 为 86.0。作者还报告用 512 张 H800 完成一次完整 RL，租赁估算 534,700 美元；这不含底座、继续预训练及全部研发，不能直接与 V3 正式训练合计比较。Qwen2.5-32B 数学对照中达到 DAPO 表现约需一半更新步数，也不能推出总 FLOPs、显存和费用都减半。
+
+## M2、M2.5、M2.7：从回答问题转向交付可验收产物
+
+截至 2026-09，M2 系列已有覆盖三个版本的公开技术报告，不再是只有发布博客。M2 为 229.9B 总参数、9.8B 每 token 激活，采用全注意力与 GQA，不能继续标成 01/M1 的 Lightning Attention 路线。后训练以 interleaved-thinking SFT 和 Agent RL 组织代码、搜索、办公及通用任务，数据必须配套可执行工作区和可信的产物反馈。
+
+M2 是这条 Agent 原生路线的初始版本；M2.5 延续该路线并扩大深度搜索、工具与工作区任务族。不能仅写“RL 步数更多”：修复仓库需要测试，表格任务需要检查公式与单元格，幻灯片任务需要检查结构和内容，每种新任务都要求相应的环境和验收信号。系列报告给出了公共机制，但不能据此断言每个 checkpoint 的数据比例和超参数完全一致。
+
+M2.7 增加模型协助实验运行、日志诊断与脚手架修改的 self-evolution 实践。官方所说处理 30–50% 工作流是特定内部流程的自报比例，仍有研究者指导；它不意味着可以无约束修改生产权重。报告 Table 4 中，M2.5 到 M2.7 的 Terminal-Bench 2.0 为 51.7 到 57.0，GDPval-AA 为 35.0 到 50.0，但 MMLU-Pro 从 85.2 降到 81.8。改进有任务边界，应保存独立回归集，而非宣称所有能力单调提升。
+
+Forge 是这条路线的训练系统：训练、推理、Agent 解耦；Windowed FIFO 允许窗口内先提取已完成轨迹，窗口前沿仍受队首任务消费约束，不是队列满就丢弃最长任务。Prefix Tree Merging 共享重复前缀计算，但必须保留各分支因果掩码、位置与损失权重。报告最多 40 倍训练加速依赖特定的前缀冗余，不是单次服务请求普遍快 40 倍。
+
+## GLM-5：连续训练后，还要守住前面学到的能力
+
+GLM-5 采用 SFT、reasoning RL、agentic RL、general RL，再用跨阶段蒸馏缓解能力回退。SWE 任务来自真实 issue、修复和测试，Terminal 任务带环境与脚本，Search 则构建网页关系和多跳问题；训练样本因此包含可执行状态与反馈，而不只有问答文本。
+
+它区分 interleaved thinking、preserved thinking 与 turn-level 控制：前者在回复和工具调用前进行思考，中者保留历史思考状态，后者控制某一轮是否思考。Qwen3 的模式融合主要让同一模型兼容 thinking/non-thinking，GLM-5 的这些开关还管理多轮轨迹中的状态；两者相关但不能互换。
+
+异步 slime 将 rollout 和训练解耦，但会引入策略陈旧。TITO 保存推理引擎实际产生的 token ID、边界与元数据，避免文本往返重分词改变动作；配合 rollout log-prob、token masking、版本 freshness 与 IcePop 等一致性处理。它不是装上一个框架就天然 on-policy。
+
+跨阶段 OPD 保存前序阶段的 checkpoint 作教师，在当前学生的轨迹上给逐 token 分布反馈，帮助恢复早先能力。它不要求教师拿到参考答案，因此不是本课程所定义的 privileged-context OPSD。教师是否能恢复某一能力必须经相应保留集验证，不能由“加了蒸馏”直接推出。
+
+## 闭源模型：可以学习公开方法，不能补写私有配方
+
+OpenAI 的 Deliberative Alignment 和 Safe-Completions、Google 的 Gemini 报告、Anthropic 的 Constitutional AI 与历史 HH-RLHF，公开程度并不相同。它们提供安全规则、监督数据、AI 偏好或多模态奖励的具体证据，但不自动公开 o1/o3、Gemini 或 Claude 当前产品的全部能力训练。下方比较表只讨论原文披露的部分。`,
+    },
+    {
+      id: "example",
+      type: "example",
+      title: "手算：切片、并行和裁剪各自改变什么？",
+      body: String.raw`以下都是教学数字。先设两条回答分别需要 12 与 4 个 token，每轮允许一条轨迹新增最多 4 个 token。第一轮两条各生成 4，短回答结束，长回答剩 8；第二轮长回答再生成 4；第三轮才完成。总生成仍是 $12+4=16$，切片改变调度，不会凭空把工作量减半。
+
+如果教学实现约定“每个片段只训练一次”，长回答第三轮的响应掩码可为前八位 0、后四位 1。旧片段仍参与上下文，但不重复计入这次损失。这是一种教学掩码约定，不声称 K1.5 原系统只采用此策略；真实实现必须说明何时回填终局奖励、哪些片段重用、如何处理旧行为策略。
+
+再看 PARL 式并行的关键路径。三个互不依赖的子任务耗时 4、6、3 秒，编排与汇总共 2 秒：
+
+$$T_{\mathrm{serial}}=4+6+3+2=15\text{ 秒}$$
+$$T_{\mathrm{parallel}}=\max(4,6,3)+2=8\text{ 秒}$$
+
+$T_{\mathrm{serial}}$ 与 $T_{\mathrm{parallel}}$ 分别是串行和并行的墙钟时间，理想加速比为 $15/8=1.875$。总子任务工作量仍为 13 秒，并发甚至可能增加成本；若第三个任务依赖第二个，就不能直接取三个任务的最大值。实际还受并发槽位、失败重试与工具限流影响。
+
+最后设某 token 的旧策略概率为 0.2、新策略为 0.4，重要性比为 2，裁剪区间为 [0.8, 1.2]，优势为 0.5。CISPO 的冻结权重为 1.2，对这个 token 的 log-prob 梯度系数为 $1.2\times0.5=0.6$，不是 0。对照标准 PPO 的正优势分支，该点的 clipped surrogate 已进入平坦区；两个方法裁剪的对象与求导路径不同。
+
+若教师在同一前缀上给该 token 概率 0.8、学生给 0.4，OPD 的教师差值为 $\log(0.8/0.4)=\log2\approx0.693$。这是逐 token 分布监督，不是把一条序列放进组内中心化后还能凭空得到非零优势。`,
+    },
+    {
+      id: "diagram",
+      type: "diagram",
+      title: "图解：GLM-5 的前序教师与当前学生如何闭环",
+      body: String.raw`主线从 SFT 依次进入 reasoning RL、agentic RL、general RL。顺序训练有利于逐步建立复杂能力，但后阶段数据和奖励的变化可能导致遗忘。为此，保存前序阶段最终 checkpoint，按任务域选择教师，再让当前学生自己生成轨迹并接受教师分布反馈。
+
+图中从早期 checkpoint 指向“教师评分”的边传递冻结的教师能力，从学生 rollout 指向教师的边传递实际访问的前缀。教师不替学生重新生成一份完整答案；学生更新后，下一轮还应刷新 rollout。
+
+这与简单的 checkpoint 参数平均不同，也与把历史正确答案离线缓存后做 SFT 不同。前者在参数空间混合，后者训练固定轨迹；跨阶段 OPD 针对的是当前学生的状态分布。较完整的工具环境和异步系统实现见第 28 章，本图只解释能力保留的学习闭环。`,
+      diagram: {
+        kind: "flow",
+        nodes: [
+          "SFT 初始化",
+          "Reasoning RL：保存 checkpoint",
+          "Agentic RL：保存 checkpoint",
+          "General RL：当前学生",
+          "学生按任务域 rollout",
+          "冻结前序教师：同前缀评分",
+          "逐 token OPD 更新",
+        ],
+        links: [
+          [0, 1], [1, 2], [2, 3], [3, 4],
+          [1, 5], [2, 5], [4, 5], [4, 6], [5, 6], [6, 4],
+        ],
+      },
+    },
+    {
+      id: "derivation",
+      type: "derivation",
+      title: "数学视角：权重裁剪、教师差值与安全乘积",
+      body: String.raw`## CISPO：截断的是权重，不是把 token 更新直接归零
+
+设 $x$ 为问题，$i$ 为轨迹编号，$t$ 为轨迹内 token 位置，$G$ 为轨迹数量，$T_i$ 为第 $i$ 条轨迹长度。$y_{i,t}$ 是采样 token，$s_{i,t}=(x,y_{i,<t})$ 是它之前的前缀。当前训练策略为 $\pi_\theta$，记录的行为策略为 $\pi_{\mathrm{old}}$，$\theta$ 是待更新参数。对采样支持集内、旧概率非零的 token 定义：
+
+$$\rho_{i,t}=
+\frac{\pi_\theta(y_{i,t}\mid s_{i,t})}
+{\pi_{\mathrm{old}}(y_{i,t}\mid s_{i,t})},\qquad
+w_{i,t}=\operatorname{sg}\!\left[
+\operatorname{clip}(\rho_{i,t},\ell,u)\right].$$
+
+$\ell$、$u$ 是下、上裁剪界，满足 $0<\ell<u$；$\operatorname{clip}$ 把数值截到区间，$\operatorname{sg}$ 表示停止沿括号内的计算反向传播。令 $\hat A_i$ 为由该组结果奖励得到、训练时冻结的相对优势，$m_{i,t}$ 为有效动作掩码。下面是展示核心机制、带掩码的 token 平均形式：
+
+$$J_{\mathrm{CISPO}}(\theta)=
+\frac1N\sum_{i=1}^{G}\sum_{t=1}^{T_i}
+m_{i,t}w_{i,t}\hat A_i
+\log\pi_\theta(y_{i,t}\mid s_{i,t}),\qquad
+N=\sum_{i,t}m_{i,t}>0.$$
+
+若损失定义为 $L=-J_{\mathrm{CISPO}}$，训练最小化 $L$。对单个已选 token，把权重和优势视为常量后，目标对其 log-prob 的局部导数为 $m_{i,t}w_{i,t}\hat A_i/N$。权重在上界饱和，不意味着 log-prob 梯度消失；当然真实参数梯度还经过整个网络，不能把这个局部系数当作参数更新的全部。
+
+掩码为 1 的位置应是本次要优化的模型动作，用户输入和工具返回不是模型采样动作。跨轮复用的旧片段如何掩码、当前实现按 token 还是轨迹归一化，需要显式约定。这里的目标用于解释 CISPO 的 detach 机制，不声称覆盖 M1 或 M2 系列的全部辅助项。
+
+## 跨阶段 OPD：教师在学生的前缀上提供方向
+
+令 $\pi_T^{\mathrm{infer}}$ 为冻结教师推理引擎的分布，$\pi_\theta^{\mathrm{train}}$ 为学生训练引擎的分布。GLM-5 的逐 token 教师优势是：
+
+$$\hat A^{\mathrm{OPD}}_{i,t}=
+\operatorname{sg}\!\left[
+\log\pi_T^{\mathrm{infer}}(y_{i,t}\mid s_{i,t})
+-\log\pi_\theta^{\mathrm{train}}(y_{i,t}\mid s_{i,t})
+\right].$$
+
+教师更支持该 token 时差值为正，反之为负。它不减去同组奖励均值，所以报告可用 group size=1；这不是标准 GRPO 在单样本时突然获得了组相对信号。实际更新使用策略目标，不能直接对被冻结的优势求导。教师概率、学生概率必须对应相同 token 和前缀，TITO 等工程记录因此与数学定义直接相关。
+
+## 安全乘积：奖励门控不是现实世界的安全证明
+
+Safe-Completions 的公开方法把帮助性与安全评分组合。用 $h$ 表示帮助性分数、$s$ 表示安全分数，一个体现该机制的简化目标是 $r=h\,s$，其中 $r$ 为最终奖励。若教学例子中 $h=0.9$、$s=0$，则 $r=0$；安全替代回答若 $h=0.6$、$s=1$，得分为 0.6。
+
+这解释了为什么不能靠高帮助性抵消被识别的不安全输出。但“被评分器判为安全”和“真实安全”不是同一件事：漏判时 $s$ 可能错误地非零，分布外请求和奖励投机仍需独立评估。Reward-to-go 同样只是把未来奖励分配给先前动作的一种估计，不能把它解释成每步都有已知的因果真值。`,
+    },
+    {
+      id: "code",
+      type: "code",
+      title: "代码实验：审计动作掩码、CISPO 系数与教师方向",
+      body: String.raw`下面是可独立运行的 Python 标准库例子。每行代表一个不同前缀上的 token；概率是教学输入，不是同一个位置上的完整词表分布。旧响应、工具返回与新响应分开标记，避免把环境文本当作模型动作。
+
+~~~python
+from math import isclose, log
+
+# Only fresh model actions are trained in this teaching setup.
+rows = [
+    ("prompt", "input", None, None, None),
+    ("cached", "old_response", 0.3, 0.3, 0.4),
+    ("tool", "observation", None, None, None),
+    ("new_a", "new_response", 0.2, 0.4, 0.8),
+    ("new_b", "new_response", 0.4, 0.2, 0.1),
+]
+lower, upper, group_advantage = 0.8, 1.2, 0.5
+mask = [int(origin == "new_response") for _, origin, *_ in rows]
+assert mask == [0, 0, 0, 1, 1]
+coefficients, teacher_gaps = [], []
+
+for row, enabled in zip(rows, mask):
+    token, origin, old_p, student_p, teacher_p = row
+    if not enabled:
+        continue
+    if not all(0 < p <= 1 for p in (old_p, student_p, teacher_p)):
+        raise ValueError("probabilities must be in (0, 1]")
+    ratio = student_p / old_p
+    weight = min(upper, max(lower, ratio))
+    # In autodiff code, detach weight and the teacher advantage.
+    coefficient = weight * group_advantage
+    gap = log(teacher_p) - log(student_p)
+    coefficients.append(coefficient)
+    teacher_gaps.append(gap)
+    print(token, "CISPO:", round(coefficient, 3), "OPD:", round(gap, 3))
+
+assert len(coefficients) == 2
+assert isclose(coefficients[0], 0.6)
+assert isclose(coefficients[1], 0.4)
+assert isclose(teacher_gaps[0], log(2))
+assert isclose(teacher_gaps[1], -log(2))
+normalized = [c / sum(mask) for c in coefficients]
+assert all(isclose(a, b) for a, b in zip(normalized, [0.3, 0.2]))
+
+task_seconds, overhead = [4, 6, 3], 2
+serial = sum(task_seconds) + overhead
+parallel = max(task_seconds) + overhead
+assert (serial, parallel) == (15, 8)
+print("ideal latency speedup:", serial / parallel)
+assert isclose(0.9 * 0.0, 0.0)
+assert isclose(0.6 * 1.0, 0.6)
+~~~
+
+两个新 token 的 CISPO 未归一化系数应为 0.6、0.4，OPD 差值为 0.693、-0.693；若按两个有效 token 平均，CISPO 系数再除以 2。代码没有把两个优势相加，它们代表两种独立监督，避免误导为 GLM-5 或 MiniMax 的统一混合损失。
+
+真实实现还需检查 tokenizer/chat template、采样掩码、rollout 策略版本、工具边界和截断原因。本例只验证局部数学与动作归属；不能据此声称完成了训练栈的 on-policy 保证，也未模拟自动微分或奖励服务。`,
+    },
+    {
+      id: "pitfall",
+      type: "pitfall",
+      title: "常见误区：系统速度、模型能力与安全保证混为一谈",
+      body: String.raw`**MuonClip 与概率裁剪混淆。** 前者监测 attention logits 并调整相关投影，服务于预训练稳定；CISPO 裁剪冻结的 token IS 权重；GSPO 使用长度归一化序列似然比。三者都有“稳”的目标，但监测量和梯度路径不同。
+
+**异步生成就叫 on-policy。** Partial Rollout、Windowed FIFO 和异步 slime 都可能复用较旧策略的轨迹。应记录行为概率与版本、控制陈旧度、核验支持集，再讨论重要性修正。丢掉慢任务还会改变训练分布，不能把这种偏差当作纯吞吐优化。
+
+**把数值故障归咎于错误的浮点常识。** M1 报告用 FP32 LM head 缓解实际的训推 kernel 概率偏差，不是因为 BF16 指数范围无法表示 1e-7 与 1e-8。作者观察到大量极小梯度，才讨论 AdamW epsilon 的影响；减小 epsilon 不是通用防 NaN 技巧，必须结合梯度尺度与实验验证。
+
+**用 TITO 或某个 top-k 函数宣称彻底确定。** TITO 解决 token 记录与重分词对齐，不自动修复路由、注意力、采样掩码和数值差异。GLM-5 报告的非确定性 DSA top-k 故障伴随熵骤降，而不是另一处二级描述中的熵激增。所测栈使用 torch.topk 并冻结 indexer，不能保证所有设备、并列值和版本下都确定。
+
+**把系统加速当作能力因果证据。** Forge 的共享前缀加速依赖重复程度，PARL 的墙钟改善依赖可并行任务结构。应分别测样本吞吐、单位轨迹成本、任务成功率和最终延迟；模型多调用几个 Agent 并不自动变聪明。
+
+**把自我进化理解成无约束自改。** M2.7 的公开工作流仍有研究者设定方向。教学上的合理部署需要隔离实验环境、日志、可回滚变更、独立保留集与发布审批；模型参与研发不意味着自动批准自己的上线。
+
+**把厂商报告当独立审计。** GLM-5 的 SWE-bench Verified 为 77.8，BrowseComp 在无上下文管理与有管理时为 62.0、75.9；工具脚手架属于结果的一部分。报告里也有其他模型在某项更高，不能写成“全面最佳”。安全奖励为零的代数性质同样不是对现实安全的证明。`,
+    },
+    {
+      id: "comparison",
+      type: "comparison",
+      title: "比较表：开放机制与公开对齐各学到什么",
+      body: String.raw`| 系列 | 主要阶段或数据 | 反馈与系统重点 | 必须保留的边界 |
+|---|---|---|---|
+| Kimi K1.5 | 长 CoT 监督、长上下文 RL、long2short | 结果/CoT 反馈，Partial Rollout | 分片不省总 token，压短存在准确率代价 |
+| Kimi K2 | 工具规格、任务 rubric、合成轨迹、SFT/RL | 真实加合成环境，自评偏好；MuonClip 属预训练 | judge critic 不等于 value critic |
+| Kimi K2.5 | 图文预训练、Zero-Vision SFT、视觉/Agent RL | PARL 冻结子 Agent，优化编排器 | early fusion 是数据时机；加速限特定任务 |
+| MiniMax-01 | 短/长 SFT、短/长 DPO、短 online RL | 混合注意力，四类奖励 | 最后 RL 不是百万 token 全长训练 |
+| MiniMax-M1 | 继续预训练、冷启动 SFT、CISPO | token 权重 detach，数值与长序列优化 | 更新步数和租赁估算都不是通用总成本 |
+| M2 / M2.5 | Agent 轨迹 SFT 与 RL，扩展工作区任务 | 全注意力，产物验证，Forge | 不沿用 M1 架构标签，不猜逐版本超参数 |
+| M2.7 | 继续扩展 Agent 任务，参与研发迭代 | 自我改进脚手架，独立验收需求 | 后续已有报告；博客工作占比仍为自报 |
+| GLM-5 | SFT、推理 RL、Agent RL、通用 RL、跨阶段 OPD | TITO、异步一致性、前序 checkpoint 教师 | 能力回退需分域评测，不保证全部恢复 |
+
+## 闭源公开对齐：写出已知部分，也写出未知部分
+
+| 公开材料 | 可核验的训练机制 | 奖励或监督来源 | 不能据此推断 |
+|---|---|---|---|
+| OpenAI Deliberative Alignment | 用规范推理样本 SFT，再做高计算 RL | 基于安全规范生成/过滤数据，带规范的 judge | o1/o3 的全部能力数据、优化器与预算 |
+| OpenAI Safe-Completions | 在安全约束内提高帮助性，允许安全替代回答 | 对问题与最终回答评分的 helpfulness/safety RM | 分类器永不漏判、所有现实风险已消除 |
+| Gemini 2.5 技术报告 | SFT、RM、RL 扩展，多模态与工具任务 | 可验证奖励与模型生成式奖励 | 固定 PPO/GRPO/critic 细节，或沿用 Gemma 方法 |
+| Anthropic Constitutional AI | 先自我批评/修订做监督学习，再用 AI 偏好训练 PM 并 RL | 宪法原则、模型比较与偏好信号 | Claude 3.5/4 的完整现行配方或完全无人类选择 |
+| Anthropic HH-RLHF | 历史公开的人类偏好训练与迭代 | 新鲜人类反馈和偏好模型 | 当前产品仍逐项沿用旧论文超参数 |
+
+Deliberative Alignment 的“规范生成、推理、过滤”是构造 SFT 数据的过程，不应被误拆成四个独立训练阶段。Constitutional AI 的原则来自人类选择，AI 偏好也不是无来源的客观真理。Gemini 的报告足以说明反馈类型，但不能把 Gemma 的 BOND/WARM/WARP 自动迁移成 Gemini 的事实。
+
+这三个名字各自对应一个不同对象：BOND（Best-of-N Distillation）让策略学习从多个候选中择优所得到的输出分布，目标是减少每次部署都大量采样的成本；WARM（Weight Averaged Reward Models）在参数空间平均多个奖励模型，以研究评分泛化和奖励过优化；WARP（Weight Averaged Rewarded Policies）平均经过奖励优化的策略，研究奖励提高与偏离参考模型之间的权衡。Gemma 3 报告明确说使用它们的改进版本，但没有因此公开所有改动细节。一个蒸馏输出分布，一个合并评分器，一个合并策略，不能当作同一种平均操作，更不能跨产品推断。
+
+**教学性选择原则：** 可执行任务先保证工作区和验收器可信；长期运行先解决轨迹版本、掩码与调度；连续多域训练先建能力回归集；安全问题同时检查帮助性、误拒与漏拒。优化器是这个系统中的一个模块，不能替代其余验证。`,
+    },
+    {
+      id: "interview",
+      type: "interview",
+      title: "面试表达：用一个工程故障串起整章",
+      body: String.raw`**30 秒回答：**“Agent RL 的难点是长轨迹与环境交互。Kimi 用 partial rollout 缓解长任务阻塞，用 long2short 和 PARL 管理推理预算；MiniMax 用 CISPO 的冻结 token 权重和 Forge 的调度、前缀共享支撑规模化训练；GLM-5 用 TITO 和训推一致性处理确保学的是实际动作，再用跨阶段 OPD 缓解遗忘。闭源公司的安全方法只引用已公开机制，不推断完整训练配方。”
+
+**训练吞吐突然下降，先改算法吗？** 先拆生成、环境等待、奖励判分、训练与空闲时间，检查轨迹长度分布和慢任务。若瓶颈是网络工具限流，更换 policy loss 不会直接解决问题。
+
+**CISPO 超出 ratio 上界为何还有梯度？** 裁剪并冻结的是乘在 log-prob 前的权重，不是把整个 token surrogate 截成常量。需要把公式的 stop-gradient 位置写出来，再讨论正负优势。
+
+**GLM-5 的 group size=1 为什么不是错误？** 此时优势由教师和学生的逐 token log-prob 差提供，不是减去单样本自身的奖励均值。它属于跨阶段 OPD 的监督来源改变。
+
+**PARL 为什么不同时训练所有子 Agent？** 报告中冻结子 Agent，把它们作为环境的一部分，只更新编排器，便于把训练目标集中到拆解与协调。是否联合训练是另一种设计，需要分析环境非平稳性和信用分配。
+
+**“模型能自我进化”怎样验收？** 把提议变更、运行实验、产物验证和上线批准分开。保存独立测试、权限边界与回滚记录，检查改善是否超出模型参与选择的训练或开发集。30–50% 的特定流程自报占比不能替代质量与风险评估。`,
+    },
+    {
+      id: "quiz",
+      type: "quiz",
+      title: "自测：认清裁剪对象与证据层级",
+      body: "先写出被优化的对象，再说明数据来自谁、反馈由谁提供。",
+      questions: [
+        {
+          q: "12-token 轨迹切成三段，每段 4 token，是否把总生成工作量减少为三分之一？",
+          a: "没有。总生成仍为 12 token，改变的是调度与同步等待。旧片段要保留上下文、行为策略和奖励归属；它们不会自动成为当前策略的新样本。",
+        },
+        {
+          q: "QK-Clip 是检测 Q/K 谱范数后截断 RL 概率比吗？",
+          a: "不是。Kimi K2 的 QK-Clip 依据当前 batch 的最大 attention logit 缩放相关 Q/K 投影，属于 MuonClip 的预训练稳定措施，不是 policy ratio clipping。",
+        },
+        {
+          q: "CISPO 中 ratio=2、区间 [0.8,1.2]、优势=-0.5 时，未归一化的 log-prob 梯度系数是多少？",
+          a: "冻结后的权重为 1.2，系数为 -0.6；若目标是最大化 J，会降低该 token 的倾向。不能因为权重被裁剪就断言梯度为零。",
+        },
+        {
+          q: "Zero-Vision SFT 是否意味着 Kimi K2.5 在训练期间从未使用图像？",
+          a: "不是。它限定视觉 SFT 样本的使用，此前有图文联合预训练，之后还有视觉 RL。early fusion 的相关消融研究视觉数据进入预训练的时间和比例。",
+        },
+        {
+          q: "Windowed FIFO 是把队列里最老的未完成任务直接丢弃吗？",
+          a: "不是。它允许在滑动窗口内取已完成轨迹，窗口外仍有顺序限制，前沿随队首任务被消费而前进。随意丢弃慢任务会改变任务分布。",
+        },
+        {
+          q: "为什么 GLM-5 的跨阶段蒸馏可以用一条 rollout，却不等于特权上下文 OPSD？",
+          a: "信号来自前序 checkpoint 教师与当前学生的 token log-prob 差，不依赖组内奖励均值；教师也不必读取参考答案，所以不等于同模型加 privileged context 的 OPSD。",
+        },
+        {
+          q: "M2.7 比 M2.5 的某个 Agent benchmark 更高，能推出所有能力都提高吗？",
+          a: "不能。系列报告 Table 4 中多个 Agent 指标提高，但 MMLU-Pro 为 85.2 到 81.8。必须按任务、脚手架和推理设置报告，并做能力回归。",
+        },
+        {
+          q: "安全乘积奖励在 safety=0 时为零，是否证明部署后永远安全？",
+          a: "没有。零分性质依赖评分器正确识别风险；漏判、分布外输入与奖励投机仍存在。需要独立安全评估，不能把数学门控当作现实保证。",
+        },
+      ],
+    },
+  ],
+  sources: [
+    {
+      label: "Gemma 3 Technical Report",
+      url: "https://arxiv.org/html/2503.19786v1",
+      evidence: "Post-Training Techniques 与参考文献：BOND/WARM/WARP 的改进版本；不迁移为 Gemini 配方",
+    },
+    {
+      label: "Kimi k1.5: Scaling Reinforcement Learning with LLMs",
+      url: "https://arxiv.org/html/2501.12599",
+      evidence: "原始报告：长上下文 RL、Partial Rollout、long2short；短模型 60.8 与 3,272 token 的协议",
+    },
+    {
+      label: "Kimi K2: Open Agentic Intelligence",
+      url: "https://arxiv.org/html/2507.20534",
+      evidence: "原始报告：MuonClip/QK-Clip 的 attention-logit 信号、工具合成、rubric 和 Self-Critique Reward",
+    },
+    {
+      label: "Kimi K2.5: Visual Agentic Intelligence",
+      url: "https://arxiv.org/html/2602.02276",
+      evidence: "原始报告：视觉数据时机、Zero-Vision SFT、冻结子 Agent 的 PARL；区分 K2 Thinking 的 Toggle 实验",
+    },
+    {
+      label: "MiniMax-01: Scaling Foundation Models with Lightning Attention",
+      url: "https://arxiv.org/html/2501.08313",
+      evidence: "原始报告：Text-01 五阶段、短/长序列长度与奖励维度；Vision-01 配方另列",
+    },
+    {
+      label: "MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention",
+      url: "https://arxiv.org/html/2506.13585",
+      evidence: "原始报告：CISPO Eq. 3–4、M1-80k Table 2、RL 租赁口径、FP32 LM head 与小梯度",
+    },
+    {
+      label: "The MiniMax-M2 Series, v1",
+      url: "https://arxiv.org/html/2605.26494v1",
+      evidence: "2026-05 原始报告：M2/M2.5/M2.7、全注意力、任务工作区、CISPO、Forge；Table 4 含提升与回退",
+    },
+    {
+      label: "Forge: A Scalable Agent RL Framework and Algorithm",
+      url: "https://www.minimax.io/news/forge-scalable-agent-rl-framework-and-algorithm",
+      evidence: "官方工程博客，结合后续报告核对 Windowed FIFO、Prefix Tree Merging 与加速适用范围",
+    },
+    {
+      label: "MiniMax-M2.7 Official Release",
+      url: "https://www.minimax.io/news/minimax-m27-en",
+      evidence: "官方博客，公开信息有限：研究者指导下的工作流自报比例；不视为独立复现或无约束自改证据",
+    },
+    {
+      label: "GLM-5: from Vibe Coding to Agentic Engineering",
+      url: "https://arxiv.org/html/2602.15763",
+      evidence: "原始报告：SFT/RL 阶段、interleaved/preserved thinking、TITO、slime、IcePop 与 Table 7",
+    },
+    {
+      label: "GLM-5: On-Policy Cross-Stage Distillation, §3.5",
+      url: "https://arxiv.org/html/2602.15763v1#S3.SS5",
+      evidence: "原始公式：前序 checkpoint 教师、逐 token log-prob 差与 group size=1；非组内中心化",
+    },
+    {
+      label: "Deliberative Alignment: Reasoning Enables Safer Language Models",
+      url: "https://arxiv.org/html/2412.16339",
+      evidence: "OpenAI 公开方法：规范推理数据 SFT 与带规范 judge 的 RL，不等于产品完整能力配方",
+    },
+    {
+      label: "From Hard Refusals to Safe-Completions",
+      url: "https://arxiv.org/html/2508.09224",
+      evidence: "OpenAI 公开方法：最终回答的帮助性/安全评分与奖励门控；不保证评分器无误",
+    },
+    {
+      label: "Gemini 2.5 Technical Report",
+      url: "https://arxiv.org/html/2507.06261",
+      evidence: "原始报告：SFT/RM/RL、多模态工具与可验证/生成式奖励；未据此核实固定优化器或 critic",
+    },
+    {
+      label: "Constitutional AI: Harmlessness from AI Feedback",
+      url: "https://arxiv.org/html/2212.08073",
+      evidence: "Anthropic 公开历史方法：批评/修订监督学习与 AI 偏好 RL；不冒充 Claude 当前完整配方",
+    },
+    {
+      label: "Training a Helpful and Harmless Assistant with RLHF",
+      url: "https://arxiv.org/html/2204.05862",
+      evidence: "Anthropic 历史公开人类偏好与反馈迭代证据，不推定后续产品沿用全部细节",
+    },
+    {
+      label: "agentic-rl-analysis: 工业与 Agentic Training，固定提交 66ae4423",
+      url: "https://github.com/xavierzhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch2",
+      evidence: "二级材料：2.2、2.4、2.5、2.7、2.10 全文阅读；CISPO、MuonClip、调度和产品披露已按原文勘误",
+    },
+  ],
+};
+
+export default chapter;

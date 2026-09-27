@@ -1,0 +1,589 @@
+{
+  "repository": "https://github.com/XavierZhang2002/agentic-rl-analysis",
+  "revision": "66ae4423b36270ef50a288fb1bb2e1b31c46c329",
+  "documents": [
+    {
+      "path": "README.md",
+      "sha256": "334284c8b94df74422da5be32c4b0cf964235999b9d76af168df3331b19d933e",
+      "bytes": 2134,
+      "headings": [
+        "# LLM Post-Training & Agentic RL",
+        "## Overview",
+        "### Post-Training Technical Report",
+        "### Agentic RL Survey",
+        "## Quick Start",
+        "## License"
+      ]
+    },
+    {
+      "path": "README_zh.md",
+      "sha256": "0b87541f5a33a11b05487021e298d3ee63740924ab543d8ff05e8f8a78ea6831",
+      "bytes": 2018,
+      "headings": [
+        "# LLM Post-Training & Agentic RL",
+        "## 概述",
+        "### Post-Training 技术报告",
+        "### Agentic RL 调研报告",
+        "## 快速开始",
+        "## License"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch1/1.1-overview.md",
+      "sha256": "4214d716166e72ea18a7e4c63607f5f6803bc13ec65c0c54f06b5f27816532f1",
+      "bytes": 3326,
+      "headings": [
+        "# 1.1 从推理 RL 到 Agentic RL",
+        "## RLVR 的成功与边界",
+        "## Agentic RL 的核心矛盾",
+        "## 四大核心挑战"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch1/1.2-reward-stability.md",
+      "sha256": "6dd5dd8addc3ef6cfedd82ef3257730cc6323551eebae75866f4dffb96b3d603",
+      "bytes": 11617,
+      "headings": [
+        "# 1.2 奖励信号与训练稳定性",
+        "## 奖励信号：从稀疏到自包含",
+        "### 问题分析",
+        "### IGPO — 信息增益作为内在奖励",
+        "### CM2 — 多维度 Checklist 奖励",
+        "### 其他方案概览",
+        "## 训练稳定性：从经验到收敛保证",
+        "### 问题分析",
+        "### SeeUPO — 首个多轮 RL 收敛保证",
+        "### ARLArena/SAMPO — 系统性稳定性分析框架",
+        "### VCPO — 方差控制的动态学习率",
+        "### 其他方案概览"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch1/1.3-exploration-credit.md",
+      "sha256": "b09eb66129f916a7a3e8c973d7bf949ef0325bdd5f9b34176e3366df8dba5a91",
+      "bytes": 12333,
+      "headings": [
+        "# 1.3 探索效率与信用分配",
+        "## 探索效率：突破 On-Policy 局限",
+        "### 问题分析",
+        "### EMPO² — 记忆增强探索",
+        "### LUFFY — 混合策略学习",
+        "### 其他方案概览",
+        "## 信用分配：长程归因的精细化",
+        "### 问题分析",
+        "### GiGPO — 锚点状态分组",
+        "### ELPO — 错误定位与分层归因",
+        "### ProxMO — 语义邻近性软聚合",
+        "### 其他方案概览"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch1/1.4-engineering.md",
+      "sha256": "fe4e4471dffab1e6a209ffb54a52195c2544c2acd75c3f4cb781bb0259846a29",
+      "bytes": 2806,
+      "headings": [
+        "# 1.4 工程实践",
+        "## GLM-5 — 异步 Agent RL 基础设施",
+        "## Kimi K2 — 大规模工具使用训练",
+        "## 环境构建"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch1/1.5-algorithm-summary.md",
+      "sha256": "838998b7513421da627eec2137284fb66b0b3f63346c104a0205f5275a018f03",
+      "bytes": 2704,
+      "headings": [
+        "# 1.5 算法速查与路线图",
+        "## 全部算法一览",
+        "## 按影响力分级",
+        "## 技术路线图"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch2/2.1-landscape.md",
+      "sha256": "3feacc1f4ca31c182d11666802e8bacf0809606119283f866c6f890e733ec17e",
+      "bytes": 6634,
+      "headings": [
+        "# 2.1 领域全景与技术路线",
+        "## 时间线",
+        "### 论文分布",
+        "### 机构分布",
+        "## 技术路线分析：哪些方向最有前景",
+        "### 四大挑战的解决进展",
+        "### 三条技术路线",
+        "## 产业观察：从论文到产品",
+        "### 已落地的 Agentic RL 产品",
+        "### 开源生态",
+        "### 中美对比"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/ch2/2.2-outlook.md",
+      "sha256": "3adb5027763c82d2ce2f0784d0203aff0bbd7451ebcab85d0565c39188ceb6e6",
+      "bytes": 7880,
+      "headings": [
+        "# 2.2 核心判断与未来预测",
+        "## 核心判断与个人观点",
+        "## 未来方向与预测"
+      ]
+    },
+    {
+      "path": "docs/agentic-rl/index.md",
+      "sha256": "5e2422557711d96f74317ce7913cec3389e0c31cb446ab54bd00741f3f8e4e8d",
+      "bytes": 2664,
+      "headings": [
+        "# Agentic RL 调研报告",
+        "## 与 Post-Training 报告的关系"
+      ]
+    },
+    {
+      "path": "docs/index.md",
+      "sha256": "ac0469daaf85804872c487e7d5f9588139ae8a4750520bed2a4b8a12b84d963c",
+      "bytes": 2202,
+      "headings": [
+        "# LLM Post-Training 与 Agentic RL 研究"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.1-training-landscape.md",
+      "sha256": "fef93084b7027d3d1d1860e4a2df4b1021792ab88b46dee891ceda96e4b13574",
+      "bytes": 5973,
+      "headings": [
+        "# 1.1 大模型训练全景",
+        "## 三阶段全景",
+        "## Pre-Training：从数据中学习世界知识",
+        "## Mid-Training：定向能力增强",
+        "## Post-Training：对齐与能力释放",
+        "## 三阶段关系与 2025 年趋势"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.10-sapo.md",
+      "sha256": "d3a391eb1872870fb0487fdff192a5b57f4a6e2861c2fa4085b8c1effaa1b46f",
+      "bytes": 2288,
+      "headings": [
+        "# 1.10 SAPO — 连续信任域的软门控",
+        "## 核心问题",
+        "## 核心公式",
+        "## 统一视角：三种 Gating 函数",
+        "## 与 GSPO 的联系",
+        "## 为什么要非对称温度"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.11-cheatsheet.md",
+      "sha256": "b17340d257191085baf010973cbc97b03d9dd7da4c4f20620ec7e5bacaaffbf9",
+      "bytes": 2223,
+      "headings": [
+        "# 1.11 全部算法公式速查表"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.12-evolution.md",
+      "sha256": "736d6be6c08463d60cbe196eec2bb8a69100e15eb3b6f4173fbdf17309c5bad4",
+      "bytes": 2968,
+      "headings": [
+        "# 1.12 演进逻辑总结"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.2-rlhf-rlvr.md",
+      "sha256": "49eeeca76182a11bdb6f1b7d1af02d8b14fb54d287c73eecab45f934643ec0a2",
+      "bytes": 4505,
+      "headings": [
+        "# 1.2 RLHF 与 RLVR 两大范式",
+        "## RLHF 范式：从人类反馈中学习",
+        "### 经典三阶段流程",
+        "### RL 优化目标",
+        "### 奖励模型的已知问题",
+        "## RLVR 范式：基于可验证奖励的强化学习",
+        "### RLHF vs RLVR 对比",
+        "### 为什么 RLVR 在推理任务上取得了突破？",
+        "### 2025 年的收敛范式"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.3-dpo.md",
+      "sha256": "30b8f3b35c70c824fc4e137f21230f4fb2ac8c68b43e23ddb4120380a69d25e0",
+      "bytes": 1537,
+      "headings": [
+        "# 1.3 DPO — 离线偏好优化",
+        "## 损失函数",
+        "## DPO 的实际定位"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.4-ppo.md",
+      "sha256": "63905bfbafd1f390cc26ed288fa1b7de88f9a05f0567572f011bd03f29d7725e",
+      "bytes": 3015,
+      "headings": [
+        "# 1.4 PPO — 经典策略优化基础",
+        "## 核心思想",
+        "## 核心公式",
+        "## 裁剪机制",
+        "## PPO 在 LLM 场景的问题"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.5-grpo.md",
+      "sha256": "f2dfd3590652645524cae6180b78ca975c3ed004538ee812f63ed473e94313ee",
+      "bytes": 5390,
+      "headings": [
+        "# 1.5 GRPO — RLVR 的奠基算法",
+        "## 核心思想",
+        "## 核心公式",
+        "## 为什么这么设计",
+        "## GRPO 的局限"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.6-dapo.md",
+      "sha256": "de5dfd6d4eede2f6489bca48c066c5e6f81c890f98dce0555b77769f4438f218",
+      "bytes": 2924,
+      "headings": [
+        "# 1.6 DAPO — 工业级 RLVR 工程优化",
+        "## 核心公式",
+        "## 四大核心改进",
+        "## 移除 KL 散度"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.7-vapo.md",
+      "sha256": "a2488346dc94ff4fca8a392658d62f51ff0c89576980eb9c7089a1294e2cc0bb",
+      "bytes": 3247,
+      "headings": [
+        "# 1.7 VAPO — Value-Based 路线的回归与修正",
+        "## 核心论点",
+        "## 核心公式",
+        "## 三大 Critic 修复技术",
+        "## 技术来源总结",
+        "## 消融实验汇总"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.8-cispo.md",
+      "sha256": "94bd69cee33b61c04aef4ea29be0262a1705d9143d2751101f9fdaad35d5f046",
+      "bytes": 1990,
+      "headings": [
+        "# 1.8 CISPO — 裁剪 IS 权重而非目标函数",
+        "## 核心问题",
+        "## 核心公式",
+        "## PPO vs CISPO 梯度行为"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch1/1.9-gspo.md",
+      "sha256": "ee23aa3706fe589ad7664dcffb131747ff7a88aee41a5062879fee004073e7ad",
+      "bytes": 12125,
+      "headings": [
+        "# 1.9 GSPO — 序列级策略优化",
+        "## 核心问题",
+        "## 核心公式",
+        "## GRPO vs GSPO 梯度对比",
+        "## 极小裁剪范围",
+        "## 深入：MoE 训练为什么难",
+        "### ① 路由波动（Routing Volatility）",
+        "### ② Token-Level IS Ratio 在 MoE 下被噪声污染",
+        "### ③ Clip 在 token level 形同虚设",
+        "### 对照：旧时代的工程补丁——Routing Replay",
+        "#### R2 vs R3：Routing Replay 自身的演进",
+        "## 深入：GSPO 凭什么能根治 MoE",
+        "### 机理 ①：路由噪声被几何均值\"摊平\"",
+        "### 机理 ②：IS 粒度终于和 Reward 粒度对齐",
+        "### 机理 ③：Clip 重新变成有意义的 Trust Region",
+        "### 机理 ④：Routing Replay 这个 Hack 直接退役",
+        "## GRPO vs GSPO on MoE：一图总结",
+        "## 参考资料"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.1-deepseek.md",
+      "sha256": "d636e2c2152e0ec8230863a743db2d2a8cfdf556e2bd8eda8c11893a7d9731be",
+      "bytes": 15421,
+      "headings": [
+        "# 2.1 DeepSeek -- 纯 RL 到 Specialist Distillation",
+        "## DeepSeek-R1 -- 纯 RL 推理涌现",
+        "### 核心动机",
+        "### R1-Zero：纯 RL 的涌现实验",
+        "### 四阶段 Pipeline",
+        "### GRPO 的选择理由",
+        "### 失败尝试（报告 Section 3.4 -- 极有价值的负面结果）",
+        "### 蒸馏模型：蒸馏 >> 直接 RL",
+        "## DeepSeek-V3 -- 高效后训练与蒸馏",
+        "### 核心动机",
+        "### Post-Training Pipeline",
+        "### 极致成本效率",
+        "### Multi-Token Prediction (MTP)",
+        "## DeepSeek-V3.2 -- Specialist Distillation 与 GRPO 工程化",
+        "### 核心动机",
+        "### 架构变化",
+        "### 三阶段后训练 Pipeline",
+        "### 四个 GRPO 稳定化创新",
+        "### 后训练成本的剧变",
+        "### 关键结果",
+        "### 负面结果与局限",
+        "## 系列演进分析"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.10-agentic-training.md",
+      "sha256": "261a8b05ae26fb3a93f8d51b185c198d5ea9fcd4429cd3ff2db93c52ae91b70b",
+      "bytes": 14214,
+      "headings": [
+        "# 2.10 基座的 Agentic 能力是怎么训出来的",
+        "## 1. GLM-5 训练全流程",
+        "### 1.1 Base Model Training：先把底座练扎实",
+        "### 1.2 Post-Training：渐进式对齐",
+        "#### 1.2.1 SFT：不只是指令微调",
+        "#### 1.2.2 Reasoning RL：先强化推理",
+        "#### 1.2.3 Agentic RL：让模型学会\"执行任务\"",
+        "#### 1.2.4 General RL：通用场景对齐",
+        "#### 1.2.5 On-Policy Cross-Stage Distillation（OPD）：防遗忘",
+        "## 2. Agentic 数据合成",
+        "### 2.1 标准流水线（6 步）",
+        "### 2.2 SWE 数据合成",
+        "### 2.3 Terminal 数据合成",
+        "### 2.4 Search 数据合成",
+        "#### GLM-5 的做法",
+        "#### MiniMax M2 的做法：Query 进化",
+        "## 3. RL 训练挑战与解决方案",
+        "### 3.1 训推不一致问题",
+        "#### 3.1.1 IcePop：显式处理训推分布差异",
+        "#### 3.1.2 DSA（DeepSeek Sparse Attention）带来的不一致",
+        "### 3.2 异步框架 off-policy 问题",
+        "#### 为什么要用异步框架",
+        "#### 问题：off-policy",
+        "#### GLM-5 的三层解决方案",
+        "### 3.3 Kimi K2.5 的 Agent Swarm",
+        "#### 为什么要多智能体并行",
+        "#### 架构设计",
+        "#### 奖励设计（PARL）",
+        "#### 上下文管理",
+        "## 要点总结"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.2-kimi.md",
+      "sha256": "84f6af46e6339a9228db168a771e1c2ef2f082c30f803eb34ec541687a8a1473",
+      "bytes": 14730,
+      "headings": [
+        "# 2.2 Kimi -- 推理 Scaling 到 Agentic 智能",
+        "## Kimi K1.5 -- 长上下文推理 Scaling",
+        "### 核心动机",
+        "### 算法选择：非 GRPO、非 PPO",
+        "### 长上下文 RL 的关键技术",
+        "### 工程亮点",
+        "## Kimi K2 -- 开放 Agentic 智能",
+        "### 核心动机",
+        "### 模型架构",
+        "### MuonClip 优化器（核心工程创新）",
+        "### 大规模 Agentic 数据合成（三阶段）",
+        "### Self-Critique Rubric Rewards",
+        "### RL 基础设施",
+        "### 关键结果（非 Thinking 模式）",
+        "## Kimi K2.5 -- 多模态 Agentic 演进",
+        "### 核心定位",
+        "### 三个反直觉的发现",
+        "### Agent Swarm / PARL（并行 Agent 协作学习）",
+        "### Toggle（Token 高效 RL）",
+        "## 系列演进分析"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.3-qwen.md",
+      "sha256": "f6870fb710c6d18fefa8623311285f47a438c7193a2c83b95f20dd40891f248f",
+      "bytes": 14643,
+      "headings": [
+        "# 2.3 Qwen -- Pipeline 精炼与算法迭代",
+        "## Qwen2.5 -- 奠基性 Pipeline",
+        "### 核心动机",
+        "### 后训练 Pipeline",
+        "### 六维度 RM 设计（核心方法创新）",
+        "### GRPO 阶段设计",
+        "## Qwen3 -- 四阶段与思考模式融合",
+        "### 核心动机",
+        "### 四阶段 Pipeline（报告 Section 4-5）",
+        "### 阶段 2 的极致效率",
+        "### Thinking Mode Fusion（阶段 3）",
+        "### Strong-to-Weak 蒸馏",
+        "## Qwen3.5 -- 混合架构探索",
+        "### 架构创新：GDN + MoE 混合",
+        "## GSPO -- 修复 GRPO 在 MoE 上的根本缺陷",
+        "### 问题诊断",
+        "### GSPO 的核心解决方案",
+        "## SAPO -- 平滑替代硬裁剪",
+        "### 问题诊断",
+        "### SAPO 的核心设计",
+        "### 不对称温度（关键细节）",
+        "### 与 GSPO 的关系",
+        "### 关键优势",
+        "## 系列演进分析"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.4-minimax.md",
+      "sha256": "876f5e2a700d2c1f38313d16209429b0f2b41b09e5c1b74b98c4738df4c940c9",
+      "bytes": 10981,
+      "headings": [
+        "# 2.4 MiniMax -- 长上下文到 Agent 原生 RL",
+        "## MiniMax-01 -- 长上下文后训练",
+        "### 核心动机",
+        "### 架构基础",
+        "### 五阶段后训练 Pipeline",
+        "## MiniMax-M1 -- CISPO 与推理 RL",
+        "### 核心动机",
+        "### GRPO 的具体失败模式",
+        "### CISPO 算法",
+        "### 三阶段训练",
+        "### 关键工程发现",
+        "## MiniMax-M2 / M2.5 -- Agent-Native RL",
+        "### M2（2025.10）",
+        "### M2.5 与 Forge 框架（2026.02）",
+        "### 关键结果",
+        "## MiniMax-M2.7 -- 自我进化",
+        "## 系列演进分析"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.5-glm.md",
+      "sha256": "82c3b1fed31e4775b6a327cf3ccc37508b3f0bc5ce3666e2180a151323c0b6a2",
+      "bytes": 8147,
+      "headings": [
+        "# 2.5 GLM-5 -- 异步 Agentic RL 工程",
+        "## 模型架构",
+        "## 五阶段后训练 Pipeline",
+        "## 三种 Thinking 模式",
+        "## TITO Gateway -- 被忽视的工程关键",
+        "## 非确定性 CUDA top-k Bug",
+        "## 异步 Agentic RL -- \"Slime\" 框架",
+        "## Cross-Stage Distillation",
+        "## 国产芯片适配"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.6-seed.md",
+      "sha256": "409b7aad42b38f9e994f65e48e81b9d0d90dbe61fb2cda80064077ea1c611910",
+      "bytes": 7349,
+      "headings": [
+        "# 2.6 Seed -- GRPO 修复到 Actor-Critic 复兴",
+        "## DAPO -- 四个修复让 GRPO 飞升",
+        "### 核心动机",
+        "### 四个修复及贡献量化",
+        "## VAPO -- 让 PPO 在长 CoT 中复活",
+        "### 核心动机",
+        "### 七个修复",
+        "## Seed1.5-Thinking -- 大规模验证",
+        "### RFT 反面发现",
+        "## Seed2.0 与 Seed-Coder",
+        "## 系列演进分析"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.7-closed-source.md",
+      "sha256": "b68a9ce5697633d0e7910699475fa0b5321d17f39f3455917beca4f61265c7a4",
+      "bytes": 2559,
+      "headings": [
+        "# 2.7 闭源模型概览",
+        "## OpenAI -- 可参考的安全对齐细节",
+        "## Google Gemini -- \"RL*F\" 与有限披露",
+        "## Anthropic -- Constitutional AI 基础"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.8-cross-model.md",
+      "sha256": "ec43d1a6b0551cdf1d83c33f53509773ae5a117715de932ae97c35efc7d32bbb",
+      "bytes": 7634,
+      "headings": [
+        "# 2.8 跨模型训练经验总结",
+        "## 后训练 Pipeline 对比",
+        "## RL 算法演进脉络",
+        "## 奖励设计对比",
+        "## 十条共性训练经验",
+        "## 趋势展望"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch2/2.9-data-engineering.md",
+      "sha256": "a9964b30d98183a171e7b30597c788eb711767c9e30f3ea92c07f2d2fbb48c5b",
+      "bytes": 28976,
+      "headings": [
+        "# 2.9 数据工程专题 -- 后训练数据获取方法全景",
+        "## 全景图",
+        "## 一、SFT 数据获取：6 种方法",
+        "### 横向对比速查",
+        "### ❶ Cold-start 人工标注",
+        "### ❷ 强模型蒸馏",
+        "### ❸ 拒绝采样 (Rejection Sampling)",
+        "### ❹ 指令合成",
+        "### ❺ Agentic 合成 (Seed-then-Expand)",
+        "### ❻ 自博弈",
+        "## 二、RL 数据获取：3 个维度",
+        "### ❶ Query 获取与筛选",
+        "### ❷ 奖励信号构建",
+        "### ❸ 环境与测例构建",
+        "## 三、质量控制要点",
+        "## 四、数据混合与课程",
+        "## 五、SFT–RL 数据闭环",
+        "## 六、核心要点提炼",
+        "## 参考文献"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch3/3.1-timeline-paradigms.md",
+      "sha256": "a5b0434221111cb35240f4029f6a0f044e962a87249c7fe4b73d54444266f0cf",
+      "bytes": 5265,
+      "headings": [
+        "# 3.1 技术演进与范式变迁",
+        "## 关键里程碑",
+        "## 时间线的几个关键转折",
+        "## Post-Training 范式演变",
+        "### 四代范式",
+        "### 范式演变的驱动力"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch3/3.2-challenges-future.md",
+      "sha256": "13e7967f36a8f39c9f41700a8769824c7316912b7b802e5724f56da94cfdd607",
+      "bytes": 15927,
+      "headings": [
+        "# 3.2 行业共识与核心挑战",
+        "## 六大行业共识",
+        "### 共识一：轻量 SFT + 重度 RL 成为标准范式",
+        "### 共识二：Hard Clipping 是 GRPO 系列的原罪",
+        "### 共识三：MoE 模型需要专用 RL 方案",
+        "### 共识四：Query 质量远比数量重要",
+        "### 共识五：大模型 RL，小模型蒸馏",
+        "### 共识六：工程实现的重要性不亚于算法设计",
+        "## 核心技术挑战与现有解法",
+        "### 挑战一：信任域设计 -- 从梯度消失到连续门控",
+        "### 挑战二：Critic 的规模化困境",
+        "### 挑战三：不可验证任务的奖励设计",
+        "### 挑战四：长序列优化的粒度选择",
+        "### 挑战五：多阶段 Pipeline 的能力遗忘",
+        "## 挑战关系总览"
+      ]
+    },
+    {
+      "path": "docs/post-training/ch3/3.3-opinions.md",
+      "sha256": "36a9636084e30ccd36ae5957d61cb4f12426ceae7c2c3639a7b942e9e008197c",
+      "bytes": 11599,
+      "headings": [
+        "# 3.3 个人分析与思考",
+        "## 算法演进的深层规律",
+        "## 被低估的杠杆与被高估的方向",
+        "## RL 的本质：教授还是选择？",
+        "## 产业格局与竞争壁垒",
+        "## 对未来方向的判断",
+        "## 写在最后"
+      ]
+    },
+    {
+      "path": "docs/post-training/index.md",
+      "sha256": "e046608d434acd582ab86c7b59860c37482d3570da6b9aba0a22498491af600e",
+      "bytes": 1781,
+      "headings": [
+        "# Post-Training 技术报告"
+      ]
+    }
+  ]
+}
