@@ -19,6 +19,19 @@ const chapter = {
     "OPD 让学生在自己会访问的前缀上接受外部教师的密集分布监督；OPSD 用同一模型在 privileged context 下充当教师以省去外部大模型，但训练信息不对称会带来不可迁移捷径与长推理失稳风险。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：KL 梯度、轨迹分布与特权信息",
+      body: String.raw`先修 softmax Jacobian、score function 和策略采样。依次学习固定前缀上的两向 KL 梯度、温度尺度、外层轨迹分布的导数，再分析 privileged-context OPSD。面试必须明确：谁生成前缀、教师是否冻结、目标是否对长度平均、全词表求和还是 sampled token；这些选择不能都缩写为一个“OPD loss”。`,
+      links: [
+        { label: "OPD 与跨阶段蒸馏目标", sectionId: "derivation", level: "必会" },
+        { label: "两向 KL 的 logit 梯度", sectionId: "math-kl-logit-temperature", level: "推导" },
+        { label: "固定前缀与整轨迹", sectionId: "math-trajectory-gradient", level: "推导" },
+        { label: "OPSD 与信息条件", sectionId: "math-privileged-opsd", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：在学生真正迷路的位置教它",
@@ -50,7 +63,7 @@ $$D_{\mathrm{KL}}(p_S\|p_T)
 =0.6\log\frac{0.6}{0.2}
 +0.3\log\frac{0.3}{0.7}
 +0.1\log\frac{0.1}{0.1}
-\approx0.43$$
+\approx0.404978$$
 
 若用 OPSD，$p_T$ 可能来自同一 checkpoint，但 teacher prompt 额外包含正确答案。此时差异可能是真正的推理纠正，也可能只是教师从答案反推后偏好某种措辞。学生推理时没有答案，后者未必可迁移。
 
@@ -125,6 +138,16 @@ $$D_{\mathrm{KL}}(p_T\|p_S)
 
 on-policy 指外层状态 $y_{<t}$ 由学生采样；内部 KL 可以对全词表求和，也可只用 sampled token 构造策略梯度式近似。全词表更密集但需要教师 logits，词表大时通信和显存昂贵。上式按采样前缀计算局部 KL 时，常把前缀当作固定训练数据；若声称优化整条序列的精确 KL，则必须同时说明外层采样分布的梯度处理，二者不能直接混同。
 
+实际一批数据由冻结的 $\pi_{\rm old}$ 生成，更准确的局部训练定义是：
+
+$$\tilde L(\theta;\theta_{\rm old},\bar\theta)
+=\mathbb E_{y\sim\pi_{\rm old}}
+\left[\frac1{T(y)}\sum_t
+D_{\rm KL}(\pi_\theta(\cdot|s_t)\|
+\operatorname{sg}(\pi_{\bar\theta}(\cdot|s_t)))\right]$$
+
+这里 old 是 rollout 版本，$\bar\theta$ 是教师版本，$\theta$ 是当前学生，三者职责不同。训练前缀和长度作为固定样本，不沿离散采样反传；只刷新数据可称 on-policy 数据闭环，并不自动添加外层分布的导数。
+
 GLM-5 报告第 3.5 节采用逐 token 的教师差值，记教师推理引擎概率为 $\pi_T^{\mathrm{infer}}$、学生训练引擎概率为 $\pi_\theta^{\mathrm{train}}$：
 
 $$\hat A_{i,t}=\operatorname{sg}\left[
@@ -132,6 +155,104 @@ $$\hat A_{i,t}=\operatorname{sg}\left[
 -\log\pi_\theta^{\mathrm{train}}(y_{i,t}|x,y_{i,<t})\right]$$
 
 $\operatorname{sg}$ 表示不沿这一权重反向传播；梯度来自策略目标中的 log-prob 或 ratio。教师给某 token 概率 0.4、学生给 0.2 时，权重为 $\log2\approx0.693$；反过来是 -0.693。它不再依赖组内均值，因此该报告可用 group size=1，而不是把一条样本放进标准 GRPO 的中心化公式。多域混合比例、教师能力和训推概率对齐仍要控制；恢复程度必须由前序任务的独立评估证明。`,
+    },
+    {
+      id: "math-kl-logit-temperature",
+      type: "derivation",
+      title: "Forward/Reverse KL 对学生 logits 的完整梯度",
+      body: String.raw`固定一个前缀，学生 logits $z\in\mathbb R^K$，教师 logits $v\in\mathbb R^K$ 冻结。温度 $\tau>0$，$p_i=\operatorname{softmax}(z/\tau)_i$，$q_i=\operatorname{softmax}(v/\tau)_i$，两侧先按相同词表对齐：
+
+$$\frac{\partial p_i}{\partial z_j}=\frac1\tau p_i(\mathbf1[i=j]-p_j),
+\qquad
+\frac{\partial\log p_i}{\partial z_j}=\frac1\tau(\mathbf1[i=j]-p_j)$$
+
+**Forward KL，即教师在左。** $L_F=\sum_iq_i\log(q_i/p_i)$，教师熵不依赖学生：
+
+$$\frac{\partial L_F}{\partial z_j}
+=-\frac1\tau\sum_iq_i(\mathbf1[i=j]-p_j)
+=\frac{p_j-q_j}{\tau}$$
+
+**Reverse KL，即学生在左。** $L_R=\sum_ip_i\log(p_i/q_i)$，须同时求导权重 p 与 log p：
+
+$$\frac{\partial L_R}{\partial z_j}
+=\frac1\tau\sum_ip_i(\mathbf1[i=j]-p_j)
+[\log(p_i/q_i)+1]$$
+$$=\frac{p_j}{\tau}\left[\log(p_j/q_j)-D_{\rm KL}(p\|q)\right]$$
+
+常数 +1 由 softmax Jacobian 行和消去；忘记对 p 的权重求导会得出错误结论。两个梯度分量之和都为零，符合所有 logits 共同平移不改变概率。
+
+**教学手算，温度 1。** $p=[0.6,0.3,0.1],q=[0.2,0.7,0.1]$。$L_F\approx0.373386$，$L_R\approx0.404978$；forward 梯度为 $[0.4,-0.4,0]$，reverse 约为 $[0.416181,-0.375683,-0.040498]$。第三个 token 虽然 p=q，reverse 梯度仍非零，因为归一化耦合所有 logits。两向 KL 在 p=q 时都为零梯度，但远离时形状不同；mode-covering/mode-seeking 是受模型容量和支撑影响的倾向，不是硬规则。
+
+**温度与尺度。** 蒸馏常最小化 $\tau^2 L$，此时 forward logit 梯度为 $\tau(p-q)$，reverse 为 $\tau p_j[\log(p_j/q_j)-L_R]$。没有 $\tau^2$ 时保留上式的 $1/\tau$；二者是不同学习尺度约定。大温度下 p-q 也缩小，$\tau^2$ 有助于补偿；高温且 K 固定时，$\tau^2 L_F$ 近似中心化 logits 的平方差除以 $2K$。这不保证任意温度下梯度幅度恒定。
+
+教师 logits 必须停止梯度，即使教师和学生来自同一参数存储；否则 loss 还会通过 q 回传，变成两侧共同移动的不同目标。采样温度与蒸馏温度可以不同，采样分布不匹配时要明确重新加权或承认 surrogate。`,
+    },
+    {
+      id: "math-trajectory-gradient",
+      type: "derivation",
+      title: "固定前缀局部 KL 不等于整条轨迹 KL 的梯度",
+      body: String.raw`先考虑固定有限时域 T、共同支持集和冻结因果教师。学生轨迹 $P_\theta(y)=\prod_tp_\theta(y_t|s_t)$，教师 $Q(y)=\prod_tq(y_t|s_t)$。KL 链式法则给：
+
+$$D_{\rm KL}(P_\theta\|Q)
+=\mathbb E_{y\sim P_\theta}\sum_t\log\frac{p_\theta(y_t|s_t)}{q(y_t|s_t)}
+=\mathbb E_{y\sim P_\theta}\sum_t K_\theta(s_t)$$
+
+其中 $K_\theta(s)=D_{\rm KL}(p_\theta(\cdot|s)\|q(\cdot|s))$。这是不按长度平均的恒等式。变长回答可用 EOS 吸收状态及合适可积条件处理；直接除以样本长度 $T(y)$ 得到的是新目标，不是原始序列 KL。
+
+**外层分布也求导。** 记 $u_k=\nabla\log p_\theta(y_k|s_k)$，局部 $\nabla K$ 把前缀固定：
+
+$$\nabla D_{\rm KL}(P_\theta\|Q)
+=\mathbb E\left[\sum_t\nabla K_\theta(s_t)
++\sum_k u_k\sum_{t>k}K_\theta(s_t)\right]$$
+
+第二项是早期动作改变未来所到前缀的分布。过去及当前 K 对 $a_k$ 采样前可测，乘 score 的期望为零，所以剩余严格未来项。固定前缀全词表自动微分只算第一项。
+
+等价的 sampled-token 形式是：
+
+$$\nabla D_{\rm KL}(P_\theta\|Q)
+=\mathbb E\left[\sum_k u_k
+\sum_{t\geq k}\log\frac{p_\theta(y_t|s_t)}{q(y_t|s_t)}\right]$$
+
+来自 $\nabla\mathbb E_P\log(P/Q)=\mathbb E_P[(\log(P/Q)+1)\nabla\log P]$，再用 score 均值为零和因果性消项。因此精确轨迹梯度需要后缀 KL cost-to-go，不是仅乘当前 token 的 log-ratio。
+
+若 $a\sim p_\theta$、固定前缀、温度 1，使用停止梯度的 $A(a)=\log q(a)-\log p_\theta(a)$，则：
+
+$$\mathbb E_p[A(a)\nabla\log p_\theta(a)]
+=-\nabla D_{\rm KL}(p_\theta\|q)$$
+
+这是局部 reverse-KL 梯度的采样估计，不包含改变未来状态的那项。若 a 来自 old，需动作 importance ratio 才还原当前局部期望；长度平均和 clip 又进一步改变目标。GLM-5 的训练机制可据报告陈述，但不能据此宣称它无条件等于完整轨迹 KL 的精确梯度。
+
+**两步反例。** 第一步学生 $\pi(a=1)=\sigma(h)$，教师概率 0.5；在 h=0，两者一致。第二步分支 0 的两者相同，K0=0；分支 1 学生 $[0.75,0.25]$、教师 $[0.25,0.75]$，K1=$\tfrac12\log3$，第二步 logits 不依赖 h。固定前缀的 KL 对 h 导数为 0；精确轨迹目标却含 $\sigma(h)K1$，在 h=0 的导数为 $\tfrac18\log3\approx0.137327$。
+
+最后，$D_{\rm KL}(Q\|P_\theta)=\mathbb E_{y\sim Q}\sum_tD_{\rm KL}(q(\cdot|s_t)\|p_\theta(\cdot|s_t))$ 的前缀来自教师。学生 rollout 上的 forward KL 局部训练不能直接冒充这个教师轨迹期望。`,
+    },
+    {
+      id: "math-privileged-opsd",
+      type: "derivation",
+      title: "OPSD：条件信息、教师停梯度与不可迁移下界",
+      body: String.raw`OPSD 的 student 只见 $s=(x,y_{<t})$，teacher 额外见 z。明确冻结或周期刷新的教师参数 $\bar\theta$：
+
+$$p_\theta(\cdot|s)=\pi_\theta(\cdot|x,y_{<t}),\qquad
+q_{\bar\theta}(\cdot|s,z)=
+\operatorname{sg}[\pi_{\bar\theta}(\cdot|x,z,y_{<t})]$$
+$$\tilde L_{\rm OPSD}=
+\mathbb E_{\substack{(x,z)\sim D\\y\sim\pi_{\rm old}(\cdot|x)}}
+\left[\frac1{T(y)}\sum_t
+D(p_\theta(\cdot|s_t),q_{\bar\theta}(\cdot|s_t,z))\right]$$
+
+D 要明确为哪一向 KL。rollout、z、teacher 输出均固定，只更新学生分支；若 $\bar\theta$ 每次从当前学生复制，stop-gradient 只切当前计算图，不会把跨步移动目标变成静态优化问题。不得让 student prompt 含 reference，再声称评估无特权条件能力。
+
+**更多信息何时能迁移？** 固定 s，教师随隐藏 z 变化。以 forward KL 为例，设 $\bar q=\mathbb E_{z|s}[q_z]$：
+
+$$\mathbb E_{z|s}D_{\rm KL}(q_z\|p)
+=\mathbb E_{z|s}D_{\rm KL}(q_z\|\bar q)
++D_{\rm KL}(\bar q\|p)$$
+
+证明只需在 $\log(q_z/p)$ 中加减 $\log\bar q$，对 z 求均值。容量无限时最佳学生是 $\bar q$，第一项仍无法消去，它等于教师诱导的条件联合分布下 $I(V;Z|s)$。这是固定前缀、forward-KL 的信息下界，不是所有 OPSD 目标的统一收敛定理。
+
+教学反例：z 是从 s 完全无法预测的公平硬币，教师知道 z 后必选 token z。学生最多输出 $[0.5,0.5]$，最小平均 forward KL 为 $\log2$。不能靠密集模仿创造部署输入里不存在的信息。若 z 是问题可推导但学生尚未学会的答案，则可能通过训练学到规律；需要无 z 的保留集和 OOD 实验，而不是以训练 KL 下降作证。
+
+工程上将 teacher 的额外前缀与学生 response 位置严格对齐，只对学生动作评分；reference-only、错 reference、无 reference、成功/失败轨迹、长预算与未见题族分别做对照。Purified OPSD、RLSD、H²SD 等原有来源提供的是各自条件下的方案与实证，不据名称补造未披露超参数或普适收益。`,
     },
     {
       id: "code",
@@ -242,6 +363,30 @@ for problems, references in loader:
         {
           q: "Lightning OPD 的关键适用假设是什么？",
           a: "SFT rollout 与提供预计算监督的教师具有 teacher consistency；离线缓存降低在线教师成本，但策略更新后状态不再严格实时 on-policy。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：两向 KL、轨迹梯度与信息边界",
+      body: "先写左右分布、采样来源和冻结量，再求导。",
+      questions: [
+        {
+          q: "固定教师 q，学生 p=softmax(z/τ)。推导两向 KL 的 logit 梯度，并解释 reverse 中的中心化项。",
+          a: String.raw`softmax Jacobian 为 $p_i(\mathbf1[i=j]-p_j)/\tau$。forward 导数为 $(p_j-q_j)/\tau$；reverse 对 $p_i\log(p_i/q_i)$ 两部分求导，得 $p_j[\log(p_j/q_j)-D_{\rm KL}(p\|q)]/\tau$。**得分点：**教师冻结；reverse 权重也求导；各分量和为零；若 loss 乘 $\tau^2$ 则梯度同乘。`,
+        },
+        {
+          q: "p=[0.6,0.3,0.1]、q=[0.2,0.7,0.1]、τ=1。计算两向 KL 和梯度，第三项 p=q 是否意味着梯度为零？",
+          a: String.raw`forward KL≈0.373386、梯度 $[0.4,-0.4,0]$；reverse KL≈0.404978、梯度约 $[0.416181,-0.375683,-0.040498]$。reverse 第三项为 $0.1(0-L_R)$，并非零。**得分点：**log-ratio 方向；softmax 的全局归一化；不混同 p 的偏导与 logits 的偏导。`,
+        },
+        {
+          q: "两步模型第一步 p=σ(h)、teacher=0.5，第二步 KL 分别为 0 和 log(3)/2。h=0 时精确轨迹与固定前缀梯度有何不同？",
+          a: String.raw`根节点局部 KL 导数为零；第二步 logits 不依赖 h，因此固定前缀法对 h 也是零。但轨迹目标含 $\sigma(h)\log3/2$，导数为 $0.25\log3/2=\log3/8\approx0.137327$。**得分点：**早期动作影响后续状态分布；外层 score 项；按长度平均又是不同目标。`,
+        },
+        {
+          q: "教师看到学生输入无法推断的公平硬币 z 并据此输出 token，学生能把平均 forward KL 降到零吗？",
+          a: String.raw`不能。最佳学生为教师分布的均值 $[0.5,0.5]$，最小平均 KL 为 $\log2$。一般分解为 $\mathbb E_zD(q_z\|\bar q)+D(\bar q\|p)$，第一项是不含 z 的学生无法消去的项。**得分点：**信息条件；限定 forward KL 与固定前缀；teacher detach 不等于特权信息自动可迁移。`,
         },
       ],
     },

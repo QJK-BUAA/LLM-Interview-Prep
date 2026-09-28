@@ -78,7 +78,9 @@ test("annotates only the first glossary occurrence", () => {
 test("filters sections for interview mode", () => {
   const chapter = {
     sections: [
+      { type: "roadmap" },
       { type: "intuition" },
+      { type: "example" },
       { type: "derivation" },
       { type: "pitfall" },
       { type: "comparison" },
@@ -87,10 +89,10 @@ test("filters sections for interview mode", () => {
     ],
   };
 
-  assert.equal(visibleSections(chapter, "learn").length, 6);
+  assert.equal(visibleSections(chapter, "learn").length, 8);
   assert.deepEqual(
     visibleSections(chapter, "interview").map((section) => section.type),
-    ["pitfall", "comparison", "interview", "quiz"],
+    ["roadmap", "example", "derivation", "pitfall", "comparison", "interview", "quiz"],
   );
 });
 
@@ -127,4 +129,24 @@ test("renders completion controls and folded quiz answers", () => {
   assert.match(html, /aria-pressed="true"/);
   assert.match(html, /<details class="quiz-answer">/);
   assert.match(html, /<summary>查看答案<\/summary>/);
+});
+
+test("interview formulas are open, indexed and linked to folded whiteboard answers", () => {
+  const chapter = {
+    id: "99", title: "公式测试", subtitle: "", part: "", level: "", duration: 30,
+    summary: "", objectives: [], sources: [],
+    sections: [
+      { id: "roadmap", type: "roadmap", title: "路线", body: "先定义再求导。",
+        links: [{ label: "求导", sectionId: "math-gradient", level: "推导" }] },
+      { id: "math-gradient", type: "derivation", title: "梯度", body: "$$L=x^2$$" },
+      { id: "whiteboard", type: "quiz", title: "白板", body: "先作答。",
+        questions: [{ q: "求导？", a: "$2x$。" }] },
+    ],
+  };
+  const html = renderChapter(chapter, { mode: "interview" });
+  assert.match(html, /class="derivation-disclosure" open/);
+  assert.match(html, /href="#99\/math-gradient"/);
+  assert.match(html, /href="#99\/whiteboard"/);
+  assert.match(html, /class="quiz-answer"><summary>/);
+  assert.match(html, /data-action="set-derivations" data-open="false"/);
 });

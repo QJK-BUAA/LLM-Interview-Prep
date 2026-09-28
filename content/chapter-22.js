@@ -22,6 +22,19 @@ const chapter = {
     "工业后训练不是把 PPO 换成某个新缩写。DeepSeek 展示探索与蒸馏的分工，Qwen 展示查询筛选、模式融合与大小模型迁移，Seed 展示长序列奖励、价值校准和数据工程。只有同时核对训练阶段、评测预算与公开证据，模型之间的比较才有意义。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：把工业阶段翻译成可计算的训练合同",
+      body: String.raw`先修第 16–20 章的策略、偏好与蒸馏梯度，以及第 21 章的数据筛选概率。先读各报告真正披露的阶段，再把专家数据、模式融合、混合 RL 写成带领域和长度分母的目标；随后区分离线蒸馏与学生前缀监督，最后核算拒绝采样、教师和优化的完整预算。所有新增数字都是教学设置，不补猜厂商未披露的权重、学习率或训练步数。`,
+      links: [
+        { label: "报告阶段与证据边界", sectionId: "intuition", level: "必会" },
+        { label: "领域与长度归一化", sectionId: "math-domain-normalization", level: "推导" },
+        { label: "专家蒸馏与模式融合目标", sectionId: "math-distillation-pipeline", level: "推导" },
+        { label: "完整生成与训练预算", sectionId: "math-pipeline-budget", level: "进阶" },
+        { label: "工业方案白板题", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：同一所学校，不同的课程与考试",
@@ -162,6 +175,94 @@ C_{\mathrm{overhead}}.$$
 各项分别是生成、策略训练、价值模型、奖励判分、蒸馏教师、工具环境，以及通信、调度和空闲开销；同一项工作只能计入一个桶。没有 critic 时对应项可为零，但判分、生成和等待不会随之消失。actor-critic 多多少成本取决于模型大小、共享方式、序列长度和并行配置，不存在通用“固定多 25% 显存”的结论。
 
 若 $C_{\mathrm{post}}$ 是后训练成本，$C_{\mathrm{pre}}$ 是预训练成本，则 $C_{\mathrm{post}}/C_{\mathrm{pre}}$ 与 $C_{\mathrm{post}}/C_{\mathrm{total}}$ 是不同占比。V3.2 报告后训练计算预算超过预训练成本的 10%，只能作为该报告口径下的投入观察，不能与 V3 的合计占比直接拼成严格的投资回报曲线。`,
+    },
+    {
+      id: "math-domain-normalization",
+      type: "derivation",
+      title: "领域配比落到 loss：专家蒸馏与 mixed RL 的分母",
+      body: String.raw`**问题。** V3.2 披露专家蒸馏后 mixed RL，R1 披露推理 RS 与通用数据混合 SFT，Seed1.5 披露分任务反馈。它们都要求区分“抽到哪些域”和“这些域实际贡献多少梯度”；报告没有公开的域权重不能从总分反推。
+
+**符号与维度。** 批次中 $d_i\in\{1,\ldots,D\}$ 标记第 $i$ 条回答所属域；$m_{it}$ 为动作 mask，$T_i=\sum_tm_{it}>0$，$N_d=\sum_{i:d_i=d}T_i$。$w\in\mathbb R^D$ 是非负且和为 1 的目标域权重。SFT token 损失 $\ell_{it}=-\log\pi_\theta(y_{it}|s_{it})$ 是标量。
+
+**第一步：写出控制域权重的目标。** 若希望每个域先按自己的有效 token 平均，再按 $w$ 混合，应使用
+
+$$L_{\mathrm{domain}}=\sum_{d=1}^D w_d
+\frac{\sum_{i:d_i=d}\sum_t m_{it}\ell_{it}}{N_d}.$$
+
+假设每个 $w_d>0$ 的域都有 $N_d>0$；空域不能除零，应通过分层批次或跨批累积满足配额。设某位置词表 logits $z\in\mathbb R^V$、$p=\operatorname{softmax}(z)$、目标 one-hot 向量 $e_y$，由 $\partial(-\log p_y)/\partial z=p-e_y$ 得
+
+$$\nabla_z L_{\mathrm{domain}}=\frac{w_{d_i}m_{it}}{N_{d_i}}(p-e_y).$$
+
+这明确了数据管道的权重如何落到反传，不是配置里写了 $w$ 就自动成立。
+
+**第二步：找出平铺 token 的隐式域权重。** 若直接把全部 token 平均，
+
+$$L_{\mathrm{flat}}=\sum_d\frac{N_d}{N}\bar\ell_d,\qquad N=\sum_dN_d.$$
+
+按样本概率 $q_d$ 采样、均长为 $\bar T_d$ 的大批次，其域 token 比例趋向 $q_d\bar T_d/\sum_jq_j\bar T_j$。教学例中数学、代码各一条，长 1000、4000，各自平均 NLL 为 1、3。等域目标为 2；平铺目标为 $(1000+12000)/5000=2.6$。等域时每个数学 token 系数 $0.5/1000$，代码为 $0.5/4000$，相差四倍；平铺时都为 $1/5000$。
+
+**第三步：迁移到混合 RL。** 若 $J=\sum_dw_d\mathbb E[R_d]$，在固定任务分布、可交换求导等条件下，
+
+$$\nabla_\theta J=\sum_dw_d\,
+\mathbb E\!\left[(R_d-b_d(x))\sum_t\nabla_\theta\log\pi_\theta(y_t|s_t)\right].$$
+
+$b_d(x)$ 不依赖采样动作。这里是完整回报目标的 score-function 梯度；实际 PPO/GRPO 的 clipping、优势标准化及 token/sequence 平均是进一步的 surrogate 选择。若给每条轨迹再除以长度，不应继续无条件称为上述目标的同一个梯度。
+
+**手算与追问。** $w=[0.6,0.3,0.1]$、域平均奖励 $[0.8,0.5,0.9]$ 给出 0.72；若只把代码域奖励扩大十倍，目标变为 $0.48+1.5+0.09=2.07$，采样权重虽不变，优化尺度已变。是否做分域标准化、保留什么长度惩罚、怎样验收通用能力，都应写入实验合同。这个教学目标用于解释报告中的 mixed RL，不代表上述模型采用同一权重或同一归一化。`,
+    },
+    {
+      id: "math-distillation-pipeline",
+      type: "derivation",
+      title: "蒸馏的箭头传什么：输出轨迹、模式标签还是教师分布",
+      body: String.raw`**从报告到建模。** R1-Distill 使用整理后的教师样本做 SFT；V3/V3.2 的专家生成数据再交给通用模型；Qwen3 的 strong-to-weak 同时涉及离线输出蒸馏和 on-policy 教师分布监督。它们不是“把教师参数平均到学生”的同一个操作。以下目标是这些数据流的可计算解释，不补写未披露的具体 KL 方向。
+
+**第一步：RS 后的教师分布。** 固定输入 $x$，教师生成概率为 $t(y|x)$，确定验证器 $v(x,y)\in\{0,1\}$，通过概率 $Z(x)=\sum_yt(y|x)v(x,y)>0$。保留样本的分布是
+
+$$h(y|x)=\frac{t(y|x)v(x,y)}{Z(x)},\qquad
+L_{\mathrm{offline}}=-\mathbb E_{y\sim h}\sum_t\log\pi_\theta(y_t|x,y_{<t}).$$
+
+这里明确选用序列 NLL 和；若改成序列内均值，要在期望里除以 $T_y$，优化权重随长度改变。教师两个候选概率为 $[0.6,0.4]$，只有第一个通过，则保留分布为 $[1,0]$，平均两条成功样本需生成 $2/0.6=3.333333$ 条。学生学的是筛选后的分布，不是原始教师的全部行为；若第一个只是利用测例漏洞，蒸馏会一并复制漏洞。
+
+**第二步：固定学生前缀上的软监督。** 在同一个前缀 $s$，教师与学生词表分布为 $t,p_\theta\in\mathbb R^V$，都归一化，教师冻结。以 forward KL 作为一种明确的教学实现：
+
+$$L_s=D_{\mathrm{KL}}(t\|p_\theta)
+=\sum_vt_v\log t_v-\sum_vt_v\log p_{\theta,v}.$$
+
+第一项与学生无关；用 softmax Jacobian 求导得到
+
+$$\frac{\partial L_s}{\partial z_v}
+=-\sum_ut_u(\mathbf1[u=v]-p_v)=p_v-t_v.$$
+
+取 $t=[0.8,0.2],p=[0.5,0.5]$，KL 约 0.192745 nats，logits 梯度为 $[-0.3,0.3]$；若只保留第一 token 的 hard label，梯度为 $[-0.5,0.5]$。软监督保留教师不确定性，hard 轨迹则省去存取全词表分布的成本。教师是否能提供完整 logits、只提供采样 token logprob，决定了能实现哪一种目标。
+
+**第三步：为什么强调“学生前缀”？** 离线 SFT 在固定教师轨迹的状态上训练；OPD 让学生访问自己的前缀，再向教师询问。在缓存前缀上反传上式，是固定前缀的监督梯度；若目标写成对当前策略全部状态分布的期望，状态分布也依赖 $\theta$，还会出现采样分布的导数。不能把局部 $p-t$ 直接称为完整轨迹目标的无偏梯度。
+
+Qwen3 Thinking Mode Fusion 的训练数据还带模式条件 $b$，目标应写成 $-\log\pi_\theta(y|x,b)$。thinking RS 数据与另行整理的 non-thinking 数据在带标签的输入上融合，不要求每题都有成对答案。权重、长度分母和模式覆盖共同决定是否遗忘；只知道存在两种模式，无法反推出官方的具体配比。
+
+**追问。** 只有教师生成接口，没有 logits 时能否声称做了上述 forward KL？不能，只能训练可获得的输出监督或另定义估计器。教师花费应算离线一次性生成还是每轮学生前缀打分？两者不同，下一节必须分别计账。`,
+    },
+    {
+      id: "math-pipeline-budget",
+      type: "derivation",
+      title: "预算推导：拒绝样本、教师查询和完整成本",
+      body: String.raw`**符号与单位。** 令 $M$ 为要求保留并优化的 response token 数，$\alpha$ 为 RS 的独立通过概率；先假设每条候选等长、通过事件与长度无关。生成、验证、优化、教师评分每千 token 的成本分别为 $c_r,c_v,c_u,c_T$，统一用教学成本单位 CU；这些不是任何厂商报价。$U$ 表示对保留数据的优化遍数。
+
+**第一步：离线 RS 蒸馏账本。** 收齐目标数据前，期望候选 token 为 $M/\alpha$，所以
+
+$$C_{\mathrm{RS}}=\frac{M}{1000\alpha}(c_r+c_v)
++\frac{UM}{1000}c_u.$$
+
+取 $M=10^6,\alpha=0.25,U=1,c_r=1,c_v=0.2,c_u=2$，生成 400 万 token 花 4000 CU，验证花 800 CU，优化花 2000 CU，总计 6800 CU。只对保留的 100 万计生成和验证会误报 3200 CU。长度影响验证通过或采样终止时，应记录候选与保留 token 的实际比值，不能用题目通过率代替 token 保留率。
+
+**第二步：学生前缀 OPD 账本。** 假设不做 RS，生成 $M$ 个学生 token、查询一次冻结教师，优化 $U$ 遍，可写成
+
+$$C_{\mathrm{OPD}}=\frac M{1000}(c_r+c_T+Uc_u).$$
+
+教学取 $c_T=0.5$，其余不变，得到 3500 CU。这不证明 OPD 比 RS 更有效：数据分布、教师强度和成功率不相同，教师训练的摊销、全词表通信、环境及调度尚需单列。多次更新是否重查教师也要写清。独立能力评估才决定同预算下哪个方案值得采用。
+
+**第三步：把查询数放回总生成量。** Qwen3 公开的 3,995 query-verifier 对是题库规模，不是 rollout 数。教学取每题 16 次、每次 4096 token，则一轮 $3995\times16\times4096=261{,}816{,}320$ token；16 与 4096 不是报告超参数。若换动态采样，还需除以有效组接受率并计入被拒绝组，不能用最终 batch 大小替代总生成量。
+
+**边界与追问。** V3 表内 $5000/2788000\approx0.179340\%$ 是后训练占正式训练合计；$5000/2664000\approx0.187688\%$ 是占预训练。两者都不是 R1 的 RL 成本。GPU-hours、CU、美元和 token 必须分列，除非给出经过测量的换算率；MoE 的激活参数量也不足以独自推算 KV、通信和环境成本。预算验收应先锁定成本上限，再报告能力与推理延迟，而不是先看到最高分再改分母。`,
     },
     {
       id: "code",
@@ -306,6 +407,26 @@ print("V3 post / total:", f"{100 * post_fraction:.3f}%")
         {
           q: "从 Qwen3.5 的 MoE 架构或 Seed2.0 的产品名，能推断其训练必用 GSPO 或 VAPO 吗？",
           a: "不能。架构与家族名称不决定优化器；需要对应 checkpoint 的原始训练披露。本章 Qwen3.5 依据官方博客，Seed2.0 依据发布及后续模型卡摘要，均不补猜未披露细节。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：给工业 pipeline 写目标与账本",
+      body: "可以借鉴报告阶段，但答案中的自定参数必须明确是教学假设。",
+      questions: [
+        {
+          q: "数学和代码各一条，长 1000、4000，域平均 NLL 为 1、3。目标是两域各 50%，写 loss 与每个 token 系数；若直接平铺会怎样？",
+          a: String.raw`目标 $L=0.5\,\sum_{\mathrm{math}}\ell/1000+0.5\,\sum_{\mathrm{code}}\ell/4000=2$。两个域的单 token 系数为 $1/2000$、$1/8000$；再乘 $p-e_y$ 得 logits 梯度。平铺则 $L=13000/5000=2.6$，代码占 80% token。**得分点：** 域采样与 loss 权重不是一回事；空域需处理；这些比例不能标为 V3.2 官方配置。`,
+        },
+        {
+          q: "固定前缀，教师 t=[0.8,0.2]、学生 p=[0.5,0.5]。推导 forward KL 的 logits 梯度，与只取教师首选 token 的 SFT 比较。",
+          a: String.raw`$L=\sum_vt_v\log(t_v/p_v)$，教师熵项为常数；softmax 的 $\partial\log p_u/\partial z_v=\mathbf1[u=v]-p_v$ 给出 $p-t=[-0.3,0.3]$，KL 约 0.192745。hard 首选标签得到 $p-[1,0]=[-0.5,0.5]$。**得分点：** 说明教师冻结、完整词表与同一前缀；该局部梯度不是对学生整条状态分布求导后的全部项。`,
+        },
+        {
+          q: "RS 需保留一百万等长 token，通过率 0.25；每千 token 生成、验证、单遍优化成本为 1、0.2、2 CU。算总成本，并解释能否与只公开 GPU-hours 的报告直接比较。",
+          a: String.raw`候选量 $10^6/0.25=4\times10^6$，成本为 $4000+800+2000=6800$ CU。只计保留量会误报 $1000+200+2000=3200$ CU。**得分点：** 拒绝数据仍耗计算、长度与通过独立的假设、单位一致；还要加教师训练摊销/环境等未计项目，没有实测换算率不能拿 CU 直接比较 GPU-hours。`,
         },
       ],
     },

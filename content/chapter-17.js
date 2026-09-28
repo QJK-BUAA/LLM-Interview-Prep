@@ -18,6 +18,18 @@ const chapter = {
     "GRPO 对同一 prompt 的多条回答做相对比较，以组均值替代 critic；它降低模型内存，却把稳定性转移到采样覆盖、组内方差、长度归一化和新旧策略概率比等设计上。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：组估计、归一化与 DAPO 配方",
+      body: String.raw`先修 PPO 的有符号裁剪、采样分布与 baseline 证明。按“完整 GRPO 目标 → 自身进入 baseline 的偏差 → std/长度归一化 → RLOO → DAPO 四项”学习。不要把去 critic、去 RM 和去 reference 三个决定混在一起。面试必须能写分母、说明组样本是否独立，并给全同奖励和变长回答的反例。`,
+      links: [
+        { label: "完整 GRPO 目标", sectionId: "derivation", level: "必会" },
+        { label: "组标准化与 RLOO", sectionId: "math-normalization-rloo", level: "推导" },
+        { label: "DAPO 与长度聚合", sectionId: "math-dapo", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：同一道题内做相对排名",
@@ -92,7 +104,24 @@ $$r_{i,t}(\theta)=
 \frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}
 {\pi_{\mathrm{old}}(y_{i,t}|x,y_{i,<t})}$$
 
-一种 GRPO surrogate 对每个 token 使用同一序列优势，并做 PPO 式 clip，再对 token 与 batch 聚合。这里隐藏两个选择：是“每条序列先平均再对序列平均”，还是“所有 token 直接平均”。后者让长回答贡献更多 token，前者又可能使每个 token 权重随长度缩小，都会形成长度偏差。
+明确 outcome-supervision 的常见完整写法。令 $T_i$ 是有效 response token 数（含实际生成的 EOS，不含 prompt/padding），$\mu=G^{-1}\sum_iR_i$，教学约定 $\sigma^2=G^{-1}\sum_i(R_i-\mu)^2$、$\hat A_i=\operatorname{sg}[(R_i-\mu)/(\sigma+\epsilon_{\rm std})]$。最大化：
+
+$$J_{\rm GRPO}(\theta)=
+\mathbb E_{\substack{x\sim D\\y_{1:G}\sim\pi_{\rm old}(\cdot|x)}}
+\left[\frac1G\sum_{i=1}^G\frac1{T_i}\sum_{t=1}^{T_i}
+\left\{\min\left(r_{i,t}\hat A_i,
+\operatorname{clip}(r_{i,t},1-\epsilon,1+\epsilon)\hat A_i\right)
+-\beta k_{i,t}(\theta)\right\}\right]$$
+
+$$k_{i,t}(\theta)=
+\frac{\pi_{\rm ref}(y_{i,t}|s_{i,t})}{\pi_\theta(y_{i,t}|s_{i,t})}
+-1-\log\frac{\pi_{\rm ref}(y_{i,t}|s_{i,t})}{\pi_\theta(y_{i,t}|s_{i,t})}$$
+
+reference 固定，old 是本批 rollout 策略，current $\theta$ 可训练；old log-prob、奖励和组统计停止梯度，ratio 分子与显式 KL 项保留梯度。这里展示的是原始形式的采样 KL surrogate，不能声称多 epoch 旧样本平均始终等于当前分布 KL，更不能把固定样本 k3 的梯度当作精确 reverse-KL 梯度；第 16 章给出条件。全同奖励时只有相对奖励项为零，KL 项仍可能更新。
+
+组样本假设条件独立采样；共享随机种子、去重、best-of-N 选择都会改变估计性质。标准差用总体还是样本分母、epsilon 加在开方内还是外，都应报告。本章数字用总体标准差，不能把代码库默认的无偏样本标准差混入手算。
+
+“每条序列先平均再对序列平均”和“所有 token 直接平均”是不同目标。后者让长回答贡献更多 token，前者使每个 token 权重随长度缩小。也不能把任一种归一化称为对原始序列奖励目标的无偏梯度。
 
 GSPO 定义长度归一化的序列 likelihood ratio，例如：
 
@@ -110,6 +139,79 @@ Dr.GRPO 的核心批评是特定 advantage 标准差和按响应长度归一化�
 设两条回答长为 2 和 8，序列平均会给每个短回答 token 权重 $1/(2\times2)=1/4$，长回答 token 权重 $1/(2\times8)=1/16$；按全体 10 个 token 平均则每个权重都是 $1/10$。这改变的是 loss 聚合，不是把序列终局奖励变成了精确的 token 信用。
 
 Overlong Reward Shaping 在最大长度 $L_{\max}$ 前保留宽度 $L_{\mathrm{cache}}$ 的缓冲区：缓冲区前奖励修正为 0，区间内按超出缓冲起点的比例降到 -1。必须区分真实结束与因长度上限截断，不能把“未完成”自动当成语义错误。DAPO 公开配方移除了显式 reference KL，但这是推理任务的实验选择，不能推广为所有多域训练都该去掉 KL。`,
+    },
+    {
+      id: "math-normalization-rloo",
+      type: "derivation",
+      title: "从含自身的组均值到 RLOO：无偏条件与标准差效应",
+      body: String.raw`先研究没有 clip、没有长度平均、没有 std 的 on-policy 序列梯度。令 $u_i=\nabla\log\pi_\theta(y_i|x)$，同 prompt 的 $G>1$ 条轨迹条件独立，$g=\mathbb E[u_iR_i|x]$。由于 $\mathbb E[u_i|x]=0$，对 $j\ne i$ 有 $\mathbb E[u_iR_j|x]=0$，但自身项不消失：
+
+$$\mathbb E[u_i(R_i-\bar R)|x]
+=g-\frac1Gg=\left(1-\frac1G\right)g$$
+
+含自身 baseline 会产生有限组的缩小因子。RLOO 使用其他样本：
+
+$$b_{-i}=\frac1{G-1}\sum_{j\ne i}R_j,\quad
+A_i^{\rm LOO}=R_i-b_{-i}
+=\frac{G}{G-1}(R_i-\bar R)$$
+$$\hat g_{\rm LOO}=\frac1G\sum_i\operatorname{sg}(A_i^{\rm LOO})u_i,\qquad
+\mathbb E[\hat g_{\rm LOO}|x]=g$$
+
+这依赖条件独立、同策略采样、序列 log-prob 求和和冻结奖励。加 clip、长度平均、同组随机 std 后不再自动成立；“RLOO baseline 无偏”不证明任意名为 RLOO 的训练配方无偏。
+
+**数值例。** 奖励 $[1,1,0,0]$，中心化为 $[0.5,0.5,-0.5,-0.5]$，RLOO 为 $[2/3,2/3,-2/3,-2/3]$，总体 std 标准化为 $[1,1,-1,-1]$。若使用样本标准差 $\sqrt{1/3}$，优势变为约 $\pm0.866025$，不是同一个梯度尺度。
+
+对于二元奖励，设组内通过比例 $p=k/G$，$0<p<1$，忽略 epsilon：
+
+$$\sigma=\sqrt{p(1-p)},\quad
+A_{\rm correct}=\sqrt{\frac{1-p}{p}},\quad
+A_{\rm wrong}=-\sqrt{\frac{p}{1-p}}$$
+
+$[1,0,0,0]$ 给 $[\sqrt3,-1/\sqrt3,-1/\sqrt3,-1/\sqrt3]$，稀少的正确样本被放大。随机分母又与自身奖励相关，这不是简单减去动作无关 baseline。正仿射奖励变换在 epsilon=0 时不改变标准化 A，但改变 RLOO 的尺度；epsilon 非零时尺度不变性仅近似成立。
+
+当 $p=0$ 或 1，直接计算会 $0/0$；加 epsilon 或跳过可避免 NaN，但不能制造方向。$G=1$ 时组中心化为零，RLOO 分母为零不可用；第 19 章教师差值能用单样本，是另一种信号而非这一公式。`,
+    },
+    {
+      id: "math-dapo",
+      type: "derivation",
+      title: "DAPO 四项的公式、长度分母和筛选分布",
+      body: String.raw`**1. Clip-Higher。** 令 $l=1-\epsilon_{\rm low}$、$u=1+\epsilon_{\rm high}$，仍使用 $f(r,A)=\min(rA,\operatorname{clip}(r,l,u)A)$。扩大上界只延后正优势侧的封顶，不取消负优势侧的纠偏梯度。论文的一组上下参数为 0.2、0.28，它们不是所有任务的最佳设置。
+
+**2. Dynamic Sampling。** 对二元正确性过滤 $0<\sum_iR_i<G$ 的组并补采。若单次成功率 p 且条件独立，则保留概率：
+
+$$P({\rm keep}|x)=1-p(x)^G-(1-p(x))^G,\qquad
+D_{\rm keep}(x)\propto D(x)P({\rm keep}|x)$$
+
+因此过滤更改了 prompt 分布；$G=4,p=0.5$ 时保留率 0.875，不是 1。难题全错不代表永远不可学；统计总生成成本时必须包括丢弃的 rollout。连续奖励下“非零方差”和“有对有错”不是同一判据。
+
+**3. Token-level loss。** 对一个已保留的 prompt 组，写出不含显式 KL 的 DAPO surrogate：
+
+$$J_{\rm DAPO}=
+\mathbb E_{\rm kept\ groups}
+\left[\frac{\sum_i\sum_{t=1}^{T_i}f(r_{i,t},\hat A_i)}
+{\sum_iT_i}\right]$$
+
+若实现把多个 prompt 的整个 minibatch token 一起平均，分母要改为该 batch 的总 token，且 prompt 权重也随总长度改变。对比 Dr.GRPO 的固定尺度奖励项：
+
+$$J_{\rm DrGRPO,reward}=
+\mathbb E\left[\frac1{G L_{\max}}\sum_i\sum_{t=1}^{T_i}
+f(r_{i,t},\operatorname{sg}(R_i-\bar R))\right]$$
+
+它去掉随机 std 和单条实际长度分母；$L_{\max}$ 是预先固定的尺度，不是当前 batch 平均长度。这消除所讨论的特定归一化偏差，但不消除自身 baseline、clip、旧数据和采样选择的所有偏差。
+
+教学例两条回答长度 $[2,8]$、优势 $[1,-1]$，所有 ratio=1、KL=0。序列先平均目标为 0；组内 token 平均为 $(2-8)/10=-0.6$；固定 $G L_{\max}=20$ 时为 -0.3。虽然序列优势和为零，token 聚合不一定为零。这只是该 batch 的目标值，不代表梯度向量恰好按这三个数排序。
+
+**4. Overlong Reward Shaping。** 软长度修正为：
+
+$$R_{\rm length}(T)=
+\begin{cases}
+0,&T\leq L_{\max}-L_{\rm cache}\\
+\frac{L_{\max}-L_{\rm cache}-T}{L_{\rm cache}},
+&L_{\max}-L_{\rm cache}<T\leq L_{\max}\\
+-1,&T>L_{\max}
+\end{cases}$$
+
+叠加到任务奖励，而不是改写为 token 级因果标签。教学取 $L_{\max}=10,L_{\rm cache}=2$，长度 8、9、10 的惩罚为 0、-0.5、-1。真正在硬上限停止的回答还涉及截断样本的 mask/有效性处理；软惩罚、丢弃超长样本和 bootstrap 是不同操作，应分别记录。`,
     },
     {
       id: "code",
@@ -207,6 +309,30 @@ DAPO 是一组工程与算法配方，不只是 clip-higher：其论文同时强
         {
           q: "GSPO 与标准 token-ratio GRPO 的核心差异是什么？",
           a: "GSPO 从整条回答的长度归一化 likelihood 构造 sequence ratio，并在序列级 clipping/优化，使权重单位与序列奖励一致。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：组统计、偏差与长度反例",
+      body: "先写采样和归一化假设，再回答算法名称。",
+      questions: [
+        {
+          q: "G=4、奖励 [1,1,0,0]。分别算中心化、总体 std 标准化与 RLOO 优势，并证明 RLOO 的缩放关系。",
+          a: String.raw`$\bar R=0.5,\sigma=0.5$，结果为 $\pm0.5,\pm1,\pm2/3$。$R_i-(G\bar R-R_i)/(G-1)=G(R_i-\bar R)/(G-1)$。独立同策略样本下，其他轨迹奖励与本条 score 的乘积期望为零。**得分点：**三种分母；$G>1$；无偏性不延伸到随机 std 或 clip。`,
+        },
+        {
+          q: "长度 [2,8]、优势 [1,-1]、ratio 均为 1。算序列平均、token 平均和固定分母 20 的目标，说明反例。",
+          a: String.raw`序列平均 $(1-1)/2=0$；token 平均 $(2-8)/10=-0.6$；固定分母 $(2-8)/20=-0.3$。组优势和为零不代表 token loss 为零，长短样本的权重不同。**得分点：**明确求和单位；不把 scalar loss 大小当梯度方向；不宣称 token 平均就是精确信用分配。`,
+        },
+        {
+          q: "四条回答全错时，哪些 GRPO 项没有信号？动态采样能解决什么，不能保证什么？",
+          a: String.raw`中心化奖励全零，标准化必须处理 $\sigma=0$。相对奖励 surrogate 无梯度，但显式 reference KL 等正则仍可能有梯度。动态采样补充混合组，改变为 $D_{\rm keep}\propto D[1-p^G-(1-p)^G]$；全错难题可能长期被排除。**得分点：**奖励项与完整 loss 区分；无 NaN；数据分布和丢弃成本。`,
+        },
+        {
+          q: "证明含自身组均值 baseline 的原始 on-policy 序列梯度有 (G-1)/G 因子。G=1 能否改用 RLOO？",
+          a: String.raw`令 $u_i=\nabla\log\pi(y_i|x)$。交叉项 $\mathbb E[u_iR_j]=0$，自身项 $\mathbb E[u_iR_i]=g$，故 $\mathbb E[u_i(R_i-\bar R)]=g-g/G$。$G=1$ 中心化全零，RLOO 除以零，不能使用。**得分点：**条件独立；用完整序列 score；不能把教师差值单样本算法称为组均值特例。`,
         },
       ],
     },

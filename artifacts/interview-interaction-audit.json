@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-09-28T19:50:23.232Z",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "learn/interview",
+        "formulas open by default",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "hidden deep link switches to learn",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route"
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "learn/interview",
+        "formulas open by default",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "hidden deep link switches to learn",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route"
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "learn/interview",
+        "formulas open by default",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "hidden deep link switches to learn",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route"
+      ]
+    }
+  ],
+  "console": {
+    "success": true,
+    "data": {
+      "messages": []
+    },
+    "error": null
+  },
+  "passed": true
+}

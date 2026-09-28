@@ -18,6 +18,18 @@ const chapter = {
     "Q-Learning 用一步奖励和下一状态最优 Q 值更新动作价值；DQN 用神经网络扩展到大状态空间，但必须用经验回放和目标网络缓解相关样本、移动目标与函数近似共同造成的不稳定。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：从 TD 目标到稳定价值学习",
+      body: String.raw`先修 Bellman 最优方程和神经网络反传。先分清行为策略与目标策略，再写出目标的停止梯度，最后定位 Double、Dueling、Huber 各自修改了什么。面试标准是能手算一次更新、解释 max 高估的来源，并指出经验回放和目标网络没有提供一般收敛保证。`,
+      links: [
+        { label: "TD 与半梯度", sectionId: "derivation", level: "必会" },
+        { label: "Double 与 max 高估", sectionId: "math-double-bias", level: "推导" },
+        { label: "Dueling、Huber 与更新周期", sectionId: "math-dueling-huber", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：给每个状态动作组合记长期分数",
@@ -105,9 +117,64 @@ $$L(\theta)=\mathbb E_{(s,a,r,s',d)\sim\mathcal D}
 最大化操作和带噪估计会产生过高估计。Double DQN 用在线网络选动作、目标网络评估：
 
 $$a^*=\arg\max_{a'}Q_\theta(s',a'),\qquad
-y=r+\gamma Q_{\theta^-}(s',a^*)$$
+y=r+\gamma(1-d)Q_{\theta^-}(s',a^*)$$
 
-Dueling DQN 则把输出分成状态价值 $V(s)$ 和动作优势 $A(s,a)$，再组合为 Q，使网络在许多动作效果接近时更容易学习共同状态价值。`,
+Dueling DQN 则把输出分成状态价值 $V(s)$ 和动作优势 $A(s,a)$，再组合为 Q，使网络在许多动作效果接近时更容易学习共同状态价值。
+
+**半梯度到底少了哪一项？** 为简化系数，用单样本 $\ell=\tfrac12(Q_\theta-\operatorname{sg}(y))^2$，记 $\delta=y-Q_\theta$。则：
+
+$$\nabla_\theta\ell=-\delta\nabla_\theta Q_\theta(s,a),\qquad
+\theta\leftarrow\theta+\alpha\delta\nabla_\theta Q_\theta(s,a)$$
+
+对于 one-hot 表格参数，$\nabla Q$ 只在当前格为 1，就还原 Q-Learning。若让同一网络构造 $y_\theta$ 且沿它反传，平方残差梯度变为 $(Q_\theta-y_\theta)(\nabla Q_\theta-\nabla y_\theta)$，不是 TD 半梯度。DQN 使用冻结 target 时，对这次监督式损失是完整梯度；称为半梯度是相对自举固定点问题而言。Double 的 argmax 选择也作为固定目标的一部分，不对动作索引求导。
+
+例如 $Q_\theta(s,a)=2\theta$，固定 target=4.6，$\theta=1$。$\delta=2.6$，$\partial\ell/\partial\theta=-5.2$；学习率 0.1 后 $\theta=1.52$、当前预测 3.04。不是表格式直接把 Q 加 $0.1\delta$，因为网络 Jacobian 改变了更新尺度。`,
+    },
+    {
+      id: "math-double-bias",
+      type: "derivation",
+      title: "max 高估的精确反例与 Double DQN",
+      body: String.raw`设同一状态两个动作真实价值都为 0，各自估计误差独立取 $+1,-1$，概率各半。四种等概率估计是 $(1,1),(1,-1),(-1,1),(-1,-1)$；每个动作估计无偏，但：
+
+$$\mathbb E[\max(\hat Q_1,\hat Q_2)]
+=\tfrac14(1+1+1-1)=\tfrac12>0=\max_a Q_a$$
+
+一般由 max 的凸性，$\mathbb E[\max_a\hat Q_a]\geq\max_a\mathbb E[\hat Q_a]$。问题是“选中正噪声再用同一个正噪声评估”，不要求环境奖励有正偏差。
+
+Double DQN 用 online 网络选择 $a^*$，用 target 网络评估。如果评估误差相对选择独立且条件均值为 0，那么 $\mathbb E[\epsilon^-_{a^*}|a^*]=0$，这个教学模型中的高估消失。实际两个网络高度相关，故只能说缓解，不能宣称普遍无偏，也可能低估。
+
+**数值对照。** online 下一状态 $[4,3]$，target 为 $[2,5]$，$r=1,\gamma=0.9,d=0$。普通 DQN 用 target 最大值 5，$y=5.5$；Double 由 online 选第一个动作，再用 target 的 2，$y=2.8$。若真正终止，两者都为 1。不要把“双网络”直接当 Double：普通 DQN 也有 online 与 target，区别是选择和评估是否解耦。
+
+同一个 replay 样本用于 Q-Learning 时目标取贪心动作；SARSA 要使用该策略实际采到的下一动作；Expected SARSA 则用 $\sum_{a'}\pi(a'|s')Q(s',a')$。行为是否探索和目标是否取 max 是两个问题。`,
+    },
+    {
+      id: "math-dueling-huber",
+      type: "derivation",
+      title: "Dueling 的可辨识性、Huber 梯度与目标更新",
+      body: String.raw`若直接写 $Q_a=V+A_a$，任意 $c$ 都能作 $V'=V+c,A'_a=A_a-c$ 而 Q 不变。Dueling 的常用均值中心化聚合为：
+
+$$Q_\theta(s,a)=V_\theta(s)+A_\theta(s,a)
+-\frac1{m}\sum_{b=1}^m A_\theta(s,b)$$
+
+其中 $m$ 是动作数，V 头输出标量，A 头输出 $m$ 维。对当前动作 $a$：
+
+$$\frac{\partial Q_a}{\partial V}=1,\qquad
+\frac{\partial Q_a}{\partial A_b}=\mathbf1[a=b]-\frac1m$$
+
+有效优势均值为零，V 等于 Q 的动作算术均值。它不必等于某个行为策略的 $V^\pi$；原始 A logits 仍允许共同平移。教学例 $V=3,A=[2,0,-1]$，均值 $1/3$，Q 为 $[14/3,8/3,5/3]$。Dueling 改架构，Double 改 target，两者可组合。
+
+**Huber 损失。** 令 $e=Q-\operatorname{sg}(y)$，阈值 $\kappa>0$：
+
+$$\ell_\kappa(e)=
+\begin{cases}\tfrac12e^2,&|e|\leq\kappa\\
+\kappa(|e|-\tfrac12\kappa),&|e|>\kappa\end{cases},
+\qquad
+\frac{\partial\ell_\kappa}{\partial Q}
+=\operatorname{clip}(e,-\kappa,\kappa)$$
+
+小误差是平方，大误差是线性，抑制离群 TD error。$e=-2.6,\kappa=1$ 时 loss=2.1、对 Q 梯度为 -1；半平方损失则为 3.38、梯度 -2.6。Huber 限制的是 loss 对预测的导数，乘上很大的网络 Jacobian 后，参数梯度仍可很大，因此不等于全局梯度范数裁剪。
+
+**数据与时间尺度。** replay 的均匀采样近似优化 buffer 的经验分布，不自动还原当前策略状态分布；优先采样若要还原均匀经验目标，须按采样概率加 IS 权重。target 可每 $C$ 步硬复制 $\theta^-\leftarrow\theta$，或软更新 $\theta^-\leftarrow(1-\tau)\theta^-+\tau\theta$。$\tau=1$ 每步追随 online；很小则稳定但陈旧。复制和软更新均不属于本次反向传播图。`,
     },
     {
       id: "code",
@@ -210,6 +277,26 @@ print(target, td_error, q[state][action])  # 4.6, 2.6, 3.3
         {
           q: "为什么 LLM 的 token 动作空间让 epsilon-greedy 很低效？",
           a: "词表有数万动作，均匀随机 token 大多语义无效，还会把后续状态带离合理文本分布；策略分布提供了更结构化的探索。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：目标、偏差与梯度",
+      body: "每题先标明可训练量与冻结量，再给出计算。",
+      questions: [
+        {
+          q: "Qθ=2θ，θ=1，固定 target=4.6，用半平方损失。推导梯度并给出 α=0.1 的一步结果。",
+          a: String.raw`$\ell=\tfrac12(2\theta-4.6)^2$，$\partial_\theta\ell=(2\theta-4.6)2=-5.2$，更新为 $\theta=1.52$，预测 3.04。若 target 依赖同一参数，必须说明是否停止梯度，否则会多出 $-\nabla y$ 项。**得分点：**误差符号、链式因子 2、target detach；不混用表格更新。`,
+        },
+        {
+          q: "两个真实 Q 都为零，独立噪声 ±1。算 max 的期望，并说明 Double 在什么条件下去掉这个偏差。",
+          a: String.raw`枚举四种情况，最大值为 $[1,1,1,-1]$，均值 0.5。独立的第二估计器若对被选动作仍条件无偏，则 $\mathbb E[\epsilon^-_{a^*}|a^*]=0$。**得分点：**单动作无偏不等于最大值无偏；分离选择与评估；实际 target 与 online 相关，不能保证无偏。`,
+        },
+        {
+          q: "V=3、A=[2,0,-1] 时计算 Dueling Q；e=-2.6、κ=1 时计算 Huber loss 和梯度。它们各解决什么？",
+          a: String.raw`减去 A 均值 $1/3$，得 $Q=[14/3,8/3,5/3]$。Huber 大误差分支给 $\ell=2.6-0.5=2.1$，$\partial_Q\ell=-1$。Dueling 学共享状态分量，Huber 降低离群残差影响，都不直接修正 max 选择偏差。**得分点：**中心化；区分损失值与导数；指出不能替代 Double 或梯度范数裁剪。`,
         },
       ],
     },

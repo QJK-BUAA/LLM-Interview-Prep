@@ -57,9 +57,16 @@ function validateCatalog(chapters, { partial }) {
     if (!chapter.sections.some(section => section.type === "code" && /~~~[\w-]*\n[\s\S]+?~~~/.test(section.body))) {
       errors.push(`${chapter.id}: missing substantive fenced code`);
     }
-    if (chapter.sections.length !== REQUIRED_SECTION_TYPES.length ||
-        new Set(chapter.sections.map(section => section.type)).size !== REQUIRED_SECTION_TYPES.length) {
-      errors.push(`${chapter.id}: requires exactly nine distinct teaching sections`);
+    if (chapter.sections[0]?.type !== "roadmap") {
+      errors.push(`${chapter.id}: must begin with a knowledge roadmap`);
+    }
+    const whiteboard = chapter.sections.find(section => section.id === "whiteboard");
+    if (whiteboard?.type !== "quiz" || whiteboard.questions?.length < 3 ||
+        !whiteboard?.questions?.every(question => question.a.includes("得分点"))) {
+      errors.push(`${chapter.id}: requires worked whiteboard questions with scoring points`);
+    }
+    if (!chapter.sections.some(section => section.type === "derivation" && section.id.startsWith("math-"))) {
+      errors.push(`${chapter.id}: requires a separately addressable mathematical topic`);
     }
     if (/\b(?:TBD|TODO)\b/i.test(serialized)) {
       errors.push(`${chapter.id}: contains a placeholder marker`);

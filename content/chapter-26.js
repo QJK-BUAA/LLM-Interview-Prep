@@ -23,6 +23,24 @@ const chapter = {
     "Agentic 训练需要同时回答两件事：什么行为值得奖励，奖励怎样形成可用且稳定的梯度。本章把信息增益、清单评分、顺序更新、重要性权重和方差控制拆开，并用可手算例子说明监督来源、有效样本量与无偏条件。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：奖励含义、梯度方向与分布校正",
+      body: String.raw`**先修能力：**第 15 章策略梯度与 baseline，第 17 章组相对优势，第 25 章轨迹分解和终止语义。先确定奖励想优化什么，再讨论怎样降低估计噪声。
+
+**学习链：**potential shaping 的望远镜消项 → entropy 与答案条件 IG 的区别 → 奖励噪声如何进入梯度 → 后缀重要性采样的支持与方差 → 回到 IGPO、CM2、SeeUPO、SAMPO、VCPO 的已核验机制。新增小节都是独立教学推导，不把通用 shaping 或 entropy bonus 冒充某篇论文的完整算法。
+
+**验收目标：**不仅会写 reward 加权和，还要能证明何时不改变策略排序，指出边界残差；不仅会说“用了 IS”，还要能列出四条后缀的概率，并计算裁剪带来的偏差。`,
+      links: [
+        { label: "Shaping 与终止边界", sectionId: "math-potential-shaping", level: "推导" },
+        { label: "熵、信息与 logits 梯度", sectionId: "math-entropy", level: "推导" },
+        { label: "奖励噪声的方向与方差", sectionId: "math-reward-noise", level: "必会" },
+        { label: "后缀 IS 的完整手算", sectionId: "math-suffix-is", level: "进阶" },
+        { label: "原论文目标与 baseline", sectionId: "derivation", level: "进阶" },
+        { label: "白板边界检验", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：考试总分、过程清单与更新步长",
@@ -157,6 +175,127 @@ $$\mathbb E\left[\frac1N\sum_i\psi_i(R_i-\bar R)\right]
 =\left(1-\frac1N\right)g$$
 
 因为 $\bar R$ 含有当前 $R_i$，即使 detach 也与 $\psi_i$ 相关。leave-one-out 基线 $b_{-i}=(N-1)^{-1}\sum_{j\ne i}R_j$ 去掉这一自身相关性，在上述条件下恢复相同期望；若其他轨迹来自相互依赖的树搜索，独立性还需重新检查。组 std、筛选、截断 IS、自归一化权重又各自改变估计器，不能一并套上“baseline 不引入偏差”的结论。`,
+    },
+    {
+      id: "math-potential-shaping",
+      type: "derivation",
+      title: "Potential Shaping：展开望远镜，保留终点残差",
+      body: String.raw`**教学目标。** 想给中间进展加奖励，又不改变原任务偏好。令 $x_t$ 表示包含剩余预算的充分状态或 belief，固定势函数 $\Phi(x)$ 与 reward 同量纲，定义 $F_t=\gamma\Phi(x_{t+1})-\Phi(x_t)$，新奖励 $r'_t=r_t+F_t$。$\Phi$ 不随本次策略求导改变；这不是 IGPO 或 CM2 的原算法定义。
+
+对长度 $H$ 的轨迹从头展开，而不是只记“势函数不改最优策略”：
+
+$$\begin{aligned}
+G'_0-G_0
+&=\sum_{t=0}^{H-1}\gamma^t
+[\gamma\Phi(x_{t+1})-\Phi(x_t)]\\
+&=[\gamma\Phi(x_1)+\cdots+\gamma^H\Phi(x_H)]
+-[\Phi(x_0)+\cdots+\gamma^{H-1}\Phi(x_{H-1})]\\
+&=-\Phi(x_0)+\gamma^H\Phi(x_H).
+\end{aligned}$$
+
+固定初始分布、有限 episode 且所有真正终态 $\Phi=0$ 时，差只取决于初态，因此策略排序保持。无限时域在 $\gamma<1$、$\Phi$ 有界时终点项趋零。若 $\gamma=1$，不能套用这个无限时域极限；有限时域仍可通过零终态势保证消项。非零且相同的终态势在可变长度、$\gamma<1$ 时也可能因 $\gamma^H$ 改变排序。
+
+**完整数字。** 原奖励 $[-0.1,-0.1,1]$，$\gamma=0.9$，势序列 $[0.2,0.5,0.8,0]$。得到 $F=[0.25,0.22,-0.8]$，$r'=[0.15,0.12,0.2]$：
+
+$$G'_0=0.15+0.9(0.12)+0.9^2(0.2)=0.42=0.62-0.2$$
+
+若只把末态势改成 1，回报变为 $0.62-0.2+0.9^3=1.149$，不再仅差初态常数。更直接的反例：一步任务，初态势为零，动作 A 原奖励 1、终态势 0，动作 B 原奖励 0、终态势 2，$\gamma=0.9$；新奖励 A 为 1、B 为 1.8，偏好被反转。
+
+**worker 截断怎样处理？** 在未终止的 $x_H$ bootstrap，须使用一致的 $V'(x_H)=V(x_H)-\Phi(x_H)$。这样 shaped prefix 加 $\gamma^HV'$ 后，终点势再次抵消；只加 shaping 不改 bootstrap 就会留下偏差。SMDP 则用 $\gamma^{\Delta_t}\Phi(x_{t+1})-\Phi(x_t)$，并按累计时间折扣，才有同样的望远镜。
+
+**追问链：**有限还是无限时域？→ terminal 势是否为零？→ worker 截断还是任务终止？→ 用同一个还是改变后的价值函数？这比“多发过程分不会影响结果”严格得多。`,
+    },
+    {
+      id: "math-entropy",
+      type: "derivation",
+      title: "Entropy 与 Information Gain：从定义到 logits 梯度",
+      body: String.raw`**先区分随机变量。** belief 熵衡量隐藏状态的不确定性；策略熵衡量动作随机性；IGPO 用标准答案的平均 log-prob 变化。三者不是同一个量。若 $S$ 为隐藏状态、$O$ 为新观测，在固定历史和动作下，Shannon 的期望信息增益为：
+
+$$I(S;O)=H(S)-\mathbb E_O H(S|O)
+=\mathbb E_O D_{\mathrm{KL}}(p(S|O)\Vert p(S))\ge0$$
+
+非负性是**对观测取期望**并使用一致概率模型的性质，不意味着每次实际观测都降低熵，更不能推出答案条件 log-prob 差非负。二元等先验、对称准确率 0.8 的传感器，两种 posterior 都为 $(0.8,0.2)$ 的排列：
+
+$$H_{\mathrm{prior}}=\log2\approx0.693147,\quad
+H_{\mathrm{post}}=-0.8\log0.8-0.2\log0.2\approx0.500402$$
+
+因此期望信息增益约为 0.192745 nats。IGPO 的前后平均答案 log-prob 从 -2 降到 -3 则为 -1，两者定义不同，不矛盾。
+
+**固定历史的策略熵梯度。** 设 logits $z\in\mathbb R^K$，$p_j=\exp z_j/\sum_k\exp z_k>0$，$H(p)=-\sum_jp_j\log p_j$。利用 softmax Jacobian：
+
+$$\frac{\partial p_k}{\partial z_j}=p_k(\mathbf1[k=j]-p_j),\qquad
+\frac{\partial H}{\partial z_j}
+=-\sum_k(\log p_k+1)p_k(\mathbf1[k=j]-p_j)
+=-p_j(\log p_j+H).$$
+
+所有 logits 梯度之和为零，符合 logits 加同一常数不改概率。二分类用一个 logit $z$ 与固定零 logit，$p=\sigma(z)$，则：
+
+$$\frac{dH}{dz}=p(1-p)\log\frac{1-p}{p}.$$
+
+在 $p=0.8$，导数约为 -0.221807；梯度上升会降低过大的 logit，让分布更均匀。最大化奖励加 $\alpha H$ 时，最小化 loss 的熵项是 $-\alpha H$，其 logit 梯度符号相反。$p=0.5$ 时导数为零；$p\to1$ 时也趋零，说明已严重饱和的策略未必能靠有限熵系数迅速恢复探索。
+
+这里是**固定采样历史上的局部正则梯度**。若目标是随策略改变的整条轨迹期望熵，历史访问分布也依赖参数，完整梯度还包含相应 score 项。不能仅写局部导数就称求出了全轨迹目标。
+
+**追问链：**不确定的是状态还是动作？→ 是否对观测平均？→ bonus 的最大化/最小化符号？→ 固定前缀还是当前策略访问分布？高熵乱码不是高信息检索。`,
+    },
+    {
+      id: "math-reward-noise",
+      type: "derivation",
+      title: "奖励噪声：零均值不够，必须条件零均值",
+      body: String.raw`**问题。** 验证器分数 $\widetilde R=R+\varepsilon$，轨迹 score 为 $\psi(\tau)=\nabla_\theta\log p_\theta(\tau)$。在 on-policy、奖励无直接参数依赖且矩存在时：
+
+$$\mathbb E[\widetilde R\psi]
+=\underbrace{\mathbb E[R\psi]}_{\text{真实梯度}}
++\underbrace{\mathbb E[\varepsilon\psi]}_{\text{奖励噪声偏差}}.$$
+
+只有总体 $\mathbb E[\varepsilon]=0$ 不保证右端第二项为零，因为噪声可能和动作相关。充分条件是 $\mathbb E[\varepsilon|\tau]=0$。在此条件下，噪声造成的梯度总方差（协方差矩阵的迹）增量为：
+
+$$\mathbb E[\|\psi\|^2\operatorname{Var}(\varepsilon|\tau)].$$
+
+所以“无偏噪声”仍可能让高 score 能量的少数轨迹主导抖动；减去动作无关 baseline 不能纠正系统性错误标签。
+
+**二元 judge 算例。** 固定状态只有正确动作和错误动作，正确动作概率 $p=\sigma(z)$，真 reward 分别 1、0。judge 假阳性率 $f=0.2$，假阴性率 $n=0.1$，并假设这两个错误率在各自真标签内部恒定：
+
+$$\mathbb E[\widetilde R|R]=f+(1-f-n)R=0.2+0.7R.$$
+
+故 $\mathbb E\widetilde R=0.2+0.7p$，真梯度为 $p(1-p)$，观测梯度为 $0.7p(1-p)$。在 $p=0.5$，分别为 0.25 与 0.175。$f+n=1$ 时标签没有方向信息；$f+n>1$ 时甚至反向；只有固定的、满足 $f+n<1$ 的误差率才保留此例的排序。
+
+若可靠地知道 $f,n$，可用 $(\widetilde R-f)/(1-f-n)$ 校正条件期望，但方差被除以 $(1-f-n)^2$。当二者和接近 1，估计极不稳定；真实 judge 的错误率还常随任务、语言和长度变化，不能用一个全局常数假装完成校准。
+
+**总体零均值反例。** $p=0.5$ 时，让正确动作噪声为 +1，错误动作为 -1，总体噪声均值为零，但 $\mathbb E[\varepsilon\psi]=0.5$，梯度明显改变。应按动作类型、证据和任务难度审计噪声。
+
+**追问链：**评分误差是否相关于动作？→ 用什么独立真值估计错误率？→ 过滤是否改变任务分布？→ 方差和主任务成功率是否同时改善？这才是引入 PF-PPO 等方法前要定位的问题。`,
+    },
+    {
+      id: "math-suffix-is",
+      type: "derivation",
+      title: "后缀重要性采样：四条路径、支持条件与裁剪偏差",
+      body: String.raw`**从条件分布写起。** 固定动作后的历史 $h_{t+1}$，旧策略 $\mu$ 产生后缀 $\xi$，更新后的后轮策略为 $\nu$。环境转移与观测机制相同，因此在完整后缀 likelihood ratio 中环境因子抵消：
+
+$$W(\xi)=\prod_{k>t}\frac{\nu_k(u_k|h_k)}{\mu_k(u_k|h_k)},
+\qquad \mathbb E_\mu[W R\mid h_{t+1}]
+=\mathbb E_\nu[R\mid h_{t+1}].$$
+
+这是解释 SeeUPO 后缀分布变化的标准教学恒等式，不代替它的 drift、neighbourhood 或更新规则。要求 $\nu(\xi)>0$ 时 $\mu(\xi)>0$，奖励与权重可积，行为概率真实且上下文一致；最后一轮空后缀权重为 1。只校正后缀，并没有同时校正来自旧策略的前缀访问分布。
+
+**穷举两步。** 两个后续二元动作在本算例中独立。旧策略每步成功概率都是 0.5，新策略分别为 0.8、0.75。奖励仅在两个动作都是 1 时为 1：
+
+| 后缀 | 旧概率 | 新概率 | $W$ | $R$ |
+|---|---|---|---|---|
+| 11 | 0.25 | 0.60 | 2.4 | 1 |
+| 10 | 0.25 | 0.20 | 0.8 | 0 |
+| 01 | 0.25 | 0.15 | 0.6 | 0 |
+| 00 | 0.25 | 0.05 | 0.2 | 0 |
+
+$$\mathbb E_\mu W=1,\qquad
+\mathbb E_\mu WR=0.25(2.4)=0.6,\qquad
+\mathbb E_\mu W^2=1.7.$$
+
+把权重截到 2 后，reward 估计变成 0.5，比目标少 0.1；只校正最后一个动作，得到 $0.25(1.5)=0.375$，因为第一步分布仍错。四条各出现一次的样本 ESS 为 $4^2/(2.4^2+0.8^2+0.6^2+0.2^2)=40/17\approx2.352941$。
+
+**长后缀为何危险？** 若各步比率在旧分布下独立、均值为 1、二阶矩为 $c>1$，则 $\mathbb E W^2=c^K$，随后缀长度 $K$ 指数增长。实际动作有依赖时不能直接因式分解，但长乘积仍需检查尾部。实现可累加 log-ratio 防数值溢出；这不能消除统计方差。若旧策略根本不采动作 1，任何有限权重都不能补出新策略的 11 路线。
+
+**追问链：**改了哪几个轮次？→ 校正的随机变量包含哪些动作？→ 支持是否覆盖？→ clipping、自归一化或丢弃改变了什么期望？不能用“IS 已修正”概括所有这些选择。`,
     },
     {
       id: "code",
@@ -326,6 +465,30 @@ ESS 对统一缩放不变，所以 shifted 测试会得到相同 ESS，但极大
         {
           q: "某 agent 的清单分上升但终局成功率不变，下一步应检查什么？",
           a: "检查是否重复计分、关键依赖未满足、judge 噪声或奖励投机，并核对过程分与真实终局要求。不能仅凭过程分上涨认定能力提高，也不应直接用更大学习率放大该信号。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：奖励不变性、噪声与后缀校正",
+      body: "每题必须写出成立条件、至少一个数值和失效边界。原算法的完整定义仍以已核验正文为准。",
+      questions: [
+        {
+          q: "证明 potential shaping 的有限轨迹差值，并用奖励 [-0.1,-0.1,1]、势 [0.2,0.5,0.8,0]、折扣 0.9 核验；末态势变成 1 会怎样？",
+          a: String.raw`展开 $\sum_t\gamma^t(\gamma\Phi_{t+1}-\Phi_t)$ 后中间项两两消去，剩 $-\Phi_0+\gamma^H\Phi_H$。本例 shaping 为 $(0.25,0.22,-0.8)$，新回报为 $0.42=0.62-0.2$；末态势为 1 时再加 $0.9^3$ 得 1.149。有限终止取零终态势；截断则配合 $V'=V-\Phi$ 消去残差。**得分点：**望远镜展开、终态项、bootstrap 一致性。追问：非零常量终态势在不同长度下仍可能改变排序。`,
+        },
+        {
+          q: "二分类策略 p=sigmoid(z)，在 p=0.8 推导熵对 z 的导数；最大化奖励加熵时应往哪边更新？这是否就是 IGPO？",
+          a: String.raw`先有 $dH/dp=\log((1-p)/p)$，再乘 $dp/dz=p(1-p)$，得到 $dH/dz=0.16\log(0.25)\approx-0.221807$。熵梯度上升降低 z；最小化 loss 用 $-\alpha H$。IGPO 是标准答案 teacher-forcing 平均 log-prob 的前后差，不是策略熵 bonus；期望 Shannon 信息增益又是另一种随机变量的 KL。**得分点：**链式法则、符号、三种信息量的区分。追问：固定前缀的导数不包含历史访问分布梯度。`,
+        },
+        {
+          q: "二元 judge 假阳性 0.2、假阴性 0.1，正确动作概率 p=0.5。比较真奖励和观测奖励的 logit 梯度；总体零均值噪声是否充分？",
+          a: String.raw`条件期望为 $0.2+0.7R$，故真期望梯度 $p(1-p)=0.25$，观测梯度为 0.175。一般偏差是 $\mathbb E[\varepsilon\psi]$；正确动作噪声 +1、错误动作 -1 在 p=0.5 时均值为零，偏差却为 0.5。需要如 $\mathbb E[\varepsilon|\tau]=0$ 的条件才能消项。**得分点：**错误率模型、score 相关性、条件零均值。追问：错误率之和接近 1 时，反校准会放大方差。`,
+        },
+        {
+          q: "两步旧成功概率均为 0.5，新概率为 0.8 和 0.75，只有 11 得 1。列全后缀权重，求准确估计、截到 2 的估计和只校正最后一步的估计。",
+          a: String.raw`11、10、01、00 的权重为 2.4、0.8、0.6、0.2。准确期望是 $0.25(2.4)=0.6$；截断后是 $0.25(2)=0.5$；只校正最后一步是 $0.25(1.5)=0.375$。准确权重均值为 1，二阶矩 1.7。若旧策略第一步成功概率为零，目标后缀不在行为支持内，不能用 IS 恢复。**得分点：**完整序列概率、偏差数值、支持条件。追问：log-space 计算防溢出，但不降低长乘积的方差。`,
         },
       ],
     },

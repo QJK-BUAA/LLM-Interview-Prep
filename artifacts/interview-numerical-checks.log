@@ -1,0 +1,152 @@
+
+Chapters 00-04
+PASS 00/derivation: weight=8.933333333, new_mse=5.309629630, gradient_error=0.000000002
+PASS 00/math-likelihood: gaussian_nll=1.418938533, ce=0.289909248
+PASS 00/math-reward: gradient=0.500000000, new_reward=1.049958375, gradient_error=0.000000000
+PASS 00/math-generalization: train_a=0.400000000, deploy_a=2.000000000
+PASS 01/math-matmul-backward: loss=2.500000000, gradient_error=0.000000000
+PASS 01/math-broadcast-backward: feature_gradient_error=0.000000000, position_gradient_error=0.000000000
+PASS 01/math-masked-mean: token_mean=3.200000000, sequence_mean=3.000000000
+PASS 01/math-einsum-layout: wrong_second=10.000000000, restored_second=1.000000000
+PASS 02/example: gradient=384.000000000, updated_weight=2.616000000
+PASS 02/derivation: mse=2.500000000
+PASS 02/math-quadratic: new_loss=3.090000000, lambda_max=3.618033989, gradient_error=0.000000000, hessian_error=0.000000000
+PASS 02/math-eigen: largest=3.000000000, smallest=1.000000000, determinant=3.000000000
+PASS 02/math-svd: rank_one_sse=4.000000000, least_squares_sse=25.000000000
+PASS 02/math-pca: explained_ratio=0.800000000, sse=2.000000000, mse=0.500000000
+PASS 02/math-ridge: weight=0.454545455, regularized_loss=0.227272727
+PASS 02/math-lasso: negative=-2.000000000, zero=0.000000000, positive=1.000000000, zero_objective=0.125000000, coordinate_update=1.000000000
+PASS 03/math-bayes: positive_rate=0.058500000, posterior=0.153846154
+PASS 03/math-moments: mean=2.000000000, moment_variance=0.666666667, unbiased_variance=1.000000000, total_variance=2.000000000
+PASS 03/math-mle-map: mle=0.666666667, map=0.600000000, posterior_mean=0.571428571, all_positive_map=0.800000000
+PASS 03/derivation: entropy=0.500402424, ce=0.591918645, kl=0.091516222, reverse_kl=0.104649629
+PASS 03/math-confidence: mean_lower=9.608000000, mean_upper=10.392000000, wilson_lower=0.722459831, wilson_upper=1.000000000
+PASS 03/math-importance-sampling: ordinary_mean=1.500000000, single_variance=2.250000000, single_snis_mean=1.000000000, ess=1.600000000
+PASS 04/math-logistic: initial_loss=0.693147181, updated_loss=0.687092476, gradient_error=0.000000000, hessian_error=0.000000000
+PASS 04/math-naive-bayes: spam_log_score=-1.280933845, normal_log_score=-3.583518938, spam_posterior=0.909090909
+PASS 04/math-knn: weighted_positive=0.545454545, raw_a=100.004999875, scaled_a=1.414213562, width_100d=0.977237221
+PASS 04/math-svm: alpha=0.500000000, weight=1.000000000, primal=0.500000000, dual=0.500000000
+PASS 04/math-tree: child_entropy=0.374890096, entropy_gain=0.318257084, gini_gain=0.250000000
+PASS 04/math-rf-gbdt: forest_variance=1.300000000, boost_loss=0.250000000
+PASS 04/math-adaboost: alpha=0.549306144, normalization=0.866025404, correct_weight=0.166666667, incorrect_weight=0.500000000
+PASS 04/math-xgboost: left_weight=-0.666666667, right_weight=0.666666667, gain=1.233333333, child_objective=0.866666667
+PASS 04/math-kmeans: old_sse=8.000000000, new_sse=4.000000000, first_center=1.000000000
+PASS 04/math-em: responsibility=0.880797078, right_mean=0.761594156, variance=0.419974342, old_log_likelihood=-2.970315405, new_log_likelihood=-2.439441155
+PASS 04/math-ranking: pair_loss=0.598138869, dcg=3.500000000, ndcg=0.963940433, reciprocal_rank=0.500000000, recall_at_2=0.500000000
+PASS 04/derivation: auc=0.733333333, fraud_f1=0.533333333, cost_threshold=0.100000000, positive_cost=0.800000000, negative_cost=1.800000000
+PASS 04/math-bias-variance: variable_model_risk=1.250000000, stable_model_risk=0.500000000
+
+All 35 section checks passed (standard library only).
+
+Chapters 05-12
+PASS 05 softmax row 0: 3 coordinates, max absolute error 3.494e-11
+PASS 05 softmax row 1: 3 coordinates, max absolute error 2.416e-11
+PASS 05 softmax row 2: 3 coordinates, max absolute error 2.416e-11
+PASS 05 softmax CE: 3 coordinates, max absolute error 1.172e-10
+PASS 05 full MLP: 14 coordinates, max absolute error 9.664e-11
+PASS 06 LN eps=0.0: 9 coordinates, max absolute error 1.166e-10
+PASS 06 LN eps=1e-05: 9 coordinates, max absolute error 1.110e-10
+PASS 10 RMSNorm eps=0.0: 9 coordinates, max absolute error 1.633e-10
+PASS 10 RMSNorm eps=1e-05: 9 coordinates, max absolute error 1.643e-10
+PASS 10 RMSNorm zero input: 6 coordinates, max absolute error 1.581e-05
+PASS 07 convolution overlap: 6 coordinates, max absolute error 4.361e-10
+PASS 07 RNN shared BPTT: 1 coordinates, max absolute error 1.398e-10
+PASS 07 LSTM direct cell: 1 coordinates, max absolute error 5.657e-12
+PASS 07 GRU fixed gates: 1 coordinates, max absolute error 9.378e-11
+PASS 08 temperature CE: 2 coordinates, max absolute error 1.576e-10
+PASS 09 attention worked Q/K/V: 10 coordinates, max absolute error 3.742e-10
+PASS 09 masked rectangular attention: 19 coordinates, max absolute error 2.105e-10
+PASS 10 MoE auxiliary fixed assignments: 4 coordinates, max absolute error 2.864e-12
+PASS 12 LoRA nonzero: 6 coordinates, max absolute error 7.484e-10
+PASS 12 LoRA B zero: 6 coordinates, max absolute error 4.936e-10
+PASS 12 LoRA A and B zero: 6 coordinates, max absolute error 5.751e-11
+PASS 129 checks; 130 finite-difference coordinates; chapters 05-12.
+
+Chapters 13-19
+test_13_bellman_matrix_contraction_control (__main__.CurriculumMath) ... ok
+test_13_terminal_and_discount_boundaries (__main__.CurriculumMath) ... ok
+test_14_dqn_double_dueling_huber (__main__.CurriculumMath) ... ok
+test_15_baseline_optimum_and_counterexample (__main__.CurriculumMath) ... ok
+test_15_gae_telescope_and_truncation (__main__.CurriculumMath) ... ok
+test_15_score_function_causality_discount (__main__.CurriculumMath) ... ok
+test_16_kl_estimators_values_and_gradients (__main__.CurriculumMath) ... ok
+test_16_ppo_four_cases_finite_difference (__main__.CurriculumMath) ... ok
+test_16_reward_model_and_trpo (__main__.CurriculumMath) ... ok
+test_17_aggregation_sampling_and_length_penalty (__main__.CurriculumMath) ... ok
+test_17_group_advantages_rloo_and_finite_group_bias (__main__.CurriculumMath) ... ok
+test_18_dpo_lagrangian_and_gradient (__main__.CurriculumMath) ... ok
+test_18_ipo_simpo_orpo_kto (__main__.CurriculumMath) ... ok
+test_19_kl_logit_gradients_and_temperatures (__main__.CurriculumMath) ... ok
+test_19_local_versus_trajectory_gradient (__main__.CurriculumMath) ... ok
+test_19_privileged_forward_kl_decomposition (__main__.CurriculumMath) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.001s
+
+OK
+13 Bellman: v=[8/3,10/3]; improved v=[3,3.5]; residual bound PASS
+14 Double targets: DQN=5.5, Double=2.8; Huber loss=2.1, derivative=-1
+15 baseline: b*=0.2; variances b=0/0.2/0.8 -> 0.0064/0/0.0576
+15 GAE: delta=[0.07,0.15,0.5], A=[0.4372,0.51,0.5]; lambda=1 telescope PASS
+16 PPO four-case values=[2.4,-2.6,1.4,-1.6], d/dlogp=[0,-2.6,1.4,0]
+16 RM: loss=0.313261688, gradients=+/-0.268941421; TRPO quadratic KL=0.01
+17 aggregation: sequence=0, token=-0.6, fixed=-0.3; keep probability=0.875
+17 exact enumeration: centered gradient=0.1575, RLOO=0.21; zero groups PASS
+18 DPO: loss=0.653946967, log-prob gradients=+/-0.048001066; logit checks PASS
+18 family: IPO=0.04, SimPO=0.513015252, ORPO=0.948136105, KTO=0.5
+19 KL: forward=0.373386045, reverse=0.404978015; temperature checks PASS
+19 trajectory counterexample: exact d/dh=log(3)/8=0.137326536, fixed-prefix=0
+19 privileged hidden-coin lower bound=log(2); forward-KL decomposition PASS
+
+Chapters 20-24
+test_20_gae_and_diagnostics (__main__.MathChecks) ... ok
+test_20_gspo_and_units (__main__.MathChecks) ... ok
+test_20_policy_derivatives (__main__.MathChecks) ... ok
+test_21_combinatorial_estimator_exhaustive (__main__.MathChecks) ... ok
+test_21_dynamic_selection (__main__.MathChecks) ... ok
+test_21_weight_and_verifier (__main__.MathChecks) ... ok
+test_22_budget (__main__.MathChecks) ... ok
+test_22_distillation (__main__.MathChecks) ... ok
+test_22_domain_loss_and_gradient (__main__.MathChecks) ... ok
+test_23_critical_path_and_reuse (__main__.MathChecks) ... ok
+test_23_opd_gradient_and_clipping_bias (__main__.MathChecks) ... ok
+test_23_ratio_and_support (__main__.MathChecks) ... ok
+test_24_dpo_gradient (__main__.MathChecks) ... ok
+test_24_holm_and_budget (__main__.MathChecks) ... ok
+test_24_paired_inference (__main__.MathChecks) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.006s
+
+OK
+
+Chapters 25-29
+test_belief_bayes_and_zero_evidence (__main__.Chapter25) ... ok
+test_masked_likelihood_and_finite_difference (__main__.Chapter25) ... ok
+test_smdp_time_and_truncation (__main__.Chapter25) ... ok
+test_entropy_gradient_and_information (__main__.Chapter26) ... ok
+test_reward_noise_bias_variance_and_calibration (__main__.Chapter26) ... ok
+test_shaping_bootstrap_and_smdp (__main__.Chapter26) ... ok
+test_shaping_telescope_and_terminal_reversal (__main__.Chapter26) ... ok
+test_suffix_is_enumeration_clipping_and_support (__main__.Chapter26) ... ok
+test_episode_step_credit_and_singleton (__main__.Chapter27) ... ok
+test_exploration_coverage_and_zero_signal (__main__.Chapter27) ... ok
+test_optimal_baseline_gradient_variance (__main__.Chapter27) ... ok
+test_self_baseline_and_loo_exact_expectations (__main__.Chapter27) ... ok
+test_soft_neighbors_temperature_and_exclusion (__main__.Chapter27) ... ok
+test_detached_score_finite_difference (__main__.Chapter28) ... ok
+test_ess_scaling_freshness_and_valid_failure (__main__.Chapter28) ... ok
+test_prefix_counts_and_shared_gradient (__main__.Chapter28) ... ok
+test_queue_units_capacity_and_selection (__main__.Chapter28) ... ok
+test_two_ratios_and_ppo_boundaries (__main__.Chapter28) ... ok
+test_aggregation_paired_interval_and_mcnemar (__main__.Chapter29) ... ok
+test_end_to_end_training_loss (__main__.Chapter29) ... ok
+test_lagrange_gradients_and_hard_budget_counterexample (__main__.Chapter29) ... ok
+test_wilson_cost_and_holm_boundaries (__main__.Chapter29) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.001s
+
+OK
+
+All five numerical validation suites passed.

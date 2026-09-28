@@ -2,21 +2,42 @@ const chapter = {
   id: "02",
   slug: "linear-algebra-calculus",
   part: "数学与机器学习地基",
-  title: "线性代数与微积分",
-  subtitle: "把方向、变化率和链式法则连起来",
+  title: "线性代数、矩阵求导与线性模型",
+  subtitle: "从梯度和谱分解推到 PCA、岭回归与 Lasso",
   level: "入门",
-  duration: 80,
+  duration: 210,
   prerequisites: ["01"],
-  tags: ["向量", "矩阵", "导数", "梯度", "链式法则"],
+  tags: ["矩阵求导", "Hessian", "特征值", "SVD", "PCA", "最小二乘", "岭回归", "Lasso", "L1/L2"],
   objectives: [
-    "用几何语言解释向量、点积和矩阵变换",
-    "理解导数、偏导数和梯度分别描述什么",
-    "逐步计算一个两层表达式的链式法则",
-    "解释梯度下降为什么沿负梯度更新",
+    "用下标和微分两种方法推导矩阵梯度并检查维度",
+    "从二次型 Hessian 判断凸性、唯一解和梯度下降步长",
+    "解释特征分解与 SVD 的适用对象、秩和投影意义",
+    "从最大投影方差推导 PCA，并手算重建误差",
+    "推导最小二乘、岭回归与 Lasso，解释可逆条件、收缩和稀疏性",
   ],
   summary:
     "线性代数描述模型怎样变换表示，微积分描述参数变化怎样影响损失，反向传播则用链式法则把这种影响高效传回每一层。",
   sections: [
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线与面试要求",
+      body: String.raw`先修第 01 章矩阵乘法、广播反向和轴约简，至少能写出 $XW$ 的形状。先走原来的链式法则例子，再从标量微分读出向量梯度；有了二阶导数才能讨论曲率，有了特征值才能解释 PCA 和岭回归为什么稳定。
+
+本章依赖为矩阵求导 → 二次型/Hessian → 对称特征分解 → 一般矩阵 SVD → PCA 投影 → 最小二乘/岭回归 → L1/L2 与 Lasso。PCA 用数据的主要变化方向做压缩；岭回归还使用标签并缩小不稳定参数方向，Lasso 则需要用次梯度解释精确零系数，三者不能混为一谈。
+
+约 210 分钟含白板推导，初学者通常还需分日复习。面试最低要求是独立写出梯度与 Hessian、解释什么时候可以求逆、从中心化数据算主成分、用奇异矩阵反驳“正规方程总有逆”，并从次梯度推导软阈值。`,
+      links: [
+        { label: "矩阵微分与梯度", sectionId: "derivation", level: "必会" },
+        { label: "Hessian 与步长", sectionId: "math-quadratic", level: "推导" },
+        { label: "特征方向", sectionId: "math-eigen", level: "必会" },
+        { label: "SVD 与伪逆", sectionId: "math-svd", level: "推导" },
+        { label: "PCA 目标与重建", sectionId: "math-pca", level: "推导" },
+        { label: "最小二乘与岭回归", sectionId: "math-ridge", level: "必会" },
+        { label: "L1/L2 与软阈值", sectionId: "math-lasso", level: "推导" },
+        { label: "闭卷验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
     {
       id: "intuition",
       type: "intuition",
@@ -78,12 +99,12 @@ $$\frac{\partial L}{\partial w}
     {
       id: "derivation",
       type: "derivation",
-      title: "从点积到梯度下降",
+      title: "从点积、链式法则到矩阵微分",
       body: String.raw`两个 $n$ 维向量的点积为：
 
 $$x^\top w=\sum_{j=1}^{n}x_jw_j$$
 
-线性回归对第 $i$ 个样本的预测是 $\hat y_i=x_i^\top w+b$。使用均方误差：
+**定义维度。** 数据 $X\in\mathbb R^{N\times d}$ 每行是 $x_i^\top$，参数和梯度 $w,\nabla_wL\in\mathbb R^d$，标签 $y\in\mathbb R^N$，偏置 $b\in\mathbb R$，全一向量 $\mathbf1\in\mathbb R^N$。线性回归对第 $i$ 个样本的预测是 $\hat y_i=x_i^\top w+b$。使用均方误差：
 
 $$L(w)=\frac{1}{N}\sum_{i=1}^{N}(\hat y_i-y_i)^2$$
 
@@ -94,11 +115,164 @@ $$\frac{\partial L}{\partial w_j}
 
 把所有 $j$ 的偏导合成向量：
 
-$$\nabla_w L=\frac{2}{N}X^\top(Xw+b-y)$$
+$$\nabla_w L=\frac{2}{N}X^\top(Xw+b\mathbf1-y),\qquad
+\frac{\partial L}{\partial b}=\frac2N\mathbf1^\top(Xw+b\mathbf1-y).$$
+
+**微分法复核。** 令 $e=Xw+b\mathbf1-y$，$L=e^\top e/N$。利用乘积法则：
+
+$$dL=\frac1N[(de)^\top e+e^\top de]
+=\frac2N e^\top(X\,dw+\mathbf1\,db).$$
+
+按 $dL=(\nabla_wL)^\top dw+(\partial L/\partial b)\,db$ 读出同样的梯度。矩阵参数则用 Frobenius 内积 $dL=\operatorname{tr}((\nabla_WL)^\top dW)$ 定义梯度。以 $L=\tfrac12\|XW-Y\|_F^2$ 为例，令 $E=XW-Y$，则 $dL=\operatorname{tr}(E^\top X\,dW)$，得到 $\nabla_WL=X^\top E$，不是 $EX^\top$。
+
+**数字检查。** $X=[[1,2],[3,4]]$，$w=(2,-1)^\top$，$b=1$，$y=(0,1)^\top$。残差 $(1,2)^\top$，MSE 为 $5/2$。$2/N=1$，所以 $\nabla_wL=(7,10)^\top$、$\partial L/\partial b=3$。与第 01 章的数字相同，是因为这里 $N=2$ 恰好让 MSE 系数与那一节的半平方和一致；换 $N$ 后不可省略系数。
 
 梯度与参数 shape 相同。方向导数满足 $D_uL=\nabla L^\top u$；在单位向量中，选择 $u=\nabla L/\|\nabla L\|$ 时内积最大，因此梯度是最陡上升方向，负梯度就是最陡下降方向。
 
-更新式 $w\leftarrow w-\eta\nabla_wL$ 是局部方法，只保证当前附近下降。非凸神经网络里没有承诺一步走到全局最优，因此初始化、学习率和优化器都很重要。`,
+更新式 $w\leftarrow w-\eta\nabla_wL$ 是局部方法，一阶近似在梯度非零且足够小的步长下下降；任意给一个学习率并无下降保证。非凸神经网络里更没有承诺一步走到全局最优。追问链式法则时需补一句：多路径贡献相加，串联局部导数相乘，自动微分通常传播向量-Jacobian 乘积而不构造完整 Jacobian。`,
+    },
+    {
+      id: "math-quadratic",
+      type: "derivation",
+      title: "二次型与 Hessian：凸性和步长的可计算条件",
+      body: String.raw`**问题与符号。** $x,c\in\mathbb R^d$，常矩阵 $A\in\mathbb R^{d\times d}$，研究标量 $q(x)=\tfrac12x^\top Ax+c^\top x$。先不要默认 $A$ 对称：
+
+$$dq=\tfrac12[(dx)^\top Ax+x^\top A\,dx]+c^\top dx,\qquad
+\nabla q=\tfrac12(A+A^\top)x+c,\quad
+\nabla^2q=\tfrac12(A+A^\top).$$
+
+只有对称部分影响二次型；若 $A=A^\top$，梯度才简化为 $Ax+c$、Hessian 为 $A$。对任意方向 $v$，曲率是 $v^\top Av$。全部非负为半正定，对应凸二次函数；全部非零方向严格为正则正定，存在唯一极小点 $x^*=-A^{-1}c$。半正定但奇异时，可能多个最优点，也可能因线性项沿零空间下降而无下界。
+
+**手算。** $A=\begin{bmatrix}3&1\\1&2\end{bmatrix}$，$c=(-1,0)^\top$，$x=(1,2)^\top$。$Ax=(5,5)^\top$，$q=6.5$，$\nabla q=(4,5)^\top$。学习率 0.1 得 $x'=(0.6,1.5)^\top$，$q(x')=3.09$。
+
+**为什么步长有上限。** 对称正定矩阵可在正交特征基上写成 $A=Q\Lambda Q^\top$。误差 $e_t=x_t-x^*$ 的第 $j$ 个特征坐标按
+
+$$\tilde e_{t+1,j}=(1-\eta\lambda_j)\tilde e_{t,j}$$
+
+更新。因此所有方向收敛要求 $|1-\eta\lambda_j|<1$，即 $0<\eta<2/\lambda_{\max}$。上例特征值为 $(5\pm\sqrt5)/2$，$\lambda_{\max}\approx3.618034$，0.1 满足条件。条件数 $\kappa=\lambda_{\max}/\lambda_{\min}$ 大时不同方向收敛速度差异大。
+
+**追问。** 梯度为零不充分：$q(x_1,x_2)=x_1^2-x_2^2$ 在原点梯度零，但 Hessian 特征值为 $2,-2$，是鞍点。上述固定步长收敛结论属于正定二次函数，不能直接当成任意神经网络的全局保证。`,
+    },
+    {
+      id: "math-eigen",
+      type: "derivation",
+      title: "特征分解：不改变方向的变换与 Rayleigh 商",
+      body: String.raw`**目标。** 对方阵 $A\in\mathbb R^{d\times d}$，非零向量 $v$ 满足 $Av=\lambda v$ 时称为特征向量，$\lambda$ 是沿该方向的缩放系数。实对称矩阵具有正交特征基：
+
+$$A=Q\Lambda Q^\top,\quad Q^\top Q=I,\quad
+\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_d).$$
+
+不是任意实矩阵都有实特征值或足够多的特征向量。例如 $\begin{bmatrix}1&1\\0&1\end{bmatrix}$ 只有一维特征空间，不能写成完整特征基上的对角分解。
+
+**从约束最优化推特征向量。** 最大化单位方向上的二次型 $v^\top Av$，约束 $v^\top v=1$。拉格朗日函数为 $v^\top Av-\lambda(v^\top v-1)$；对对称 $A$ 求导得 $2Av-2\lambda v=0$。将 $v=Qz$ 代入，$v^\top Av=\sum_j\lambda_jz_j^2$ 且 $\sum_jz_j^2=1$，所以最大值为最大特征值。一般非零 $v$ 的比值 $v^\top Av/(v^\top v)$ 称 Rayleigh 商。
+
+**手算。** $A=[[2,1],[1,2]]$ 的特征方程为 $(2-\lambda)^2-1=0$，解得 $3,1$。对应单位向量 $v_1=(1,1)/\sqrt2$、$v_2=(1,-1)/\sqrt2$。沿 $v_1$ 二次型是 3，沿坐标轴 $(1,0)$ 是 2；迹 $4=3+1$，行列式 $3=3\cdot1$，可交叉核对。
+
+**追问。** 特征向量符号可翻转而不改结论；重根对应子空间中的正交基不唯一。协方差矩阵半正定所以特征值非负，但一般对称矩阵可以有负特征值，不能把“特征值”一律叫方差。`,
+    },
+    {
+      id: "math-svd",
+      type: "derivation",
+      title: "SVD：从任意矩阵到秩、伪逆与低秩近似",
+      body: String.raw`**问题与维度。** 对任意实矩阵 $X\in\mathbb R^{N\times d}$，秩为 $r$。紧致 SVD 为
+
+$$X=U_r\Sigma_rV_r^\top,\quad
+U_r\in\mathbb R^{N\times r},\quad V_r\in\mathbb R^{d\times r},\quad
+\Sigma_r=\operatorname{diag}(\sigma_1,\ldots,\sigma_r),\quad \sigma_j>0.$$
+
+$U_r,V_r$ 的列分别正交，$\sigma_1\ge\cdots\ge\sigma_r$。从 $X^\top X=V_r\Sigma_r^2V_r^\top$ 看出右奇异向量是输入空间的特征方向，非零特征值为 $\sigma_j^2$；$Xv_j=\sigma_ju_j$ 再定义对应输出方向。矩阵非方阵也能用 SVD，零奇异值对应零空间。
+
+**目标与结果。** 若只保留 $k<r$ 个方向，$X_k=\sum_{j=1}^k\sigma_ju_jv_j^\top$ 是 Frobenius 范数下最优秩不超过 $k$ 的近似，误差平方为 $\sum_{j>k}\sigma_j^2$。直觉来自正交分量的误差平方可加，保留最大的能量；奇异值相等时最优子空间边界可能不唯一。
+
+**手算与伪逆。** $X=\begin{bmatrix}3&0\\0&2\\0&0\end{bmatrix}$，$U_r$ 为前三维的前两个基向量，$V_r=I_2$，奇异值为 3、2。秩一近似只保留第一列方向，误差平方为 4。伪逆把非零缩放反过来：
+
+$$X^+=V_r\Sigma_r^{-1}U_r^\top
+=\begin{bmatrix}1/3&0&0\\0&1/2&0\end{bmatrix}.$$
+
+对标签 $y=(3,4,5)^\top$，最小二乘参数 $X^+y=(1,2)^\top$，预测 $(3,4,0)^\top$；最后一个分量不在列空间，最小残差平方为 25。
+
+**追问。** 矩形矩阵的伪逆不是普通逆，它给最小二乘的最小范数解；很小的奇异值反过来会放大噪声。实际计算应使用数值库的 SVD/QR 求解，避免显式构造 $X^\top X$ 后求逆，因为满列秩时 $\kappa(X^\top X)=\kappa(X)^2$。`,
+    },
+    {
+      id: "math-pca",
+      type: "derivation",
+      title: "PCA：最大方差等价于最小正交重建误差",
+      body: String.raw`**问题与假设。** 数据 $X\in\mathbb R^{N\times d}$ 每行一个样本。先仅用训练集估计均值 $\mu=(1/N)\sum_ix_i$ 并中心化为 $X_c$。本节用总体式协方差 $C=X_c^\top X_c/N$；用无偏样本协方差时分母改为 $N-1$，方向及解释方差比例不变。
+
+一维投影 $z=X_cv\in\mathbb R^N$，$v^\top v=1$。中心化后投影均值为零，所以
+
+$$\operatorname{Var}(z)=\frac1N\|X_cv\|^2=v^\top Cv.$$
+
+上一节 Rayleigh 商的推导给出最大特征值对应向量。取 $k$ 个正交方向 $V_k\in\mathbb R^{d\times k}$，低维表示 $Z=X_cV_k$，重建为 $\hat X=ZV_k^\top+\mathbf1\mu^\top$。由正交投影：
+
+$$\|X_c-X_cV_kV_k^\top\|_F^2
+=\|X_c\|_F^2-\operatorname{tr}(V_k^\top X_c^\top X_cV_k)
+=N\sum_{j>k}\lambda_j.$$
+
+总能量固定，因此最大保留方差等价于最小重建平方误差。由 SVD 可直接取 $X_c$ 的前 $k$ 个右奇异向量，$\lambda_j=\sigma_j^2/N$。
+
+**完整手算。** 四个样本 $(2,0),(-2,0),(0,1),(0,-1)$ 均值为零。$C=\operatorname{diag}(2,0.5)$，特征方向是坐标轴，第一主成分 $v_1=(1,0)^\top$，解释方差比为 $2/(2+0.5)=0.8$。投影为 $(2,-2,0,0)^\top$，重建丢掉后两点的第二维，残差平方总和为 $1+1=2$，每样本为 0.5；SVD 奇异值为 $\sqrt8,\sqrt2$，也给出丢弃能量 2。
+
+**面试追问。** 不中心化会让均值方向影响结果；量纲不同应根据任务选择标准化，否则高方差大单位特征占优。若此例分别标准化至单位方差，协方差变为单位阵，主方向不再唯一。PCA 不看标签，所以最大方差不保证最好分类；验证/测试集必须使用训练得到的均值、尺度和投影，防止泄漏。`,
+    },
+    {
+      id: "math-ridge",
+      type: "derivation",
+      title: "最小二乘与岭回归：正规方程、奇异性和收缩",
+      body: String.raw`**目标与约定。** $X\in\mathbb R^{N\times d}$，$y\in\mathbb R^N$，$w\in\mathbb R^d$。本节假设已中心化或不使用截距，采用半平方和而非均值：
+
+$$L_{\rm LS}(w)=\tfrac12\|Xw-y\|^2,\qquad
+\nabla L_{\rm LS}=X^\top(Xw-y),\quad
+\nabla^2L_{\rm LS}=X^\top X.$$
+
+设梯度为零得到正规方程 $X^\top Xw=X^\top y$。对任意 $v$，$v^\top X^\top Xv=\|Xv\|^2$，所以总是半正定；仅当 $X$ 满列秩时正定、可逆，唯一解是 $(X^\top X)^{-1}X^\top y$。秩不足时最小二乘仍有解但参数不唯一，SVD 伪逆 $X^+y$ 选最小范数解。
+
+**加入岭惩罚并推导。** $\lambda>0$，
+
+$$L_{\rm ridge}=\tfrac12\|Xw-y\|^2+\tfrac\lambda2\|w\|^2,\quad
+\nabla L=X^\top(Xw-y)+\lambda w,\quad
+w_\lambda=(X^\top X+\lambda I)^{-1}X^\top y.$$
+
+因为 $v^\top(X^\top X+\lambda I)v=\|Xv\|^2+\lambda\|v\|^2>0$，所有参数均惩罚时即使秩不足也有唯一解。紧致 SVD 下：
+
+$$w_\lambda=V_r\operatorname{diag}\left(\frac{\sigma_j}{\sigma_j^2+\lambda}\right)U_r^\top y.$$
+
+相比伪逆的 $1/\sigma_j$，岭回归压低小奇异方向的放大。若损失改为 $\|Xw-y\|^2/(2N)+\lambda\|w\|^2/2$，正规方程中的正则量变为 $N\lambda I$，不能沿用同一个数值公式。
+
+**奇异算例。** $X=[[1,1],[2,2]]$，$y=(1,2)^\top$，$X^\top X=[[5,5],[5,5]]$。所有满足 $w_1+w_2=1$ 的参数都有零训练误差，最小范数解为 $(1/2,1/2)$。取 $\lambda=1$，线性系统为
+
+$$\begin{bmatrix}6&5\\5&6\end{bmatrix}w=\begin{bmatrix}5\\5\end{bmatrix}
+\Rightarrow w=(5/11,5/11)^\top.$$
+
+新 Hessian 特征值为 11 和 1，预测为 $(10/11,20/11)$，残差平方为 $5/121$，正则目标为 $5/22\approx0.227273$。偏差增大但不稳定性降低，测试收益必须验证。
+
+**追问。** 截距通常不惩罚，可先中心化或使用对角惩罚矩阵 $\operatorname{diag}(0,1,\ldots,1)$；此时唯一性条件是设计矩阵零空间与惩罚零空间仅交于零，不能直接照搬 $\lambda I$ 的证明。特征尺度影响惩罚，应在训练集上拟合标准化。求解线性系统优于手写逆矩阵。`,
+    },
+    {
+      id: "math-lasso",
+      type: "derivation",
+      title: "L1/L2 几何与 Lasso：从次梯度到软阈值",
+      body: String.raw`**问题与几何。** 对参数 $w\in\mathbb R^d$，L1 范数为 $\|w\|_1=\sum_j|w_j|$，L2 范数平方为 $\|w\|_2^2=\sum_jw_j^2$。将平方拟合误差限制在 $\|w\|_1\le t$ 或 $\|w\|_2\le t$ 的可行域内，二维边界分别是有坐标轴尖角的菱形和光滑圆。损失等高线与 L1 尖角相切时会出现零坐标；L2 边界通常连续缩小所有坐标。几何提供直觉，但“L1 一定使所有解稀疏”不是无条件定理。
+
+**一维完整推导。** 把单个参数的拟合目标写成
+
+$$F(w)=\tfrac12(w-z)^2+\lambda|w|,\qquad z\in\mathbb R,\ \lambda\ge0.$$
+
+$z$ 可看作不加正则时的估计。绝对值在零点不可导，但次梯度为：$w>0$ 时 1，$w<0$ 时 -1，$w=0$ 时整个区间 $[-1,1]$。凸目标的最优条件是
+
+$$0\in w-z+\lambda\,\partial|w|.$$
+
+若 $w>0$，则 $w=z-\lambda$，要求 $z>\lambda$；若 $w<0$，则 $w=z+\lambda$，要求 $z<-\lambda$；若 $w=0$，需 $z\in[-\lambda,\lambda]$。合并得唯一解
+
+$$w^*=S_\lambda(z)=\operatorname{sign}(z)\max(|z|-\lambda,0).$$
+
+相同拟合项加 L2 惩罚 $\lambda w^2/2$，普通导数给 $(w-z)+\lambda w=0$，所以 $w_{\rm ridge}=z/(1+\lambda)$。L2 对非零 $z$、有限 $\lambda$ 不会精确变零，L1 则存在整段零解区域。
+
+**手算和目标复核。** $\lambda=1$，三个独立的一维目标对应 $z=(-3,0.5,2)$，Lasso 解为 $(-2,0,1)$，ridge 解为 $(-1.5,0.25,1)$。对 $z=0.5$，零解的目标为 $0.5(0-0.5)^2=0.125$，且 $0\in-0.5+[-1,1]$；对 $z=-3$，$w=-2$ 的目标为 $0.5+2=2.5$，零解却为 4.5。不能在不可导点机械令普通导数为零。
+
+**一般设计矩阵的坐标下降。** 对 $L=\|Xw-y\|^2/(2N)+\lambda\|w\|_1$，固定其他坐标，令残差 $r_j=y-\sum_{k\ne j}X_{:,k}w_k$、$a_j=\|X_{:,j}\|^2/N>0$、$c_j=X_{:,j}^\top r_j/N$。与 $w_j$ 有关的目标是 $a_jw_j^2/2-c_jw_j+\lambda|w_j|$，同样推导得 $w_j=S_\lambda(c_j)/a_j$。
+
+**追问。** 只有正交设计等特殊情形才能把多维解直接按无正则系数逐个软阈值；相关特征要迭代，Lasso 的系数还可能不唯一。标准化改变惩罚的相对强弱，需在训练集拟合尺度；截距通常不惩罚。Elastic Net 同时加入 L1 和 L2，以保留稀疏性并改善相关方向的稳定性。`,
     },
     {
       id: "code",
@@ -188,6 +362,34 @@ print(loss, d_loss_d_w, w)
         {
           q: "两个没有激活函数的线性层为什么等价于一个线性层？",
           a: "W₂(W₁x+b₁)+b₂ 可整理为 (W₂W₁)x+(W₂b₁+b₂)，仍是一次线性或仿射变换。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：梯度、谱分解与可逆条件",
+      body: "必须说明矩阵维度和损失归一化。推导、手算和边界各至少独立完成一次。",
+      questions: [
+        {
+          q: "q(x)=0.5*x^T*A*x+c^T*x，A=[[3,1],[1,2]]，c=(-1,0)，x=(1,2)。求梯度、Hessian 和学习率 0.1 的一步结果；一般 A 不对称时怎样改？",
+          a: String.raw`微分二次项为 $\tfrac12[(dx)^\top Ax+x^\top A\,dx]$，故一般梯度为 $(A+A^\top)x/2+c$，Hessian 为 $(A+A^\top)/2$。题中对称，$Ax+c=(4,5)^\top$，Hessian 为 $A$。更新到 $(0.6,1.5)$，目标从 6.5 降到 3.09。特征值 $(5\pm\sqrt5)/2$ 均正，且 $0.1<2/\lambda_{\max}$。**得分点**：对称条件、梯度维度、曲率及步长条件，不能用“梯度零”代替最小值证明。`,
+        },
+        {
+          q: "中心化数据为 (2,0)、(-2,0)、(0,1)、(0,-1)。推导一维 PCA 方向、解释方差比和重建误差，并连接 SVD。",
+          a: String.raw`计算 $C=X^\top X/4=\operatorname{diag}(2,0.5)$。最大化 $v^\top Cv$ 且 $\|v\|=1$，拉格朗日条件给出 $Cv=\lambda v$，选 $(1,0)$。解释方差比为 $2/2.5=0.8$。投影是 $(2,-2,0,0)$，重建残差平方为 2、每样本为 0.5。由 $X^\top X$ 特征值 8、2 得奇异值 $\sqrt8,\sqrt2$，丢弃能量也是 2。**得分点**：中心化、约束推导、分母口径、SVD 与误差一致。`,
+        },
+        {
+          q: "X=[[1,1],[2,2]]，y=(1,2)，求全部最小二乘解、最小范数解及 lambda=1 的岭解。目标采用半平方和加 lambda/2 范数平方。",
+          a: String.raw`预测为 $(w_1+w_2,2(w_1+w_2))$，所以零残差要求 $w_1+w_2=1$，解不唯一，$X^\top X$ 的行列式为零。固定和时 $w_1^2+w_2^2$ 在二者相等处最小，得 $(1/2,1/2)$。岭梯度设零后得到 $6w_1+5w_2=5$、$5w_1+6w_2=5$，相减得二者相等，故均为 $5/11$。Hessian 特征值 11、1 保证唯一。**得分点**：区分有解与可逆、最小范数选择、正则尺度、唯一性的谱或二次型证明。`,
+        },
+        {
+          q: "X=[[3,0],[0,2],[0,0]]，y=(3,4,5)。用 SVD 写伪逆和最小二乘结果；为什么残差不能为零？",
+          a: String.raw`非零奇异值是 3、2，输入方向为两个坐标轴，输出方向为三维前两个坐标轴。伪逆为 $[[1/3,0,0],[0,1/2,0]]$，乘 $y$ 得 $(1,2)$，预测 $(3,4,0)$。第三坐标不在 $X$ 的列空间，残差 $(0,0,-5)$ 的平方范数为 25。**得分点**：矩形维度、只反转非零奇异值、正交投影和不可表示分量。`,
+        },
+        {
+          q: "从次梯度推导 0.5*(w-z)^2+lambda*|w| 的最优解。lambda=1、z=-3/0.5/2 时分别是多少？与 L2 比较。",
+          a: String.raw`最优条件为 $0\in w-z+\lambda\partial|w|$。正半轴得 $w=z-\lambda>0$，负半轴得 $w=z+\lambda<0$，零点可行条件为 $|z|\le\lambda$，故解为 $\operatorname{sign}(z)\max(|z|-\lambda,0)$。三个答案是 -2、0、1。L2 使用 $\lambda w^2/2$ 时导数为 $(1+\lambda)w-z$，答案为 -1.5、0.25、1。**得分点**：检查分支符号、零点区间次梯度、损失尺度、用菱形尖角与光滑圆解释精确零和连续收缩的区别。`,
         },
       ],
     },

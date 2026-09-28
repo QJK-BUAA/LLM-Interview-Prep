@@ -18,6 +18,19 @@ const chapter = {
     "强化学习研究动作如何改变未来数据与回报；MDP 给出环境规则，策略产生轨迹，价值函数把未来回报压缩到当前状态或动作，贝尔曼方程则用一步转移连接现在与未来。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：从回报定义到收敛与控制",
+      body: String.raw`先修第 02、03 章的线性方程、条件期望和无穷级数。本章按“轨迹回报 → 条件价值 → Bellman 算子 → 固定点 → 策略改进”学习。面试必须说清：评估的是哪个策略、奖励在什么时候发生、终止边界是什么。先手算两状态矩阵，再证明收缩，最后比较 policy iteration 与 value iteration；不能用“迭代直到收敛”代替收敛条件。`,
+      links: [
+        { label: "回报与条件期望", sectionId: "derivation", level: "必会" },
+        { label: "Bellman 矩阵解", sectionId: "math-bellman-matrix", level: "推导" },
+        { label: "收缩与策略改进", sectionId: "math-contraction-control", level: "推导" },
+        { label: "终止与截断边界", sectionId: "math-terminal-discount", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：当前动作会改变下一道题",
@@ -107,7 +120,93 @@ p(s',r|s,a)\left[r+\gamma V^\pi(s')\right]$$
 $$V^*(s)=\max_a\sum_{s',r}
 p(s',r|s,a)\left[r+\gamma V^*(s')\right]$$
 
-贝尔曼“最优方程”带 max，贝尔曼“期望方程”按策略概率平均。把二者混用，会把策略评估误写成控制问题。`,
+贝尔曼“最优方程”带 max，贝尔曼“期望方程”按策略概率平均。把二者混用，会把策略评估误写成控制问题。
+
+为什么可以把下一步回报换成 $V^\pi(s')$？先在给定 $(s,a,s',r)$ 下取未来条件期望，再对一步转移求平均。马尔可夫状态与后续固定策略保证未来只需条件在 $s'$ 上；这一步是全期望公式，不是假设奖励与下一状态独立。
+
+同样得到动作价值递推和优势的中心化性质：
+
+$$Q^\pi(s,a)=\sum_{s',r}p(s',r|s,a)
+\left[r+\gamma\sum_{a'}\pi(a'|s')Q^\pi(s',a')\right]$$
+
+$$V^\pi(s)=\sum_a\pi(a|s)Q^\pi(s,a),\qquad
+\sum_a\pi(a|s)A^\pi(s,a)=0$$
+
+若两个动作 $Q=[6,2]$、策略概率 $[1/4,3/4]$，则 $V=3$、$A=[3,-1]$，加权优势为 $3/4-3/4=0$。这里平均的是策略动作分布，不是动作的均匀平均。`,
+    },
+    {
+      id: "math-bellman-matrix",
+      type: "derivation",
+      title: "Bellman 矩阵解：逆矩阵为什么存在",
+      body: String.raw`考虑有限 $n$ 个状态的固定策略。列向量 $v_\pi,r_\pi\in\mathbb R^n$，矩阵 $P_\pi\in\mathbb R^{n\times n}$ 的第 $i,j$ 项为从状态 $i$ 转移到 $j$ 的概率：
+
+$$P_\pi(i,j)=\sum_a\pi(a|i)P(j|i,a),\qquad
+r_\pi(i)=\sum_a\pi(a|i)\mathbb E[r_{t+1}|i,a]$$
+
+逐状态 Bellman 方程堆叠后是：
+
+$$v_\pi=r_\pi+\gamma P_\pi v_\pi,\quad
+(I-\gamma P_\pi)v_\pi=r_\pi,\quad
+v_\pi=(I-\gamma P_\pi)^{-1}r_\pi$$
+
+不能只写最后一行。若 $0\leq\gamma<1$，随机矩阵满足 $\|P_\pi\|_\infty=1$，故 $\rho(\gamma P_\pi)\leq\gamma<1$。Neumann 级数给出：
+
+$$ (I-\gamma P_\pi)^{-1}
+=\sum_{k=0}^{\infty}\gamma^kP_\pi^k,\qquad
+v_\pi=\sum_{k=0}^{\infty}\gamma^kP_\pi^kr_\pi$$
+
+第 $k$ 项恰好是走 $k$ 步后的预期奖励，这把线性代数解与回报定义接起来。实际求解通常解线性方程而不显式构造逆矩阵。
+
+**教学手算。** 两状态交替，$P_\pi=\begin{bmatrix}0&1\\1&0\end{bmatrix}$，$r_\pi=[1,2]^\top$，$\gamma=1/2$：
+
+$$v_1=1+\tfrac12v_2,\quad v_2=2+\tfrac12v_1
+\ \Longrightarrow\ v_1=\tfrac{8}{3},\quad v_2=\tfrac{10}{3}$$
+
+从零做同步备份依次为 $[1,2]$、$[2,2.5]$、$[2.25,3]$，逼近矩阵解。若奖励有界 $|r|\leq R_{\max}$，还有 $\|v\|_\infty\leq R_{\max}/(1-\gamma)$。追问：$\gamma$ 接近 1 时有效时间尺度增长，价值尺度和求解敏感性也会变大，不能只说“更重视未来”。`,
+    },
+    {
+      id: "math-contraction-control",
+      type: "derivation",
+      title: "收缩证明、误差界与两种动态规划",
+      body: String.raw`定义 $T^\pi v=r_\pi+\gamma P_\pi v$。对任意两个价值向量 $u,v$：
+
+$$\|T^\pi u-T^\pi v\|_\infty
+=\gamma\|P_\pi(u-v)\|_\infty
+\leq\gamma\|u-v\|_\infty$$
+
+因为每行是概率加权平均，其绝对值不超过最大分量。$\gamma<1$ 时它是收缩，固定点唯一，且 $\|v_k-v_\pi\|_\infty\leq\gamma^k\|v_0-v_\pi\|_\infty$。还可用可观测的 Bellman residual 认证误差：
+
+$$\|v-v_\pi\|_\infty
+\leq\|v-T^\pi v\|_\infty+\gamma\|v-v_\pi\|_\infty$$
+$$\Longrightarrow\quad
+(1-\gamma)\|v-v_\pi\|_\infty\leq\|v-T^\pi v\|_\infty$$
+
+移项再除以正数 $1-\gamma$，得到 $\|v-v_\pi\|_\infty\leq\|v-T^\pi v\|_\infty/(1-\gamma)$，不是只看相邻值变化小就无条件宣告准确。
+
+最优算子 $T^*v(s)=\max_a\{r(s,a)+\gamma P_av\}$ 同样收缩：先用 $|\max_a f_a-\max_a g_a|\leq\max_a|f_a-g_a|$，再用概率平均界。
+
+**Policy iteration。** 精确评估 $\pi_k$ 得到 $v_k$，令 $\pi_{k+1}$ 对 $r+\gamma Pv_k$ 贪心。于是 $T^{\pi_{k+1}}v_k=T^*v_k\geq v_k$；算子单调，反复应用并取极限，得到 $v_{\pi_{k+1}}\geq v_k$。有限状态动作、精确评估、平局时保留原动作可避免无意义循环，最终到达最优策略。
+
+**Value iteration。** 不等评估完成，直接 $v_{k+1}=T^*v_k$，由收缩趋于 $v^*$。教学例中只在状态 1 加“奖励 2 后终止”的动作：原交替策略的继续价值 $8/3>2$，贪心仍选择继续；如果终止奖励改为 3，则改选终止，新的 $v=[3,3.5]$。
+
+以上证明用于已知模型的精确 tabular backup；采样误差、非线性函数近似和 off-policy 更新并不自动继承它。`,
+    },
+    {
+      id: "math-terminal-discount",
+      type: "derivation",
+      title: "终止、时间截断与 gamma 等于 1 的边界",
+      body: String.raw`真正终止后未来奖励为零，令终止状态价值为 0。有限时域任务要把剩余时间加入状态，或写时间相关价值：
+
+$$V_t^\pi(s)=\mathbb E[r_{t+1}+\gamma V_{t+1}^\pi(s')|s],
+\qquad V_T^\pi=0$$
+
+这里即使 $\gamma=1$ 也能从 $T$ 倒推，因为只累加有限项。无限持续任务则不同：单状态自环每步奖励 1，$\gamma=1$ 时 $v=1+v$ 没有有限解；每步奖励 0 时 $v=v$ 又不唯一。
+
+对会吸收的 episodic 链，只取非终止状态的转移子矩阵 $Q$。若终止机制保证 $\rho(Q)<1$，则在 $\gamma=1$ 时仍有 $v=(I-Q)^{-1}r$；有限状态下合适的吸收条件可保证有限期望长度。不能仅因接口返回 done 就认定满足这些条件。
+
+**两种 mask。** 令 $d_t$ 表示真正终止，$c_t$ 表示当前采样片段结束。TD target 用 $r_{t+1}+\gamma(1-d_t)V(s_{t+1})$；优势递推跨片段时还要切断连接，不能串到另一 episode。纯采集时间上限 $c_t=1,d_t=0$ 时保留末状态 bootstrap；如果时间上限就是任务定义的结束，则应建模为真正终止。
+
+教学例：$r=2,\gamma=0.9,V(s')=5$，真正终止 target=2，非终止采集截断 target=6.5。错误清零少算 4.5。还要使用 reset 前的 final observation，而不是下一局的初始观测。`,
     },
     {
       id: "code",
@@ -209,6 +308,26 @@ model-free 表示不显式学习或使用转移模型来规划，不代表环境
         {
           q: "时间限制导致 episode 停止时，为什么不能总把下一状态价值设为零？",
           a: "时间截断不代表环境真正终止，未来回报仍可能存在；错误清零会产生向下偏差，应区分 terminated 与 truncated。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：Bellman 解、收缩与边界",
+      body: "先写条件和维度，再计算；答案中的得分点用于闭卷自评。",
+      questions: [
+        {
+          q: "两状态交替，奖励 [1,2]、折扣 0.5。写出矩阵方程并求价值。",
+          a: String.raw`$P=\begin{bmatrix}0&1\\1&0\end{bmatrix}$，$(I-0.5P)v=[1,2]^\top$。消元得 $v_1=1+0.5(2+0.5v_1)$，即 $0.75v_1=2$，故 $v=[8/3,10/3]^\top$。**得分点：**行表示起始状态；即时奖励不额外折扣；解释 $\rho(0.5P)<1$ 保证唯一解。`,
+        },
+        {
+          q: "证明固定策略 Bellman 算子收缩。γ=0.9、residual 的无穷范数为 0.02 时，价值误差上界是多少？",
+          a: String.raw`概率行的加权平均满足 $\|P(u-v)\|_\infty\leq\|u-v\|_\infty$，故收缩系数为 $\gamma$。对固定点用三角不等式得 $(1-\gamma)\|v-v_\pi\|_\infty\leq\|v-T^\pi v\|_\infty$，误差上界 $0.02/0.1=0.2$。**得分点：**指出固定点与 residual；必须除以 $1-\gamma$；不把神经 TD 的收敛当此定理结论。`,
+        },
+        {
+          q: "为什么 γ=1 不一定有唯一有限价值？给反例并说明截断该如何 bootstrap。",
+          a: String.raw`无限自环每步奖 1，回报发散且 $v=1+v$ 无解；每步奖 0 时方程有无穷多解。有限时域给 $V_T=0$ 可倒推，吸收链在 $\rho(Q)<1$ 时也可解。采集截断不是终止：$r=2,\gamma=0.9,V'=5$ 的 target 为 6.5，而真正终止是 2。**得分点：**反例；区分时域条件；区分 terminated、truncated 和 reset 前观测。`,
         },
       ],
     },

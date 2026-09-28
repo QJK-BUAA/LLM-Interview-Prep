@@ -19,11 +19,18 @@ function makeCompleteChapter() {
     tags: ["路线"],
     objectives: ["解释机器学习主线"],
     summary: "从任务、数据、目标函数和优化理解机器学习。",
-    sections: REQUIRED_SECTION_TYPES.map((type) => ({
+    sections: [...REQUIRED_SECTION_TYPES.map((type) => ({
       id: type,
       type,
       title: type,
       body: "足够完整的教学正文。",
+      ...(type === "roadmap"
+        ? { links: [
+            { label: "核心定义", sectionId: "derivation", level: "必会" },
+            { label: "动手计算", sectionId: "example", level: "推导" },
+            { label: "自测", sectionId: "quiz", level: "进阶" },
+          ] }
+        : {}),
       ...(type === "diagram"
         ? {
             diagram: {
@@ -42,7 +49,16 @@ function makeCompleteChapter() {
             ],
           }
         : {}),
-    })),
+    })), {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习",
+      body: "写出步骤，再核对得分点。",
+      questions: [1, 2, 3].map(number => ({
+        q: `推导问题 ${number}`,
+        a: "定义变量，展开目标，计算导数。得分点：假设与中间步骤。",
+      })),
+    }],
     sources: [
       {
         label: "教材",
@@ -89,4 +105,23 @@ test("rejects incomplete metadata and non-http sources", () => {
   const errors = validateChapter(chapter);
   assert.ok(errors.some((error) => error.includes("objectives")));
   assert.ok(errors.some((error) => error.includes("source URL")));
+});
+
+test("rejects broken learning paths but allows multiple independent derivations", () => {
+  const chapter = makeCompleteChapter();
+  chapter.sections.push({
+    id: "math-gradient", type: "derivation", title: "求导", body: "完整推导。",
+  });
+  assert.deepEqual(validateChapter(chapter), []);
+  chapter.sections[0].links[0].sectionId = "missing-math";
+  assert.ok(validateChapter(chapter).some(error => error.includes("invalid roadmap link")));
+});
+
+test("rejects missing whiteboard exercises and answers without scoring points", () => {
+  const chapter = makeCompleteChapter();
+  const whiteboard = chapter.sections.find(section => section.id === "whiteboard");
+  whiteboard.questions[0].a = "只有一个结论，没有推导要求。";
+  assert.ok(validateChapter(chapter).some(error => error.includes("得分点")));
+  chapter.sections = chapter.sections.filter(section => section.id !== "whiteboard");
+  assert.ok(validateChapter(chapter).some(error => error.includes("whiteboard")));
 });

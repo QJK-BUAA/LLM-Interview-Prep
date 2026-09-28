@@ -1,4 +1,5 @@
 export const REQUIRED_SECTION_TYPES = Object.freeze([
+  "roadmap",
   "intuition",
   "example",
   "diagram",
@@ -9,6 +10,19 @@ export const REQUIRED_SECTION_TYPES = Object.freeze([
   "interview",
   "quiz",
 ]);
+
+export const SECTION_LABELS = Object.freeze({
+  roadmap: "路线",
+  intuition: "直觉",
+  example: "手算",
+  diagram: "机制",
+  derivation: "推导",
+  code: "代码",
+  pitfall: "误区",
+  comparison: "对比",
+  interview: "面试",
+  quiz: "练习",
+});
 
 const REQUIRED_TEXT_FIELDS = [
   "id",
@@ -158,6 +172,30 @@ export function validateChapter(chapter) {
   for (const type of REQUIRED_SECTION_TYPES) {
     if (!types.has(type)) {
       errors.push(`missing required section type: ${type}`);
+    }
+  }
+
+  const whiteboard = chapter.sections.find(section => section?.id === "whiteboard");
+  if (whiteboard?.type !== "quiz" ||
+      !Array.isArray(whiteboard.questions) || whiteboard.questions.length < 3 ||
+      !whiteboard.questions.every(question =>
+        isNonEmptyString(question?.a) && question.a.includes("得分点"))) {
+    errors.push("whiteboard requires at least 3 worked questions with 得分点");
+  }
+
+  for (const section of chapter.sections) {
+    if (section?.type !== "roadmap") continue;
+    if (!Array.isArray(section.links) || section.links.length < 3) {
+      errors.push("roadmap requires at least 3 learning links");
+      continue;
+    }
+    for (const link of section.links) {
+      if (!isNonEmptyString(link?.label) ||
+          !sectionIds.has(link?.sectionId) ||
+          link.sectionId === section.id ||
+          !["必会", "推导", "进阶"].includes(link?.level)) {
+        errors.push(`invalid roadmap link: ${link?.sectionId ?? ""}`);
+      }
     }
   }
 

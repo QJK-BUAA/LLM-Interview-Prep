@@ -1,13 +1,49 @@
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
+import { getChapter } from "../content/catalog.js";
+import { visibleSections } from "../app/renderer.js";
 
-const session = "roadmap-interactions-v2";
+const session = "roadmap-interview-actions";
 const base = process.env.ROADMAP_URL || "http://127.0.0.1:8010/";
-const run = (args, input) => execFileSync("agent-browser", ["--session", session, ...args], {
-  input, encoding: "utf8", timeout: 20000,
-  env: { ...process.env, AGENT_BROWSER_DEFAULT_TIMEOUT: "6000" },
-});
+const clickTrace = [];
+const run = (args, input) => {
+  // CLI clicks use viewport coordinates; explicitly reveal controls in scroll panes.
+  if (args[0] === "click") {
+    run(["scrollintoview", args[1]]);
+    run(["wait", "--fn", "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))"]);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const { data: box } = JSON.parse(run(["get", "box", args[1], "--json"]));
+      const { data } = JSON.parse(run(["eval", "--json", `(() => {
+        const box = ${JSON.stringify(box)};
+        const target = [...document.querySelectorAll('a,button,input,summary')].find(el => {
+          const r=el.getBoundingClientRect();
+          return Math.abs(r.x-box.x)<0.5 && Math.abs(r.y-box.y)<0.5 &&
+            Math.abs(r.width-box.width)<0.5 && Math.abs(r.height-box.height)<0.5;
+        });
+        const hit=document.elementFromPoint(box.x+box.width/2,box.y+box.height/2);
+        return JSON.stringify({hash:location.hash,hit:hit?.outerHTML,
+          exposed:Boolean(target && hit && (target===hit || target.contains(hit))),
+          reader:Boolean(target?.closest('#reading-pane')),desktop:innerWidth>=760,
+          open:document.querySelectorAll('.derivation-disclosure[open]').length});
+      })()`]));
+      const observation = JSON.parse(data.result);
+      clickTrace.push({ selector: args[1], box, ...observation });
+      if (observation.exposed) break;
+      // scrollintoview can leave main-pane controls behind the app header.
+      if (observation.reader && box.y < 80) {
+        run(["scroll", "up", "200", ...(observation.desktop ? ["--selector", "#reading-pane"] : [])]);
+      } else {
+        assert.fail(`Click target is occluded: ${args[1]}`);
+      }
+    }
+    assert.equal(clickTrace.at(-1).exposed, true, `Unexposed control ${args[1]}`);
+  }
+  return execFileSync("agent-browser", ["--session", session, ...args], {
+    input, encoding: "utf8", timeout: 20000,
+    env: { ...process.env, AGENT_BROWSER_DEFAULT_TIMEOUT: "6000" },
+  });
+};
 function evaluate(code) {
   const result = JSON.parse(run(["eval", "--stdin", "--json"], code));
   if (!result.success) throw new Error(JSON.stringify(result));
@@ -22,7 +58,7 @@ function clickRef(selector, pattern) {
 }
 const report = { timestamp: new Date().toISOString(), viewports: [] };
 try {
-  for (const [width, height] of [[1440, 1000], [900, 900], [390, 844]]) {
+  for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
     run(["set", "viewport", String(width), String(height)]);
     run(["open", `${base}?interactions=${width}#00`]);
     run(["wait", ".chapter"]);
@@ -40,14 +76,39 @@ try {
     assert.ok(searchRef);
     run(["fill", `@${searchRef}`, "EMPO²"]);
     assert.ok(evaluate("[...document.querySelectorAll('[data-chapter-link]')].map(a=>a.dataset.chapterLink)").includes("27"));
-    clickRef("#course-list", /link "27 /);
+    assert.ok(evaluate("document.querySelectorAll('[data-search-result]').length") > 0);
+    run(["click", ".section-search-results li:first-child a"]);
     assert.equal(evaluate("document.querySelector('.chapter').dataset.chapterId"), "27");
+    assert.match(evaluate("location.hash"), /^#27\/.+/);
     assert.equal(evaluate("document.body.dataset.drawer || ''"), "");
 
     clickRef(".app-header", /button "面试"/);
-    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), 4);
+    const chapter = getChapter("27");
+    const mathCount = chapter.sections.filter(s => s.type === "derivation").length;
+    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), visibleSections(chapter, "interview").length);
+    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), mathCount);
+    clickRef(".formula-index", /button "收起全部推导"/);
+    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
+    run(["click", '.formula-index [data-section-link="derivation"]']);
+    assert.equal(evaluate("document.querySelector('#derivation details').open"), true);
+    clickRef(".formula-index", /button "展开全部推导"/);
+    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), mathCount);
+    run(["click", '.formula-index [data-section-link="whiteboard"]']);
+    assert.equal(evaluate("location.hash"), "#27/whiteboard");
+    assert.equal(evaluate("document.querySelectorAll('#whiteboard .quiz-answer[open]').length"), 0);
+    run(["click", "#whiteboard .quiz-item:first-child summary"]);
+    assert.equal(evaluate("document.querySelectorAll('#whiteboard .quiz-answer[open]').length"), 1);
+    clickRef("#whiteboard .section-header", /button ".*完成"/);
+    assert.equal(evaluate("document.querySelector('#whiteboard button').getAttribute('aria-pressed')"), "true");
+    run(["open", `${base}?whiteboard=${width}#27/whiteboard`]);
+    assert.equal(evaluate("document.querySelector('#whiteboard button').getAttribute('aria-pressed')"), "true");
+
+    // A link to code must reveal its destination even when entered from interview mode.
+    run(["open", `${base}?hidden-link=${width}#27/code`]);
+    assert.equal(evaluate("document.querySelector('[data-mode=\"learn\"]').getAttribute('aria-pressed')"), "true");
+    assert.ok(evaluate("Boolean(document.querySelector('#code'))"));
     clickRef(".app-header", /button "学习"/);
-    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), 9);
+    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), chapter.sections.length);
 
     if (width < 1180) clickRef(".app-header", /button "打开本章目录"/);
     run(["scroll", "down", "700", "--selector", "#chapter-sidebar"]);
@@ -55,9 +116,11 @@ try {
     assert.equal(evaluate("location.hash"), "#27/derivation");
     run(["wait", "--fn", "document.querySelector('#derivation').getBoundingClientRect().top >= 58 && document.querySelector('#derivation').getBoundingClientRect().top < 180"]);
     run(["click", "#derivation summary"]);
+    assert.equal(evaluate("document.querySelector('#derivation details').open"), false);
+    run(["click", "#derivation summary"]);
     assert.equal(evaluate("document.querySelector('#derivation details').open"), true);
-    const targetTop = evaluate("document.querySelector('#derivation').getBoundingClientRect().top");
-    assert.ok(targetTop >= 58 && targetTop < 180);
+    // scrollintoview may recenter the summary; TOC alignment was checked above.
+    assert.equal(evaluate("location.hash"), "#27/derivation");
     clickRef("#derivation .section-header", /button ".*完成"/);
     assert.equal(evaluate("document.querySelector('#derivation details').open"), true);
     assert.equal(evaluate("document.querySelector('#derivation button').getAttribute('aria-pressed')"), "true");
@@ -68,7 +131,7 @@ try {
     clickRef("#code", /button "复制代码"/);
     assert.equal(evaluate("document.querySelector('#toast').textContent"), "代码已复制");
     run(["open", `${base}?quiz=${width}#27/quiz`]);
-    run(["click", ".quiz-answer:first-of-type summary"]);
+    run(["click", "#quiz .quiz-item:first-child summary"]);
     assert.equal(evaluate("document.querySelectorAll('.quiz-answer[open]').length"), 1);
     clickRef(".app-header", /button "切换到深色主题"/);
     assert.equal(evaluate("document.documentElement.dataset.theme"), "dark");
@@ -91,7 +154,9 @@ try {
     run(["open", `${base}?invalid=${width}#99/missing`]);
     assert.equal(evaluate("location.hash"), "#00");
     report.viewports.push({ width, height, passed: true, tested: [
-      "v1 migration", "default chapter/count", "search/open chapter 27", "learn/interview",
+      "v1 migration", "default chapter/count", "search directly to chapter 27 section", "learn/interview",
+      "formulas open by default", "collapse/expand all", "formula index reopens destination",
+      "whiteboard answer and completion persistence", "hidden deep link switches to learn",
       "TOC jump", "derivation disclosure", "completion preserving disclosure", "refresh persistence",
       "clipboard write success", "quiz answer", "theme persistence", "drawer close", "invalid route",
     ] });
@@ -103,9 +168,10 @@ try {
 } catch (error) {
   report.passed = false;
   report.failure = error.stack;
+  report.recentClicks = clickTrace.slice(-6);
   console.error(error.stack);
   process.exitCode = 1;
 } finally {
-  writeFileSync(new URL("../artifacts/browser-interaction-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
-  if (report.passed) run(["close"]);
+  writeFileSync(new URL("../artifacts/interview-interaction-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
+  run(["close"]);
 }

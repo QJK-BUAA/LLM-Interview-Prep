@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { CHAPTERS } from "../content/catalog.js";
+import { REQUIRED_SECTION_TYPES } from "../content/schema.js";
 import { SOURCE_DOCUMENTS, SOURCE_REVISION, validateSourceManifest } from "../content/source-manifest.js";
 
 test("all 37 approved source documents are frozen and covered by actual lesson bodies", () => {
@@ -20,10 +21,12 @@ test("all 37 approved source documents are frozen and covered by actual lesson b
   assert.deepEqual(validateSourceManifest(CHAPTERS), []);
 });
 
-test("the course has 30 dependency-ordered lessons and 270 teaching sections", () => {
+test("the course has 30 dependency-ordered lessons with the full teaching contract", () => {
   assert.deepEqual(CHAPTERS.map(c => c.id), Array.from({ length: 30 }, (_, i) => String(i).padStart(2, "0")));
-  assert.equal(CHAPTERS.reduce((sum, c) => sum + c.sections.length, 0), 270);
   for (const [index, chapter] of CHAPTERS.entries()) {
+    for (const type of REQUIRED_SECTION_TYPES) {
+      assert.ok(chapter.sections.some(section => section.type === type), `${chapter.id}: ${type}`);
+    }
     for (const prerequisite of chapter.prerequisites) {
       assert.ok(CHAPTERS.slice(0, index).some(c => c.id === prerequisite), `${chapter.id} prerequisite ${prerequisite}`);
     }

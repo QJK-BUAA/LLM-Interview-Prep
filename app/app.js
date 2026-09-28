@@ -1,4 +1,5 @@
 import { CHAPTERS, getChapter, getParts } from "../content/catalog.js";
+import { SECTION_LABELS } from "../content/schema.js";
 import {
   escapeHtml,
   hydrateMath,
@@ -14,18 +15,6 @@ import {
   setTheme,
   toggleSection,
 } from "./store.js";
-
-const SECTION_LABELS = Object.freeze({
-  intuition: "直觉",
-  example: "例子",
-  diagram: "机制",
-  derivation: "推导",
-  code: "代码",
-  pitfall: "误区",
-  comparison: "对比",
-  interview: "面试",
-  quiz: "自测",
-});
 
 const searchDocuments = CHAPTERS.map((chapter) => {
   const questionText = chapter.sections
@@ -54,6 +43,21 @@ const searchDocuments = CHAPTERS.map((chapter) => {
   };
 });
 
+const sectionDocuments = CHAPTERS.flatMap(chapter =>
+  chapter.sections.map(section => ({
+    chapterId: chapter.id,
+    chapterTitle: chapter.title,
+    sectionId: section.id,
+    title: section.title,
+    type: section.type,
+    text: normalizeSearchText([
+      section.title,
+      section.body,
+      ...(section.questions ?? []).flatMap(question => [question.q, question.a]),
+    ].join(" ")),
+  })),
+);
+
 function normalizeSearchText(value) {
   return String(value).normalize("NFKC").toLocaleLowerCase("zh-CN");
 }
@@ -65,6 +69,14 @@ export function searchChapters(query) {
   return searchDocuments
     .filter(({ text }) => terms.every((term) => text.includes(term)))
     .map(({ chapter }) => chapter);
+}
+
+export function searchSections(query) {
+  const terms = normalizeSearchText(query).split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  return sectionDocuments
+    .filter(({ text }) => terms.every(term => text.includes(term)))
+    .map(({ text, ...result }) => result);
 }
 
 export function parseRoute(hash) {
@@ -194,6 +206,7 @@ function initialize() {
   function renderCourseNavigation() {
     const query = elements.searchInput.value.trim();
     const matches = searchChapters(query);
+    const sectionMatches = searchSections(query);
     const matchingIds = new Set(matches.map((chapter) => chapter.id));
     const groups = getParts()
       .map((part) => ({
@@ -207,7 +220,7 @@ function initialize() {
     elements.searchClear.hidden = query.length === 0;
     elements.searchStatus.textContent = query
       ? matches.length > 0
-        ? `找到 ${matches.length} 章`
+        ? `找到 ${matches.length} 章 · ${sectionMatches.length} 个小节`
         : `没有找到“${query}”`
       : "按学习顺序排列";
 
@@ -220,7 +233,17 @@ function initialize() {
       return;
     }
 
-    elements.courseList.innerHTML = groups
+    const searchResults = sectionMatches.length
+      ? `<section class="section-search-results"><h3>直达知识点</h3>` +
+        `<p>显示前 ${Math.min(sectionMatches.length, 24)} 个匹配小节，可增加关键词缩小范围。</p><ol>` +
+        sectionMatches.slice(0, 24).map(result =>
+          `<li><a href="${routeHash(result.chapterId, result.sectionId)}" ` +
+          `data-section-link="${escapeHtml(result.sectionId)}" data-search-result>` +
+          `<small>${escapeHtml(result.chapterId)} · ${escapeHtml(SECTION_LABELS[result.type] ?? result.type)}</small>` +
+          `<strong>${escapeHtml(result.title)}</strong></a></li>`,
+        ).join("") + `</ol></section>`
+      : "";
+    elements.courseList.innerHTML = searchResults + groups
       .map(
         (part) =>
           `<section class="course-part">` +
@@ -325,6 +348,8 @@ function initialize() {
           `#${CSS.escape(sectionId)}`,
         );
         if (target) {
+          const derivation = target.querySelector(".derivation-disclosure");
+          if (derivation) derivation.open = true;
           target.scrollIntoView({ behavior: "auto", block: "start" });
           return;
         }
@@ -378,6 +403,12 @@ function initialize() {
       }
     }
 
+    const routedChapter = getChapter(route.chapterId);
+    if (route.sectionId && !visibleSections(routedChapter, state.mode).some(
+      section => section.id === route.sectionId,
+    )) {
+      persist(setMode(state, "learn"));
+    }
     const chapterChanged = route.chapterId !== renderedChapterId;
     const modeChanged = state.mode !== renderedMode;
     if (renderedChapterId && chapterChanged) {
@@ -614,6 +645,11 @@ function initialize() {
       renderOverallProgress();
     } else if (action === "copy-code") {
       void copyCode(target);
+    } else if (action === "set-derivations") {
+      const open = target.dataset.open === "true";
+      for (const details of elements.chapterRoot.querySelectorAll(".derivation-disclosure")) {
+        details.open = open;
+      }
     } else if (action === "retry-render") {
       renderCurrentChapter({
         sectionId: currentSectionId,

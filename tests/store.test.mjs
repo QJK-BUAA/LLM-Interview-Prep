@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { CHAPTERS, getChapter } from "../content/catalog.js";
 
 import {
   DEFAULT_STATE,
@@ -98,10 +99,12 @@ test("calculates chapter and catalog progress from valid sections", () => {
   const chapter = getProgress(state, "00");
   const overall = getProgress(state);
 
-  assert.deepEqual(chapter, { completed: 2, total: 9, percentage: 22 });
+  const chapterTotal = getChapter("00").sections.length;
+  const overallTotal = CHAPTERS.reduce((sum, item) => sum + item.sections.length, 0);
+  assert.deepEqual(chapter, { completed: 2, total: chapterTotal, percentage: Math.round(200 / chapterTotal) });
   assert.equal(overall.completed, 2);
-  assert.equal(overall.total, 270);
-  assert.equal(overall.percentage, 1);
+  assert.equal(overall.total, overallTotal);
+  assert.equal(overall.percentage, Math.round(200 / overallTotal));
 });
 
 test("keeps an in-memory fallback when storage reads and writes throw", () => {

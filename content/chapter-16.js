@@ -18,6 +18,19 @@ const chapter = {
     "经典 RLHF 先把人类偏好拟合为奖励模型，再用 PPO 提高高奖励回答的概率；价值模型降低方差，reference KL 与 clip 分别约束长期偏移和单批更新。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：偏好评分、信任域与 PPO 更新",
+      body: String.raw`先修第 15 章的 score function、GAE 与停梯度。先从 Bradley-Terry 得到奖励模型梯度，再分清 reference、old、current 三个策略；用 TRPO 理解 KL 的二阶几何，再推 PPO 正负优势的四种边界。最后把 actor、critic、entropy 和可选 KL 放进一个有明确符号的训练 loss。`,
+      links: [
+        { label: "RM 与 RLHF 目标", sectionId: "derivation", level: "必会" },
+        { label: "KL 估计器与采样条件", sectionId: "math-kl-estimators", level: "推导" },
+        { label: "TRPO 与 Fisher", sectionId: "math-trpo-fisher", level: "推导" },
+        { label: "PPO 四种边界及完整损失", sectionId: "math-ppo-update", level: "必会" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：先学会评分，再谨慎提高高分回答概率",
@@ -91,6 +104,16 @@ $$P(y_w\succ y_l|x)
 $$L_{\mathrm{RM}}(\phi)=
 -\mathbb E\log\sigma(r_\phi(x,y_w)-r_\phi(x,y_l))$$
 
+令 $d=r_w-r_l$，单对损失 $\ell=\log(1+e^{-d})$。逐步求导：
+
+$$\frac{\partial\ell}{\partial d}=\sigma(d)-1,\quad
+\frac{\partial\ell}{\partial r_w}=-\sigma(-d),\quad
+\frac{\partial\ell}{\partial r_l}=\sigma(-d)$$
+$$\nabla_\phi\ell=-\sigma(-d)
+[\nabla_\phi r_\phi(x,y_w)-\nabla_\phi r_\phi(x,y_l)]$$
+
+二阶导 $\sigma(d)(1-\sigma(d))\geq0$，但神经网络参数空间不因此整体凸。$d=1$ 时 loss≈0.313262，两侧梯度约为 -0.268941 和 +0.268941。给所有回答加同一个 prompt 相关常数不改变偏好；奖励尺度则会改变 sigmoid 概率，不能说也任意不可辨识。
+
 策略阶段常优化：
 
 $$\max_\theta\ \mathbb E_{y\sim\pi_\theta(\cdot|x)}
@@ -107,7 +130,98 @@ $$L^{\mathrm{clip}}(\theta)=
 \operatorname{clip}(r_t,1-\epsilon,1+\epsilon)\hat A_t\right)
 \right]$$
 
-Actor 最大化它，critic 则回归 value target。熵 bonus、value clipping、优势标准化和 adaptive KL 都是常见实现选项，但不能在报告算法时省略，因为它们会显著改变训练行为。`,
+Actor 最大化它，critic 则回归 value target。熵 bonus、value clipping、优势标准化和 adaptive KL 都是常见实现选项，但不能在报告算法时省略，因为它们会显著改变训练行为。
+
+reference $\pi_{\rm ref}$ 通常是冻结的 SFT 基准；old $\pi_{\rm old}$ 是本批实际采样策略；current $\pi_\theta$ 是正在优化的策略。old 在本批多 epoch 中保持固定，到下一轮 rollout 才刷新；不能每个 minibatch 都重算 old 并当作行为概率。奖励模型在策略更新阶段也冻结，actor 不沿 RM 的评分反传，而用 score-function 信号。`,
+    },
+    {
+      id: "math-kl-estimators",
+      type: "derivation",
+      title: "KL reward、k1/k2/k3 与无偏性的条件",
+      body: String.raw`先固定一个前缀，令 $p=\pi_\theta(\cdot|s)$、$q=\pi_{\rm ref}(\cdot|s)$，两者同词表且严格为正。采样动作 $a\sim p$，设 $u(a)=q(a)/p(a)$：
+
+$$k_1=-\log u,\qquad k_2=\tfrac12(\log u)^2,\qquad
+k_3=u-1-\log u$$
+
+由 $\mathbb E_p[u]=\sum_aq(a)=1$：
+
+$$\mathbb E_p[k_1]=\mathbb E_p[k_3]=D_{\rm KL}(p\|q)$$
+
+$k_1$ 单样本可负；$k_3\geq0$ 来自 $\log u\leq u-1$。$k_2$ 只在 $u$ 接近 1 时由 Taylor 展开近似 KL，不是一般无偏估计。若 q 在 p 零概率之外还有质量，$\mathbb E_p[u]=1$ 的证明失效；top-k/top-p 改支持集时尤其要核对。
+
+**旧数据不是当前分布。** 若动作由 $b=\pi_{\rm old}$ 采样，直接平均 $k_3(p,q)$ 一般不等于当前 KL；在覆盖条件下，$\mathbb E_b[(p/b)k_3]=D_{\rm KL}(p\|q)$ 对固定前缀才成立。还没有修正前缀本身的状态分布变化。
+
+**无偏数值不等于无偏梯度。** $p$ 依赖参数，故 $\nabla\mathbb E_p[k]=\mathbb E_p[k\nabla\log p+\nabla k]$。如果把采样动作当常量只对 $k_3$ 求导，其期望为 $\sum_a(p_a-q_a)\nabla\log p_a$，是该固定前缀下 $D_{\rm KL}(q\|p)$ 的梯度，而非一般的 reverse-KL 梯度。不能因 k3 数值无偏就省略这个区别。
+
+**RLHF shaping。** rollout 时冻结 $\ell_t^{\rm old}$、$\ell_t^{\rm ref}$，给每个动作奖励 $-\beta(\ell_t^{\rm old}-\ell_t^{\rm ref})$，终局再加 RM 分数。它在 old 轨迹期望下估计 old-to-reference 的序列 KL；进入 GAE 后成为冻结奖励，随后多 epoch 是 PPO surrogate，不是每一步都精确优化 current-to-reference KL。
+
+教学例 old 选中概率 0.2、ref 为 0.1、$\beta=0.1$，该 token 的 KL reward 为 $-0.1\log2\approx-0.069315$。一次 token 的惩罚为负不代表整条任务奖励为负；KL 的比较基准也绝不是本轮 old/current ratio。`,
+    },
+    {
+      id: "math-trpo-fisher",
+      type: "derivation",
+      title: "TRPO：从 KL 二阶约束到自然梯度方向",
+      body: String.raw`TRPO 使用 old 状态分布上的局部 surrogate，目标是限制改进步而非直接限制欧氏参数距离。记 $\Delta=\theta-\theta_{\rm old}$，$g=\nabla_\theta L(\theta_{\rm old})$：
+
+$$\max_\Delta g^\top\Delta,\qquad
+\mathbb E_{s\sim d_{\rm old}}
+D_{\rm KL}(\pi_{\rm old}(\cdot|s)\|\pi_{\theta_{\rm old}+\Delta}(\cdot|s))
+\leq\delta$$
+
+在 $\Delta=0$ 处 KL 为零、一阶导为零，二阶近似为 $\tfrac12\Delta^\top F\Delta$。在固定支持集与可交换求导条件下：
+
+$$F=\mathbb E_{s\sim d_{\rm old},a\sim\pi_{\rm old}}
+[u(s,a)u(s,a)^\top],\qquad
+u=\nabla_\theta\log\pi_\theta(a|s)|_{\theta_{\rm old}}$$
+
+因为 $\mathbb E[\nabla^2\log\pi+uu^\top]=0$，KL 的 Hessian 等于 Fisher。F 是参数维度的半正定矩阵，不需要显式存下；实际可用 Hessian-vector product 和共轭梯度。
+
+拉格朗日函数 $g^\top\Delta-\eta(\tfrac12\Delta^\top F\Delta-\delta)$ 给出 $g-\eta F\Delta=0$。若 F 正定且 $g\ne0$，约束取等号：
+
+$$\Delta=\eta^{-1}F^{-1}g,\quad
+\eta=\sqrt{\frac{g^\top F^{-1}g}{2\delta}},\quad
+\Delta^*=\sqrt{\frac{2\delta}{g^\top F^{-1}g}}F^{-1}g$$
+
+若 F 奇异，应说明有效子空间或 damping $(F+\xi I)$；$g=0$ 时没有这个归一化方向。有限步的二阶近似并不精确，TRPO 还需要实际 KL 与 surrogate 的回溯检查。
+
+教学例 $g=[1,2]^\top,F=\operatorname{diag}(2,8),\delta=0.01$，$F^{-1}g=[0.5,0.25]^\top$、$g^\top F^{-1}g=1$，故 $\Delta^*\approx[0.070711,0.035355]$，二次 KL 正好 0.01。
+
+PPO 继承“更新不要太远”的动机，以一阶优化和 clipped surrogate 替代显式二阶约束。PPO clip 不是上述约束的代数等价解，也不提供逐状态 KL 的严格上界。`,
+    },
+    {
+      id: "math-ppo-update",
+      type: "derivation",
+      title: "PPO 四种边界、log-prob 梯度与完整训练 loss",
+      body: String.raw`令 $\rho=\exp(\ell_\theta-\operatorname{sg}(\ell_{\rm old}))$，优势 $A$ 冻结，$l=1-\epsilon,u=1+\epsilon$。单 token 最大化目标：
+
+$$f(\rho,A)=\min(\rho A,\operatorname{clip}(\rho,l,u)A)
+=\begin{cases}A\min(\rho,u),&A\geq0\\
+A\max(\rho,l),&A<0\end{cases}$$
+
+除不可导边界外，$\partial f/\partial\ell_\theta=M A\rho$，不是只有 $MA$。$M=0$ 当 $A>0,\rho>u$ 或 $A<0,\rho<l$，其余为 1。取 $\epsilon=0.2$：
+
+| 优势 A | ratio | 目标 f | 对当前 log-prob 的导数 |
+|---|---|---|---|
+| 2 | 1.3 | 2.4 | 0 |
+| -2 | 1.3 | -2.6 | -2.6 |
+| 2 | 0.7 | 1.4 | 1.4 |
+| -2 | 0.7 | -1.6 | 0 |
+
+正优势但概率太低仍要推高；负优势但概率太高仍要压低。只用 clamp 后乘 A 会错误删掉这两种纠偏梯度。边界 $\rho=l,u$ 需约定次梯度，数值差分检查应避开拐点。
+
+**一个完整的训练约定。** 令 m 为 response mask，$N=\sum m>0$，$\langle h\rangle_m=\sum mh/N$，固定 $\hat R=\operatorname{sg}(\hat A+V_{\rm old})$，最小化：
+
+$$L_{\rm train}=-\langle f(\rho,\operatorname{sg}(\hat A))\rangle_m
++c_V\left\langle\tfrac12(V_\phi-\hat R)^2\right\rangle_m
+-c_H\langle H(\pi_\theta)\rangle_m+c_K\langle K_\theta\rangle_m$$
+
+这里 $K_\theta$ 若使用，须明确是固定前缀全词表 KL 还是特定采样 surrogate。已把 KL 计入 rollout reward 的约定可取 $c_K=0$；若两处都用，要解释双重惩罚。可选 value clipping：
+
+$$V_{\rm clip}=V_{\rm old}+\operatorname{clip}(V_\phi-V_{\rm old},-\epsilon_V,\epsilon_V)$$
+$$L_V=\tfrac12\left\langle
+\max\{(V_\phi-\hat R)^2,(V_{\rm clip}-\hat R)^2\}\right\rangle_m$$
+
+它不是必需组成部分。old log-prob、old value、奖励、GAE、returns、mask 都冻结；当前 log-prob、当前 value 和熵保留梯度。多 epoch 固定同一 old 分母，重新采样后才刷新。ratio 仅修正旧前缀上的动作分布，不自动修正整个状态占用分布；评估仍需真实新 rollout。`,
     },
     {
       id: "code",
@@ -124,7 +238,7 @@ for prompts in prompt_loader:
         old_values = critic.values(prompts, responses)
 
         token_rewards = -kl_beta * (old_logp - ref_logp)
-        token_rewards[:, -1] += scores
+        token_rewards[batch_indices, last_response_indices] += scores
         advantages, returns = gae(token_rewards, old_values)
 
     for epoch in range(update_epochs):
@@ -213,8 +327,42 @@ PPO 相对 REINFORCE 的主要新增负担是 critic、old policy 逻辑与多�
         },
       ],
     },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：RM、Fisher、裁剪和 KL",
+      body: "先声明最大化目标还是最小化 loss，避免符号混淆。",
+      questions: [
+        {
+          q: "RM 的 chosen/rejected 分数差为 1。推导两侧梯度，并说明同时加 7 会怎样。",
+          a: String.raw`$\ell=-\log\sigma(d)$，$\partial_d\ell=\sigma(d)-1$。两侧梯度为 -0.268941、+0.268941，loss≈0.313262。同时加 7 不改变 d，故 loss 和偏好概率不变。**得分点：**链式符号；共同平移不辨识；缩放分数并不具有同样不变性。`,
+        },
+        {
+          q: "ε=0.2，分别计算 (ratio,A)=(1.3,2),(1.3,-2),(0.7,2),(0.7,-2) 的 PPO 目标和 log-prob 导数。",
+          a: String.raw`目标依次为 $[2.4,-2.6,1.4,-1.6]$，导数依次 $[0,-2.6,1.4,0]$。使用 $\partial\rho/\partial\ell=\rho$，只在“好动作已足够增加、坏动作已足够减少”时封顶。**得分点：**四种符号分支；保留 ratio 因子；最小化 policy loss 时整体变号。`,
+        },
+        {
+          q: "g=[1,2]、F=diag(2,8)、δ=0.01。推导局部 TRPO 步，并说明 PPO 是否严格满足同一约束。",
+          a: String.raw`驻点 $g=\eta F\Delta$，约束给 $\eta=\sqrt{1/0.02}$，所以 $\Delta=[0.070711,0.035355]$，$\tfrac12\Delta^\top F\Delta=0.01$。PPO clip 是替代目标，不是求解这个二次约束问题。**得分点：**自然梯度方向、尺度来源、二阶近似和 F 可逆条件。`,
+        },
+        {
+          q: "为什么 k3 非负且数值无偏，却不能直接说固定旧样本上的自动微分是 current-to-reference KL 的无偏梯度？",
+          a: String.raw`$k_3=u-1-\log u\geq0$，且仅在 $a\sim p$、支持条件成立时有 $\mathbb E_pu=1$。旧样本来自 b 需 $p/b$ 修正；即使来自 p，分布本身依赖参数，完整导数还含 $k_3\nabla\log p$。**得分点：**采样分布；值与梯度区分；前缀分布仍需另行处理。`,
+        },
+      ],
+    },
   ],
   sources: [
+    {
+      label: "Trust Region Policy Optimization",
+      url: "https://arxiv.org/abs/1502.05477",
+      evidence: "TRPO 原始论文；KL 二阶近似与 Fisher",
+    },
+    {
+      label: "Approximating KL Divergence",
+      url: "https://joschu.net/blog/kl-approx.html",
+      evidence: "k1/k2/k3 估计器说明；课程另推导采样与梯度条件",
+    },
     {
       label: "Constitutional AI: Harmlessness from AI Feedback",
       url: "https://arxiv.org/abs/2212.08073",

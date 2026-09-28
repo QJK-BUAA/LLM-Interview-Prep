@@ -648,6 +648,123 @@ progress::-moz-progress-bar {
   margin: 0;
 }
 
+.formula-index {
+  margin-top: 24px;
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+}
+
+.formula-index h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.formula-index p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.formula-index ul {
+  display: grid;
+  gap: 7px;
+  padding-left: 20px;
+  margin: 0 0 18px;
+  font-size: 14px;
+}
+
+.formula-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.formula-actions button,
+.practice-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--brand);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.practice-link {
+  border-color: var(--brand);
+  font-weight: 700;
+}
+
+.learning-route ol {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.learning-route a {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.route-level {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.section-search-results {
+  padding: 8px 10px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-search-results h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.section-search-results p,
+.section-search-results small {
+  margin: 4px 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.section-search-results ol {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.section-search-results a {
+  display: grid;
+  padding: 7px 8px;
+  border-radius: 4px;
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.section-search-results a:hover {
+  background: var(--brand-soft);
+}
+
+.section-search-results strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .lesson-sections {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -673,6 +790,11 @@ progress::-moz-progress-bar {
 .section--example {
   --section-accent: var(--green);
   --section-tint: var(--green-soft);
+}
+
+.section--roadmap {
+  --section-accent: var(--teal);
+  --section-tint: var(--teal-soft);
 }
 
 .section--diagram {
@@ -766,6 +888,7 @@ progress::-moz-progress-bar {
   min-width: 0;
   padding: 0 22px 24px;
   color: var(--text-soft);
+  overflow-wrap: anywhere;
 }
 
 .section-body p {

@@ -19,6 +19,23 @@ const chapter = {
     "Agentic RL 让策略在环境反馈中持续行动。强化学习本来就处理多步决策；真正的新增难点是语言动作、部分可观测状态、昂贵工具交互和不完美反馈的组合。先把一条轨迹记录正确，再讨论奖励与优化器。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：从隐状态到可训练的工具轨迹",
+      body: String.raw`**先修能力：**第 03 章的条件概率与 Bayes、第 13 章的回报和 Bellman、第 15 章的 score-function、第 16–17 章的策略更新。先能回答“环境知道什么、策略看到什么”，再计算损失。
+
+**学习链：**状态与观测区分 → 预测再观测的 belief 更新 → 决策文本的序列概率 → actor/attention/终止掩码 → 按工具耗时定义 SMDP 回报。核心问题不是把对话拼长，而是确认每个概率、奖励和时间单位属于哪个对象。原有仓库例子提供完整轨迹；新增推导用独立小算例检验容易混淆的边界。
+
+**白板验收：**能把两状态 Bayes 表算到归一化，能指出工具文本为何不贡献 actor score，能解释为什么换时间粒度后不能沿用同一个每步折扣。最后再读四挑战地图，进入第 26 章的奖励与估计器。`,
+      links: [
+        { label: "完整轨迹与原始回报", sectionId: "example", level: "必会" },
+        { label: "POMDP 的数值 Bayes", sectionId: "math-belief", level: "推导" },
+        { label: "序列概率与三种掩码", sectionId: "math-action-masks", level: "必会" },
+        { label: "SMDP 与真实时间折扣", sectionId: "math-smdp", level: "进阶" },
+        { label: "闭卷推导与反例", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：会查资料的助手与只交答案的考生",
@@ -144,6 +161,98 @@ $$\mathcal L_{\mathrm{actor}}=
 \log\pi_\theta(z_j|c_j)}{\sum_jm_j}$$
 
 $z_j$ 是该 token，$c_j$ 是其可见因果上下文，$\hat A_j$ 是分配给它的优势，$\operatorname{sg}$ 表示停止梯度，分母必须非零。它说明损失算在哪里，并不声称任意这种归一化都等价于上面的 $J$。工具、用户、padding 的 $m_j$ 为 0；工具文本仍可作为后续 token 的上下文。attention mask 控制可见性和 padding，不能直接复制 actor mask。截断标志则记录采样为何停止，与这两种 token mask 不是同一种东西。`,
+    },
+    {
+      id: "math-belief",
+      type: "derivation",
+      title: "POMDP 手算：先预测下一状态，再用观测校正",
+      body: String.raw`**问题与假设。** 以下是有限 POMDP 的教学抽象，不是某个 Agent 模型显式维护的概率表。隐藏状态只有“可用” $A$ 与“故障” $B$。动作前 belief 为行向量 $b=(0.6,0.4)$。执行检查动作后，状态按转移矩阵变化；收到观测“绿灯” $+$ 的似然如下：
+
+$$P=\begin{pmatrix}0.8&0.2\\0.1&0.9\end{pmatrix},
+\qquad Z(+|A)=0.9,\quad Z(+|B)=0.2$$
+
+矩阵行是旧状态，列是新状态，每行和为 1；传感器读取的是**转移后的状态**。先全概率预测，再逐状态乘似然：
+
+$$\bar b(A)=0.6(0.8)+0.4(0.1)=0.52,\quad
+\bar b(B)=0.48$$
+
+$$v_A=0.52(0.9)=0.468,\quad v_B=0.48(0.2)=0.096,
+\quad \Pr(+|h,a)=v_A+v_B=0.564$$
+
+$$b'(A)=\frac{0.468}{0.564}=\frac{39}{47}\approx0.829787,
+\qquad b'(B)=\frac8{47}\approx0.170213$$
+
+若直接用原先验 $0.6$ 乘传感器似然，会得到另一个问题的答案，因为遗漏了动作引起的状态变化。收到“非绿灯”时，用互补似然 $(0.1,0.8)$，得到 $b'(A)=0.052/0.436=13/109\approx0.119266$。同一动作因观测不同产生不同 posterior。
+
+**为什么 belief 可以接到 Bellman？** 在模型已知、历史完整的条件下，belief 使历史对未来的影响浓缩成状态分布。令 $R(b,a)=\sum_{s,s'}b(s)P(s'|s,a)r(s,a,s')$，更新函数为 $\mathcal B(b,a,o)$，则有限 horizon 的递推为：
+
+$$V_n(b)=\max_a\left\{R(b,a)+\gamma\sum_o
+\Pr(o|b,a)V_{n-1}(\mathcal B(b,a,o))\right\},\qquad V_0=0$$
+
+这是 belief 空间上的规划，不代表 LLM 的摘要具备这种充分性。若两个候选状态对观测似然都为零，分母为零，posterior 未定义；应检查模型、观测编码或异常路径，不能默默加一个极小量并声称完成了准确 Bayes。若似然相同且非零，观测不提供区分信息，posterior 就等于预测分布。
+
+**追问链：**为何先做转移？→ 观测在动作前还是动作后？→ 隐藏预算是否进状态？→ 摘要丢失信息后 belief 是否仍准确？每一问都改变建模条件，而不只是改公式符号。`,
+    },
+    {
+      id: "math-action-masks",
+      type: "derivation",
+      title: "动作概率与 mask：三枚生成 token 的完整损失",
+      body: String.raw`**从轨迹分解开始。** 固定任务分布和不依赖模型参数的环境，轨迹概率由策略文本概率与环境转移、观测概率相乘。对参数求 log 梯度时，环境因子的直接导数为零：
+
+$$p_\theta(\tau)=p(x,s_0,o_0)\prod_t
+\pi_\theta(u_t|h_t)P(s_{t+1}|s_t,D(u_t))Z(o_{t+1}|s_{t+1},D(u_t))$$
+
+$$\nabla_\theta\log p_\theta(\tau)
+=\sum_t\sum_{k=1}^{L_t}\nabla_\theta
+\log\pi_\theta(u_{t,k}|h_t,u_{t,<k})$$
+
+工具反馈仍影响后续条件概率，所以“没有工具 token 的直接 actor score”不等于环境对学习无影响。若共享模型同时学习环境模型，上式固定环境的假设要重新声明。
+
+**手算 token loss。** 展平来源为 [user, assistant, assistant, tool, assistant]，actor mask 为 $m=[0,1,1,0,1]$。三个生成目标 token 在各自前缀下的概率为 $[0.5,0.25,0.8]$，优势都固定为 1。条件概率连乘得到策略因子 $0.1$；有效 token 平均的负 log-prob 为：
+
+$$\mathcal L=-\frac{\log0.5+\log0.25+\log0.8}{3}
+=\frac{\log10}{3}\approx0.767528$$
+
+为单独检验梯度，假设三个位置是互不共享参数的二分类 logits $z_k$，实际目标都是类别 1，$p_k=\sigma(z_k)$。由 $\partial\log p_k/\partial z_k=1-p_k$：
+
+$$\frac{\partial\mathcal L}{\partial(z_1,z_2,z_3)}
+=-\frac13(1-p_1,1-p_2,1-p_3)
+=\left(-\frac16,-\frac14,-\frac1{15}\right)$$
+
+真实网络共享参数，需再乘 logits 的 Jacobian；工具位置没有直接目标损失，但工具 embedding 作为后续上下文仍可能接收间接梯度。把工具的假想概率 0.01 也乘进去会变成 0.001，这既错记行为概率，又改变梯度来源；把分母改成全部五个 token 则人为缩小更新。
+
+**三种掩码不能合并。** actor mask 标记由受训策略生成的目标；causal attention mask 允许后续读取有效工具结果且禁止未来信息；terminated 标志按环境动作关闭后续价值。padding 与 worker truncation 另外记录。对整轮动作求和、每 token 平均、每 episode 平均，是不同的聚合选择；不同长度轨迹一般不会得到相同权重。
+
+**文本概率不等于语义工具概率。** 若两个互斥的完整调用串（含结束标记）都解析成动作 $a$，概率分别为 0.1、0.2，则 $\Pr(a|h)=0.3$，其 score 是这两种序列 score 按 $1/3,2/3$ 加权。只采到第一串时不能把其 log-prob 分母换成 0.3，除非明确改成对语义动作边缘化的估计器。
+
+**追问链：**谁生成了 token？→ 对应哪个预测位置？→ 条件前缀是否一致？→ 按什么单位归一化？这四项先对齐，ratio 才有含义。`,
+    },
+    {
+      id: "math-smdp",
+      type: "derivation",
+      title: "SMDP：工具用时不等长时怎样折扣与 bootstrap",
+      body: String.raw`**问题。** 一次查询耗时 2 秒，另一次耗时 3 秒。把它们都算“一步”会表达按调用次数的偏好，而不是按等待时间的偏好。SMDP（半 Markov 决策过程）允许宏动作持续随机时间。下面按离散秒建模；每秒折扣为 $\gamma_{\mathrm{sec}}$，第 $t$ 个动作持续 $\Delta_t$ 秒，开始时刻为 $T_t=\sum_{j<t}\Delta_j$。
+
+令 $c_{t,k}$ 为动作内部第 $k$ 秒的奖励，$0\le k<\Delta_t$，先把宏动作内部奖励折到起点：
+
+$$R_t=\sum_{k=0}^{\Delta_t-1}\gamma_{\mathrm{sec}}^k c_{t,k},
+\qquad G_t=R_t+\gamma_{\mathrm{sec}}^{\Delta_t}(1-d_t)G_{t+1}$$
+
+$$Q(b,a)=\mathbb E\left[R_t+
+\gamma_{\mathrm{sec}}^{\Delta_t}(1-d_t)V(b_{t+1})\mid b_t=b,a_t=a\right]$$
+
+期望覆盖耗时、转移与观测。若用连续秒，可写折扣 $\exp(-\kappa\Delta)$，其中 $\kappa$ 单位为每秒；“每 token 的 0.9”不能直接替换“每秒的 0.9”。
+
+**数字例子。** 取每秒折扣 0.9，两次调用在各自开始时付出 0.1，持续时间分别 2、3 秒；最后在第 5 秒即时提交得 1。以提交点价值 $G_2=1$ 向后算：
+
+$$G_1=-0.1+0.9^3(1)=0.629,\qquad
+G_0=-0.1+0.9^2(0.629)=0.40949$$
+
+直接按时间戳展开也得到 $-0.1-0.1(0.9^2)+0.9^5=0.40949$。原仓库按每轮折扣的结果是 0.62，二者不是计算矛盾，而是目标不同。若正确奖励在动作结束时才到账，就必须按其到账时间折扣，不能当作动作起点的 $R_t=1$。
+
+**截断边界。** worker 在第 2 秒、第一轮后暂停，下一状态仍可继续；若精确估值 $V(b_1)=0.629$，target 为 $-0.1+0.9^2V(b_1)=0.40949$。误设 terminated 会得到 -0.1。若业务合同本来规定到时立即失败，则确实应终止，且“剩余时限”必须进入状态。
+
+**追问链：**优化少调用还是低延迟？→ 奖励何时到账？→ 随机工具延迟是否与动作相关？→ 预算是任务约束还是 worker 切片？先回答这些，才决定 discount 和 bootstrap。`,
     },
     {
       id: "code",
@@ -309,6 +418,26 @@ attention_keep 只演示哪些位置不是 padding，真正模型还需因果可
         {
           q: "一个模型能输出 ReAct 格式，是否足以证明它经过 Agentic RL？",
           a: "不足。ReAct 是交错推理与行动的交互模式；提示词和 SFT 都能产生这种格式。需要检查是否用环境轨迹奖励训练策略。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：belief、概率与时间边界",
+      body: "先写符号、时间单位和随机变量，再作答。数值例均为教学设计，不是论文实验。",
+      questions: [
+        {
+          q: "先验为 (0.6,0.4)，转移矩阵两行为 (0.8,0.2)、(0.1,0.9)，转移后绿灯似然为 (0.9,0.2)。请推导并手算绿灯 posterior；若观测似然都是零怎么办？",
+          a: String.raw`先预测 $\bar b=(0.52,0.48)$，再乘似然得 $(0.468,0.096)$。归一化常数为 0.564，所以 posterior 为 $(39/47,8/47)$，和为 1。若跳过转移就混淆动作前后状态；若两个似然都为零，该模型给观测的概率为零，不能定义条件分布，应进入模型失配或异常处理。**得分点：**全概率预测、Bayes 归一化、分母非零条件各一项。追问：两个似然相同且非零时，posterior 等于预测分布，不等于动作前先验。`,
+        },
+        {
+          q: "来源序列为 user/assistant/assistant/tool/assistant，生成 token 概率为 0.5、0.25、0.8，优势为 1。写 actor mask、token 平均 loss，并推导独立二分类 logits 的梯度。工具信息应否被 attention 屏蔽？",
+          a: String.raw`mask 为 $[0,1,1,0,1]$，分母 3；loss 为 $-\log(0.5\cdot0.25\cdot0.8)/3=\log10/3\approx0.767528$。对目标类别 1，$\partial(-\log\sigma(z))/\partial z=p-1$，故三项梯度为 $(-1/6,-1/4,-1/15)$。工具位置没有直接 actor loss，但必须按因果规则供后续读取；其表示仍可能接到后续损失的梯度。**得分点：**概率链、有效分母、梯度符号、区分两种 token mask。追问：每 episode 平均与每 token 平均会怎样改变长轨迹权重？`,
+        },
+        {
+          q: "两次工具调用分别耗时 2、3 秒，各在开始时付出 0.1，第 5 秒提交得 1，每秒折扣 0.9。求首轮回报；第一轮后 worker 截断时如何构造 target？",
+          a: String.raw`时间戳为 0、2、5 秒，故 $G_0=-0.1-0.1(0.9^2)+0.9^5=0.40949$。从后向前也有 $G_1=0.629$、$G_0=-0.1+0.81G_1$。worker 截断而任务未结束时保留 bootstrap；精确下一价值 0.629 恢复同一 target。误设终止得到 -0.1；改为每工具轮次折扣得到 0.62，是另一个目标。**得分点：**SMDP 指数、奖励到账时间、截断和任务时限的区别。追问：连续耗时可用 $e^{-\kappa\Delta}$，$\kappa$ 必须有每秒单位。`,
         },
       ],
     },

@@ -1,7 +1,11 @@
 import { annotateGlossary, GLOSSARY } from "./glossary.js";
 import { sourcesForChapter } from "../content/source-manifest.js";
+import { SECTION_LABELS } from "../content/schema.js";
 
 const INTERVIEW_SECTION_TYPES = new Set([
+  "roadmap",
+  "example",
+  "derivation",
   "pitfall",
   "comparison",
   "interview",
@@ -329,12 +333,20 @@ function renderSection(section, chapterId, completed, options) {
   const isCompleted = completed.has(section.id);
   let content = renderMarkdown(section.body, options);
 
-  if (section.type === "diagram") {
+  if (section.type === "roadmap") {
+    content += `<nav class="learning-route" aria-label="本章学习路线"><ol>` +
+      (section.links ?? []).map(link =>
+        `<li><a href="#${encodeURIComponent(chapterId)}/${encodeURIComponent(link.sectionId)}" ` +
+        `data-section-link="${escapeHtml(link.sectionId)}">` +
+        `<span class="route-level">${escapeHtml(link.level)}</span>` +
+        `<span>${escapeHtml(link.label)}</span></a></li>`,
+      ).join("") + `</ol></nav>`;
+  } else if (section.type === "diagram") {
     content += renderDiagram(section.diagram);
   } else if (section.type === "derivation") {
     content =
-      `<details class="derivation-disclosure">` +
-      `<summary>展开公式推导</summary>${content}</details>`;
+      `<details class="derivation-disclosure" open>` +
+      `<summary>公式与逐步推导</summary>${content}</details>`;
   } else if (section.type === "quiz") {
     content = renderQuiz(section, options);
   }
@@ -344,7 +356,7 @@ function renderSection(section, chapterId, completed, options) {
     `${isCompleted ? "is-complete" : ""}" id="${escapeHtml(section.id)}" ` +
     `data-section-id="${escapeHtml(section.id)}">` +
     `<header class="section-header"><div>` +
-    `<span class="section-kicker">${escapeHtml(section.type)}</span>` +
+    `<span class="section-kicker">${escapeHtml(SECTION_LABELS[section.type] ?? section.type)}</span>` +
     `<h2>${escapeHtml(section.title)}</h2></div>` +
     `<button class="section-complete" type="button" ` +
     `data-action="toggle-section" data-chapter-id="${escapeHtml(chapterId)}" ` +
@@ -364,6 +376,25 @@ export function renderChapter(chapter, state = {}) {
   const markdownOptions = { glossary: true, seenTerms };
   const progress = Math.round((completed.size / chapter.sections.length) * 100);
   const sourceDocs = sourcesForChapter(chapter.id);
+  const derivations = sections.filter(section => section.type === "derivation");
+  const whiteboard = sections.find(section => section.id === "whiteboard");
+  const formulaIndex = derivations.length ? (
+    `<nav class="formula-index" aria-label="本章公式与白板练习">` +
+    `<h2>本章公式与白板练习</h2>` +
+    `<p>${mode === "interview"
+      ? "先写定义与公式，再推导、手算，最后用白板题检查薄弱点。"
+      : "按知识路线学习，也可以直接进入一个公式主题。"}公式默认展开。</p>` +
+    `<ul>${derivations.map(section =>
+      `<li><a href="#${encodeURIComponent(chapter.id)}/${encodeURIComponent(section.id)}" ` +
+      `data-section-link="${escapeHtml(section.id)}">${escapeHtml(section.title)}</a></li>`,
+    ).join("")}</ul>` +
+    `<div class="formula-actions">` +
+    (whiteboard ? `<a class="practice-link" href="#${encodeURIComponent(chapter.id)}/whiteboard" ` +
+      `data-section-link="whiteboard">进入白板练习</a>` : "") +
+    `<button type="button" data-action="set-derivations" data-open="true">展开全部推导</button>` +
+    `<button type="button" data-action="set-derivations" data-open="false">收起全部推导</button>` +
+    `</div></nav>`
+  ) : "";
   const readingLinks = sourceDocs.length
     ? `<details class="source-map"><summary>本章扩展阅读（${sourceDocs.length} 篇）</summary>` +
       `<p>改编自 Xavier / Agentic RL Analysis Contributors 的调研；课程中的原论文引用用于核验定义与结论。</p><ul>` +
@@ -393,6 +424,7 @@ export function renderChapter(chapter, state = {}) {
     `<ul>${chapter.objectives
       .map((objective) => `<li>${escapeHtml(objective)}</li>`)
       .join("")}</ul></section>` +
+    formulaIndex +
     `<div class="lesson-sections">${sections
       .map((section) =>
         renderSection(section, chapter.id, completed, markdownOptions),

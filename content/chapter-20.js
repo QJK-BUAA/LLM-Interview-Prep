@@ -18,6 +18,19 @@ const chapter = {
     "VAPO 改进 critic 和长序列信用分配；CISPO 裁剪并冻结 token 重要性权重；GSPO 在长度归一化的序列比率上裁剪；SAPO 用平滑门控替代硬裁剪。它们处理不同故障，不能排成彼此淘汰的升级链。",
   sections: [
     {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：先信用估计，再比较完整梯度",
+      body: String.raw`先修第 15 章的 score function 与 GAE、第 16 章的 PPO 四象限、第 17 章的组优势。先用两 token 例子分清裁剪对象，再逐步推导 VAPO、CISPO、GSPO、SAPO；原始推导保留全部 stop-gradient、终止边界与论文条件。之后把单项系数还原成带 mask、长度和 batch 分母的参数梯度，最后用有效梯度与相关噪声定位故障。闭卷要求不是背四个缩写，而是解释同一批数据为什么得到不同更新。`,
+      links: [
+        { label: "两 token 与 PPO 四象限", sectionId: "example", level: "必会" },
+        { label: "四种方法的精确推导", sectionId: "derivation", level: "推导" },
+        { label: "统一梯度与目标单位", sectionId: "math-gradient-units", level: "推导" },
+        { label: "梯度集中度与相关噪声", sectionId: "math-update-diagnostics", level: "进阶" },
+        { label: "综合白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
+    },
+    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：老师估分、批改单位和更新力度是三件事",
@@ -170,6 +183,66 @@ f_\tau'(r_t)=4p_t(1-p_t),\qquad
 在 $r=1$ 处导数 gate 为 1；更大的温度让偏离 1 后衰减更快。论文采用负优势更紧的温度设计，需与奖励噪声和探索需求一起调参。门控导数关于 $r-1$ 对称，但完整系数还有 $r$，不能说增减两侧的更新完全对称。数学上有限正 ratio 的 sigmoid 导数为正，数值饱和、mask、零优势仍会让实际梯度为零。
 
 SAPO 与 GSPO 的联系是有条件的近似：小步更新、同序列 token 的 log-ratio 离散度较小时，平均 token gate 可近似某个序列 gate；不是精确目标等价，更不是任意向量梯度和等价。判断近似是否可信，应测量 intra-sequence log-ratio 方差，而不是只看平均 KL。`,
+    },
+    {
+      id: "math-gradient-units",
+      type: "derivation",
+      title: "统一梯度：单 token 系数怎样变成整批更新",
+      body: String.raw`**问题与维度。** 前面比较的是局部 log-prob 坐标，不是参数空间的完整梯度。设参数 $\theta\in\mathbb R^P$，批次有 $B$ 条回答，最大长度 $T_{\max}$；$\ell,m,A,r$ 均按 $B\times T_{\max}$ 存储，$m_{it}\in\{0,1\}$。有效长度 $T_i=\sum_t m_{it}>0$，总 token 数 $N=\sum_iT_i$，score 向量 $g_{it}=\nabla_\theta\ell_{it}\in\mathbb R^P$。一次更新中，样本、mask、old logprob、优势都固定；以下最大化 $J$，最小化时取负号。
+
+**第一步：对每个局部坐标求导。** 令 $c_{it}$ 不含 batch 聚合常数，已核验的三个 token 目标分别给出
+
+$$c^{\mathrm{PPO}}_{it}=M_{it}A_{it}r_{it},\quad
+c^{\mathrm{CISPO}}_{it}=\bar r_{it}A_{it},\quad
+c^{\mathrm{SAPO}}_{it}=A_{it}r_{it}\,4p_{it}(1-p_{it}).$$
+
+这三个量再乘 $g_{it}$ 才到参数空间。VAPO 的 actor 使用 PPO 家族系数，但 $A_{it}$ 来自预热 critic 和解耦 GAE；因此它不是第四个仅替换 gate 的算法。共享参数会使不同 token 的向量相抵或相助，局部系数大不保证最终梯度范数大。
+
+**第二步：恢复目标单位。** 同一组 token 项 $j_{it}$，有两个不同目标：
+
+$$J_{\mathrm{seq}}=\frac1B\sum_i\frac1{T_i}\sum_t m_{it}j_{it},
+\qquad J_{\mathrm{tok}}=\frac1N\sum_{i,t}m_{it}j_{it}.$$
+
+$$\nabla J_{\mathrm{seq}}=\sum_{i,t}\frac{m_{it}c_{it}}{BT_i}g_{it},
+\qquad \nabla J_{\mathrm{tok}}=\sum_{i,t}\frac{m_{it}c_{it}}N g_{it}.$$
+
+前者平均每条回答的 token 目标，后者平均全批有效 token。若奖励有单位 $U$，优势有单位 $U$，log probability、ratio 无量纲；目标的数值是“每回答内平均”或“每 token 平均”的奖励加权量，不能省略分母后直接比较 loss 大小。GSPO 已对序列 surrogate 求导，正确的序列平均是
+
+$$\nabla J_{\mathrm{GSPO}}=\sum_{i,t}\frac{m_{it}}B
+M_i A_i\frac{s_i}{T_i}g_{it}.$$
+
+不要再除一次 $T_i$。CISPO 的 log-prob 目标可以是负数，SAPO 可加不影响梯度的常数；不同方法的原始 objective 曲线没有统一零点，不能按目标值大小选赢家。
+
+**第三步：手算一个会翻转方向的批次。** 取 $B=2$、长度 $[2,6]$；沿某个固定参数方向，每个 token 的投影 score 都是 1，局部系数分别整行取 $[1,-0.5]$。序列平均的方向导数为 $(1-0.5)/2=0.25$；token 平均为 $(2-3)/8=-0.125$。这不是整体学习率能修复的比例差，而是长短回答重新加权后连方向都变了。
+
+**第四步：把辅助项放进同一账本。** 若 VAPO 教学实现用正样本 token 均值 $L_+=-\sum_{D_+}\ell/N_+$，则最大化 $J_{\mathrm{PPO}}-\mu L_+$ 时，正 token 额外得到 $\mu/N_+$ 的系数。取 $N=8,N_+=2,\mu=0.1$，每个正 token 额外得到 0.05；若其 PPO 未归一化系数为 1，主项为 0.125，辅助项为主项的 40%。正样本比例改变时，这个相对尺度也会变。空正集合定义辅助项为零。
+
+**追问与边界。** 为什么梯度累积不能把各 microbatch 的 token 均值直接等权平均？因为它实现“等 microbatch”而非全局 token 平均，应按各批 $N$ 加权。为什么改 reward scale 后要复核 NLL 系数？若优势随奖励放大而辅助项不变，两者比重变了；若先做优势标准化则要另算。只有明确聚合、标准化和 stop-gradient，才有可复现的超参数含义。`,
+    },
+    {
+      id: "math-update-diagnostics",
+      type: "derivation",
+      title: "从公式到诊断：平均 ratio 正常为什么仍会失稳",
+      body: String.raw`**符号与假设。** 在已记录的有效动作上，令 $a_j$ 为包含聚合因子的有符号局部梯度系数，$j=1,\ldots,N$。为衡量更新是否集中在极少数动作，定义非负质量 $v_j=|a_j|$，并假设 $\sum_jv_j>0$：
+
+$$h_j=\frac{v_j}{\sum_kv_k},\qquad
+N_{\mathrm{eff}}=\frac1{\sum_jh_j^2}
+=\frac{(\sum_jv_j)^2}{\sum_jv_j^2}.$$
+
+**推导与解释。** 均匀质量 $h_j=1/N$ 给出 $N_{\mathrm{eff}}=N$；只有一个非零质量则为 1。由 Cauchy-Schwarz，$1\le N_{\mathrm{eff}}\le N$。这借用了 ESS 的集中度形式，但不是相关 token 的独立样本数，也没有计算各 $g_j$ 的方向；全零系数时应报告“无策略信号”，不要除零。
+
+手算 $v=[1,1,1,7]$，质量为 $[0.1,0.1,0.1,0.7]$，$N_{\mathrm{eff}}=100/52\approx1.9231$。虽然四个 token 都有梯度，最后一个占绝对系数的 70%。CISPO clip fraction 高也可能四个都活跃；PPO 则需同时记录优势符号与饱和方向；SAPO 应看系数分布和近零质量，不能照搬一个硬裁剪比例。系数的正负相消与网络向量相消还需分别记录。
+
+**GSPO 平均会隐藏什么？** 令 $z_t=\log r_t$，同条回答的均值 $\bar z$ 决定 $s=e^{\bar z}$。对 $r=[0.5,2]$，$\bar z=0,s=1$，但总体离散度为 $(\log2)^2\approx0.480453$。sequence gate 正常不代表所有 token 变化都小。
+
+进一步假设噪声 $z_t$ 有相同方差 $\sigma^2$，任意不同位置的相关系数为 $\rho$，则
+
+$$\operatorname{Var}(\bar z)=\frac{T\sigma^2+T(T-1)\rho\sigma^2}{T^2}
+=\sigma^2\left(\rho+\frac{1-\rho}{T}\right).$$
+
+取 $T=100,\sigma^2=1,\rho=0.2$，得到 0.208；错误地假设独立会得到 0.01。相关项留下噪声下限，所以不能用长度归一化替代 routing replay 或训推概率核验。
+
+**追问：日志该按什么顺序看？** 先核对版本、mask 和行为概率，再看 $A$ 的非零比例及 critic 校准，然后看 token ratio 尾部、$\bar z$ 与序列内方差，最后看归一化后的系数集中度、实际梯度范数和独立成功率。上述计算只诊断可疑位置，不足以证明某个 loss 更好；需要固定数据和预算，单独更换 gate 或路由机制。`,
     },
     {
       id: "code",
@@ -362,6 +435,26 @@ print("all gradient and boundary checks passed")
         {
           q: "R3 重放 rollout 专家选择，是否意味着 router 没有梯度、GSPO 无法使用？",
           a: "都不是。原方案重放选择 mask，但以训练 logits 计算 gate 保留梯度；路由一致性与 GSPO 的序列目标正交兼容。",
+        },
+      ],
+    },
+    {
+      id: "whiteboard",
+      type: "quiz",
+      title: "白板练习：系数、归一化与稳定性",
+      body: "先写符号和冻结量，再计算，最后说明该结论不能推出什么。",
+      questions: [
+        {
+          q: "A=1、两个 token ratio=[0.5,2]、裁剪区间 [0.8,1.2]。按这条回答的 token 均值，推导 PPO、教学双侧 CISPO、GSPO 的两个系数。",
+          a: String.raw`PPO 先求 $MAr$ 得 $[0.5,0]$，再除 2 得 $[0.25,0]$。CISPO 冻结权重 $[0.8,1.2]$，得到 $[0.4,0.6]$。GSPO 的 $s=\exp((\log0.5+\log2)/2)=1$，每项为 $sA/T=0.5$，故 $[0.5,0.5]$，不能再除 2。**得分点：** 有符号 min、detach、几何平均及 GSPO 的长度因子；原 M1 无有效下界时 CISPO 第一项改为 0.25。`,
+        },
+        {
+          q: "两条回答长 2、6，每个 token 沿同一参数方向的 score=1，局部系数为 1、-0.5。分别算序列平均和 token 平均，再解释能否仅调学习率对齐。",
+          a: String.raw`序列平均为 $\frac12(2/2-3/6)=0.25$；token 平均为 $(2-3)/8=-0.125$。二者方向相反，正学习率缩放不能对齐。**得分点：** 分清局部系数和参数投影、写出两个分母、说明长回答权重改变；真实向量梯度还需各位置 score，不能只凭长度断言方向。`,
+        },
+        {
+          q: "SAPO 在 r=1.5、A=1、tau=2 时怎样从目标导出 log-prob 梯度？若四个动作的绝对系数是 [1,1,1,7]，活跃比例能说明更新均匀吗？",
+          a: String.raw`令 $p=\sigma(2(r-1))=\sigma(1)$。先对 $4\sigma(2(r-1))/2$ 求 ratio 导数得 $4p(1-p)$，再乘 $\partial r/\partial\ell=r$，系数约 1.179672。四个动作虽都活跃，集中度为 $(1+1+1+7)^2/(1+1+1+49)=1.9231$，最后一项占 70%。**得分点：** 不能漏 ratio，区分活跃与均匀，这个 ESS 形式不证明 token 独立或向量梯度不相消。`,
         },
       ],
     },
