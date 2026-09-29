@@ -1,4 +1,21 @@
-# 30 章整合验收
+# 验收产物索引
+
+当前版本的开场、公式上下文和阅读顺序修订见
+[叙事修订验收记录](../docs/research/narrative-acceptance.md)。
+本轮产物使用 `narrative-*` 前缀，包含真实章首截图、两模式布局报告和原生交互记录。
+上一轮数学补充见 [面试数学验收记录](../docs/research/interview-acceptance.md)。
+下文保留 2026-09-27 的历史整合快照，其数量和截图不代表当前页面顺序。
+
+## 2026-09-30 叙事修订
+
+- 首屏：[桌面](narrative-opening-1440x1000.png)、[平板](narrative-opening-1024x900.png)、[手机](narrative-opening-390x844.png)。
+- 连续推导：[风险与一次更新](narrative-formula-risk.png)、[蒸馏 KL 梯度](narrative-formula-distillation.png)。
+- [内容保留与路线](narrative-content-review.json)、[三宽度两模式布局](narrative-layout-audit.json)、[原生交互](narrative-interaction-audit.json)。
+- [37 项测试](narrative-tests.log)、[内容与来源校验](narrative-validation.log)、[公式解析](narrative-math-rendering.log)、[五组数值检查](narrative-numerical.log)。
+
+截图已实际查看，完整判断、修订示例与证据边界见本轮验收记录。
+
+## 2026-09-27 整合验收
 
 验收日期：2026-09-27。所有结果来自当前本地 `ml-roadmap`，不代表论文训练复现。
 

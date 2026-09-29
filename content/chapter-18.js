@@ -18,35 +18,26 @@ const chapter = {
     "DPO 把奖励模型和在线 RL 合并为一个基于偏好对的分类目标，用相对 reference 的似然差提高 chosen、压低 rejected；它更简单，但仍受偏好数据覆盖、长度偏差和离线分布限制。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：从约束最优策略到偏好损失与梯度",
-      body: String.raw`先修 KL、拉格朗日乘子、sigmoid 和序列 likelihood。按“固定奖励的策略最优化 → 隐式奖励 → Bradley-Terry 消去配分函数 → DPO 梯度 → 各变体数据与公式”学习。白板上要保留归一化乘子和所有 beta 因子，不能只背一个最终 loss。标准 DPO 是固定数据上的监督优化，没有 PPO 的 old-policy 分母。`,
-      links: [
-        { label: "DPO 完整拉格朗日推导", sectionId: "derivation", level: "必会" },
-        { label: "梯度、beta 与长度", sectionId: "math-dpo-gradient-length", level: "推导" },
-        { label: "IPO、SimPO、ORPO", sectionId: "math-preference-pairs", level: "进阶" },
-        { label: "KTO 与非成对反馈", sectionId: "math-kto", level: "进阶" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：学习相对偏好，不预测绝对分数",
-      body: String.raw`经典 RLHF 先训练标量奖励模型，再用 PPO 采样并优化。DPO（Direct Preference Optimization）观察到，在特定 KL 正则奖励最大化假设下，最优策略与 reference policy 的概率比已经编码隐式奖励，因此可直接用 chosen/rejected 对训练策略，无需显式 reward model 和 rollout loop。
+      body: String.raw`上一章让学习助手不断生成同题解答，再用组内差异学习。假如我们已经保存了大量比较记录：同一道题，一份解释清楚，另一份遗漏条件，标注者明确更喜欢前者；每轮再生成和评分很昂贵。能否直接从这些固定偏好对调整助手，不先训练独立评分器？本章沿第 16 章的正则奖励目标推导这种做法。
+
+经典 RLHF 先训练标量奖励模型，再用 PPO 采样并优化。DPO（Direct Preference Optimization）观察到，在特定 KL 正则奖励最大化假设下，最优策略与 reference policy 的概率比已经编码隐式奖励，因此可直接用 chosen/rejected 对训练策略，无需显式 reward model 和 rollout loop。
 
 一条数据是 $(x,y_w,y_l)$：同一个 prompt $x$ 下，$y_w$ 被偏好，$y_l$ 被拒绝。DPO 不只提高 chosen 的绝对似然，而是提高“当前策略相对 reference 对 chosen 的增幅”与“对 rejected 的增幅”之间的差。
 
 reference 很重要。若 chosen 本来就在基座中概率很高，当前策略无需无限提高；若 rejected 也同步被提高，偏好间隔没有改善。DPO 通过 log-ratio 比较这种相对变化。
 
-它常被称为“RL-free”，更准确的说法是训练过程不显式运行奖励模型与在线策略梯度；推导仍来自 KL 正则控制目标。离线偏好数据固定后，模型不会看到自己更新后新产生的错误状态，这与 on-policy RL、OPD 的数据闭环有根本差异。`,
+它常被称为“RL-free”，更准确的说法是训练过程不显式运行奖励模型与在线策略梯度；推导仍来自 KL 正则控制目标。离线偏好数据固定后，模型不会看到自己更新后新产生的错误状态，这与 on-policy RL、OPD 的数据闭环有根本差异。下面先用两份回答的四个概率读懂“相对改善”，再解释为什么这种差值可以替代显式奖励。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：四个 log 概率决定一对偏好",
-      body: String.raw`对某 prompt，当前策略给 chosen 与 rejected 的序列 log 概率分别为 -2.0 与 -3.0；reference 对应为 -2.5 与 -2.7。当前策略相对 reference 的变化：
+      body: String.raw`从助手的历史记录中取出同题两份解释，把标注者偏好的那份记为 chosen，另一份记为 rejected。我们不重新让它们比赛，而是分别询问当前模型和冻结基准：生成这份完整回答有多大可能？
+
+对某 prompt，当前策略给 chosen 与 rejected 的序列 log 概率分别为 -2.0 与 -3.0；reference 对应为 -2.5 与 -2.7。当前策略相对 reference 的变化：
 
 $$\log\frac{\pi_\theta(y_w|x)}{\pi_{\mathrm{ref}}(y_w|x)}
 =-2.0-(-2.5)=0.5$$
@@ -54,11 +45,24 @@ $$\log\frac{\pi_\theta(y_w|x)}{\pi_{\mathrm{ref}}(y_w|x)}
 $$\log\frac{\pi_\theta(y_l|x)}{\pi_{\mathrm{ref}}(y_l|x)}
 =-3.0-(-2.7)=-0.3$$
 
-偏好 margin 为 $\Delta=0.5-(-0.3)=0.8$。若 $\beta=0.1$，DPO 分类 logit 为 0.08，模型认为 chosen 胜出的概率为 $\sigma(0.08)\approx0.52$，仍有继续学习空间。
+用 $\Delta$ 记两种相对增幅之差，$\beta$ 为把差值映射成偏好 logit 的正系数，$\sigma$ 为 sigmoid。偏好 margin 为 $\Delta=0.5-(-0.3)=0.8$。若 $\beta=0.1$，DPO 分类 logit 为 0.08，模型认为 chosen 胜出的概率为 $\sigma(0.08)\approx0.52$，仍有继续学习空间。
 
 注意序列 log 概率是 token log 概率之和。长回答自然累加更多负数，因此长度分布会影响 margin。使用相同 prompt 的成对数据可部分抵消，但 chosen 与 rejected 长度系统不同仍会形成偏差。
 
-若当前策略同时把两条回答都提高相同的相对 log-ratio，$\Delta$ 不变，DPO 不认为偏好改善。这体现了成对目标，也说明单看 chosen loss 不能诊断 DPO。`,
+若当前策略同时把两条回答都提高相同的相对 log-ratio，$\Delta$ 不变，DPO 不认为偏好改善。这体现了成对目标，也说明单看 chosen loss 不能诊断 DPO。约 0.52 是偏好模型的胜出概率，不是算术答案正确率，更不是生成 chosen 的概率。接下来要解释为什么这个分类 logit 恰好使用相对 reference 的差，而不是任意拼接四个数。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：从约束最优策略到偏好损失与梯度",
+      body: String.raw`先固定一道题和奖励，求出在偏离 reference 需要付出代价时的最优回答分布；再反解奖励，用同题比较消去未知归一化常数，回到开场的四个 log-prob。得到 loss 后继续求 token 梯度，检查 beta、长度和 chosen 绝对概率的作用。最后根据遇到的具体问题比较变体：间隔是否要无限增大、能否去 reference、是否需要保留 chosen 的监督项，以及只有单条好坏反馈时怎么办。KL 与条件概率回看第 03 章，乘子法和 sigmoid 分别用来解最优分布与偏好似然。标准 DPO 没有 PPO 的 old-policy 分母。`,
+      links: [
+        { label: "DPO 完整拉格朗日推导", sectionId: "derivation", level: "必会" },
+        { label: "梯度、beta 与长度", sectionId: "math-dpo-gradient-length", level: "推导" },
+        { label: "IPO、SimPO、ORPO", sectionId: "math-preference-pairs", level: "进阶" },
+        { label: "KTO 与非成对反馈", sectionId: "math-kto", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -92,7 +96,9 @@ Step-level preference 把一条推理轨迹拆成中间步骤比较，信用更�
       id: "derivation",
       type: "derivation",
       title: "从 KL 正则最优策略到 DPO",
-      body: String.raw`对固定 prompt $x$，考虑奖励 $r(x,y)$ 与 reference $\pi_{\mathrm{ref}}$：
+      body: String.raw`我们只有“这份解释比那份好”的记录，却想跳过显式奖励模型。先做一个反向推理：如果奖励真的已知，什么回答分布会最优？若能由这个分布反解奖励差，就能把偏好标签直接用于训练生成模型。
+
+对固定 prompt $x$，考虑奖励 $r(x,y)$ 与 reference $\pi_{\mathrm{ref}}$；$y$ 是完整回答，$\pi$ 是待求的回答分布，$\beta$ 是偏离 reference 的代价系数。沿用第 16 章的正则目标：
 
 $$\max_\pi
 \mathbb E_{y\sim\pi}[r(x,y)]
@@ -100,7 +106,7 @@ $$\max_\pi
 
 **第一步：说明可解条件。** 在有限回答集合上，假设 $\beta>0$、reference 对每个允许回答为正，奖励有限。无限集合还需配分函数有限；reference 为零的回答不能获得有限 KL 下的正质量。
 
-**第二步：引入归一化乘子。** 简记 $p_y=\pi(y|x),q_y=\pi_{\rm ref}(y|x),r_y=r(x,y)$：
+**第二步：引入归一化乘子。** 回答概率必须加起来为 1，不能对每个回答独立无限增大概率。用 $\lambda$ 约束这个条件，简记 $p_y=\pi(y|x),q_y=\pi_{\rm ref}(y|x),r_y=r(x,y)$：
 
 $$\mathcal L(p,\lambda)=\sum_yp_yr_y-\beta\sum_yp_y\log(p_y/q_y)
 +\lambda\left(\sum_yp_y-1\right)$$
@@ -116,7 +122,7 @@ $$\pi^*(y|x)=\frac{1}{Z(x)}
 
 由于关于 p 的 Hessian 为 $-\beta\operatorname{diag}(1/p_y)$，在单纯形内部严格凹，这个驻点是唯一最优解。也可将原目标改写成 $\beta\log Z-\beta D_{\rm KL}(\pi\|\pi^*)$ 直接验证。
 
-**第四步：反解隐式奖励。** 对最优策略取 log 并移项：
+**第四步：反解隐式奖励。** 现在归一化已保证是一个合法策略，可以把刚才“奖励决定概率”的关系倒过来。对最优策略取 log 并移项：
 
 $$r(x,y)=\beta\log\frac{\pi^*(y|x)}
 {\pi_{\mathrm{ref}}(y|x)}+\beta\log Z(x)$$
@@ -132,13 +138,17 @@ $$L_{\mathrm{DPO}}=
 
 **第六步：从概率到训练。** 对数据集偏好标签取负 log-likelihood 即上式，reference 冻结，只有 $\pi_\theta$ 更新。推导依赖偏好模型、KL 正则形式与策略可表示性。DPO 损失成立不代表真实人类偏好严格服从 Bradley-Terry，也不代表离线数据覆盖了更新后策略。
 
-教学例只有两个回答，$q=[0.5,0.5],r=[\log3,0],\beta=1$。$Z=2$，$\pi^*=[0.75,0.25]$，隐式奖励差 $\log(0.75/0.5)-\log(0.25/0.5)=\log3$，BT 胜率为 0.75。改变共同奖励常数只改变 Z，不改变最优策略。`,
+为检验最优分布这一步，先把回答空间缩成只有两份解释，不使用开场四个实际 log-prob。教学例只有两个回答，$q=[0.5,0.5],r=[\log3,0],\beta=1$。$Z=2$，$\pi^*=[0.75,0.25]$，隐式奖励差 $\log(0.75/0.5)-\log(0.25/0.5)=\log3$，BT 胜率为 0.75。改变共同奖励常数只改变 Z，不改变最优策略。
+
+较好解释从基准的一半质量增加到四分之三，正是奖励倾斜与 KL 代价平衡后的结果；BT 胜率恰好也为 0.75 是此例的设定，不是两个概率概念相同。回到真实多回答空间，不必计算 Z，只需开场四个 log-prob 得到 loss。下一节继续求这个 loss 的实际梯度，检查“偏好改善”是否一定意味着 chosen 更常生成。`,
     },
     {
       id: "math-dpo-gradient-length",
       type: "derivation",
       title: "DPO 从 margin 到 token 梯度：beta、长度与概率下降",
-      body: String.raw`记 response 的序列 log-prob 为 $\ell_w,\ell_l$，冻结 reference 值为 $\ell_w^r,\ell_l^r$：
+      body: String.raw`开场的偏好胜率只有约 0.52，训练下一步会怎样改变两份解题说明？不能只说“提高好答案”：共享参数可能同时降低两者概率，也可能偏向较长的解释。本节从同一组四个 log-prob 求导，再用反例界定目标真正保证什么。
+
+记 response 的序列 log-prob 为 $\ell_w,\ell_l$，冻结 reference 值为 $\ell_w^r,\ell_l^r$，w、l 分别表示 chosen 与 rejected；$\Delta$ 为相对间隔，$z$ 为乘上 $\beta$ 后的分类 logit，L 为单对损失：
 
 $$\Delta=(\ell_w-\ell_w^r)-(\ell_l-\ell_l^r),\qquad
 z=\beta\Delta,\qquad L=\log(1+e^{-z})$$
@@ -146,7 +156,7 @@ $$\frac{\partial L}{\partial z}=-\sigma(-z),\quad
 \nabla_\theta L=-\beta\sigma(-\beta\Delta)
 (\nabla_\theta\ell_w-\nabla_\theta\ell_l)$$
 
-梯度下降提高 chosen 相对 rejected 的 log-prob。以词表 logits $h_{t,v}$ 为参数，$\partial\ell/\partial h_{t,v}=\mathbf1[v=y_t]-\pi_\theta(v|s_t)$；chosen 的系数为 $-\beta\sigma(-z)$，rejected 相反，二者共享参数时梯度再相加。prompt 与 padding mask 为零，response 含约定的 EOS；reference 不求导。
+负 log-sigmoid 对 logit 求导，再经过 margin 的相减关系，就得到两侧相反的系数。把两侧 log-prob 暂作独立坐标时，梯度下降提高 chosen 相对 rejected 的 log-prob。以词表 logits $h_{t,v}$ 为参数，$\partial\ell/\partial h_{t,v}=\mathbf1[v=y_t]-\pi_\theta(v|s_t)$；chosen 的系数为 $-\beta\sigma(-z)$，rejected 相反，二者共享参数时梯度再相加。prompt 与 padding mask 为零，response 含约定的 EOS；reference 不求导。
 
 **手算原例。** $\ell_w=-2,\ell_l=-3,\ell_w^r=-2.5,\ell_l^r=-2.7,\beta=0.1$，$\Delta=0.8,z=0.08$，$L\approx0.653947$，对两侧序列 log-prob 导数约为 $[-0.048001,0.048001]$。正确分离的数据仍有非零梯度，只是 sigmoid 饱和后变小。
 
@@ -154,13 +164,17 @@ $$\frac{\partial L}{\partial z}=-\sigma(-z),\quad
 
 **长度会进入 margin。** 标准 DPO 用 $\ell=\sum_{t=1}^T\log\pi(y_t|s_t)$。每 token 相对 reference 同样提升 0.1 时，4 token 与 1 token 回答的隐式奖励增幅相差 0.3；这只是概率比长度效应，不能证明前者更优。改成平均 log-prob 是新目标，不再原样满足上述序列 KL 推导。
 
-**chosen 概率下降反例。** reference 和初始策略都为 $[0.4,0.3,0.3]$（chosen、rejected、其他），更新后为 $[0.3,0.1,0.6]$。chosen 从 0.4 降到 0.3，但 margin 从 0 升到 $\log(0.3/0.4)-\log(0.1/0.3)=\log2.25>0$。成对目标不保证 chosen 的绝对 likelihood 上升；应分别监控两侧概率与独立质量。`,
+**chosen 概率下降反例。** 为显式看到概率质量流向哪里，把回答空间分成 chosen、rejected 和其他三类。reference 和初始策略都为 $[0.4,0.3,0.3]$（chosen、rejected、其他），更新后为 $[0.3,0.1,0.6]$。chosen 从 0.4 降到 0.3，但 margin 从 0 升到 $\log(0.3/0.4)-\log(0.1/0.3)=\log2.25>0$。成对目标不保证 chosen 的绝对 likelihood 上升；应分别监控两侧概率与独立质量。
+
+所以原例的 -0.048001 是单对 loss 对 chosen log-prob 的局部导数，不是整网训练后概率必增的承诺。长度例中的 0.3 额外间隔也没有提供新的偏好证据。下一节据此比较三种不同修改：把间隔控制在有限值、按 token 平均计分，以及显式保留 chosen 的监督项。`,
     },
     {
       id: "math-preference-pairs",
       type: "derivation",
       title: "IPO、SimPO、ORPO：精确目标与不同梯度",
-      body: String.raw`三者都使用偏好对，但不能互换 reference、长度分母和 margin 的位置。
+      body: String.raw`同一批解题偏好对可能出现三种需求：已经分得很开的回答不必继续拉开，长解释不应仅因 token 多而改变尺度，偏好学习时还想保住 chosen 的模仿能力。下面分别用 IPO、SimPO、ORPO 写出对应目标，比较时始终保留“谁是同题赢家”这个数据条件。
+
+三者都使用偏好对，但不能互换 reference、长度分母和 margin 的位置。沿用上一节的两侧序列 log-prob 与相对间隔，每种方法新增的系数在其公式前单独定义；三个教学数值用于检查各自目标，不当作跨方法的质量排名。
 
 **IPO。** 定义与 DPO 相同的未乘 beta 的相对 log-ratio 差 $h=\Delta$，用论文的正则参数 $\tau>0$：
 
@@ -170,7 +184,7 @@ $$L_{\rm IPO}=\mathbb E\left[\left(h-\frac1{2\tau}\right)^2\right],
 
 $1/(2\tau)$ 的 2 来自同时考虑偏好对的两个方向。若 $h(y_l,y_w)=-h(y_w,y_l)$，则 $\tfrac12[(h-\tau^{-1})^2+(-h)^2]=(h-\tfrac1{2\tau})^2+\tfrac1{4\tau^2}$。因此不是把目标随意设成 1，也不是在平方外乘一个 beta 就等价。$\tau=0.5$ 时目标 gap=1，h=0.8 的损失 0.04、对 h 梯度 -0.4；h 超过 1 时梯度反转，回到有限 margin。这里是原始序列 likelihood 形式，采用长度平均的实现须另注明。
 
-**SimPO。** 令 $\bar\ell(y)=T^{-1}\sum_t\log\pi_\theta(y_t|s_t)$，reference-free 隐式 reward 为 $\beta\bar\ell$，目标奖励 margin $m>0$（原文记作 gamma，不是 RL 折扣）：
+IPO 仍依赖 reference；如果希望去掉它，同时改变长短回答的计分单位，就需要另一个目标。**SimPO。** T 为有效回答长度，令 $\bar\ell(y)=T^{-1}\sum_t\log\pi_\theta(y_t|s_t)$，reference-free 隐式 reward 为 $\beta\bar\ell$，目标奖励 margin $m>0$（原文记作 gamma，不是 RL 折扣）：
 
 $$z_{\rm SimPO}=\beta(\bar\ell_w-\bar\ell_l)-m,\qquad
 L_{\rm SimPO}=-\mathbb E\log\sigma(z_{\rm SimPO})$$
@@ -180,7 +194,7 @@ $$\nabla L_{\rm SimPO}
 
 教学取 $\bar\ell_w=-0.5,\bar\ell_l=-0.8,\beta=2,m=0.2$，z=0.4，loss≈0.513015。长度平均是目标设计，不能说随机采样解码在精确最大化这个均值；其同数据效果须实验验证。
 
-**ORPO。** 按原文先作长度归一化，定义 $\tilde p(y|x)=\exp(\bar\ell(y))\in(0,1)$。它是 token 概率的几何平均，不是整个回答集合上的归一化概率。用它构造 odds：
+SimPO 仍是两侧差值目标；若还要直接奖励模仿 chosen，可把监督项放入损失。**ORPO。** 按原文先作长度归一化，定义 $\tilde p(y|x)=\exp(\bar\ell(y))\in(0,1)$。它是 token 概率的几何平均，不是整个回答集合上的归一化概率。用它构造 odds：
 
 $$o(y)=\frac{\tilde p(y)}{1-\tilde p(y)},\quad
 h_{\rm OR}=\log o(y_w)-\log o(y_l)$$
@@ -193,18 +207,22 @@ $$\frac{\partial L}{\partial\bar\ell_w}
 \frac{\partial L}{\partial\bar\ell_l}
 =\frac{\lambda\sigma(-h_{\rm OR})}{1-\tilde p_l}$$
 
-负号由最小化负 log-sigmoid 推出，不能漏掉。教学取 $\tilde p_w=0.4,\tilde p_l=0.2$，odds ratio=8/3，偏好 loss=$\log(11/8)\approx0.318454$；若 $\lambda=0.1$，含 SFT 总 loss≈0.948136。实现用稳定的 log1mexp 计算 $\log(1-e^{\bar\ell})$，不要直接把很长序列概率连乘再套 odds。`,
+负号由最小化负 log-sigmoid 推出，不能漏掉。教学取 $\tilde p_w=0.4,\tilde p_l=0.2$，odds ratio=8/3，偏好 loss=$\log(11/8)\approx0.318454$；若 $\lambda=0.1$，含 SFT 总 loss≈0.948136。实现用稳定的 log1mexp 计算 $\log(1-e^{\bar\ell})$，不要直接把很长序列概率连乘再套 odds。
+
+回到助手的两份说明：IPO 的 gap=0.8 距目标 1 尚差 0.2，所以导数 -0.4 继续拉开；SimPO 的 0.4 logit 已扣除要求的 margin；ORPO 的总损失还含 chosen 的模仿代价，不能拿它与纯偏好 loss 直接比较。这三者都需要配对；如果历史反馈只有一条回答“好”或“坏”，下一节的 KTO 才改变了数据条件。`,
     },
     {
       id: "math-kto",
       type: "derivation",
       title: "KTO：单条好坏反馈、参考点与停止梯度",
-      body: String.raw`KTO 可使用单条 $(x,y,d)$ 数据，$d\in\{D,U\}$ 是 desirable/undesirable 标签，不要求同 prompt 的偏好对。沿用原文的未缩放 log-ratio：
+      body: String.raw`用户有时只给助手的一份说明点了“有帮助”或“无帮助”，没有留下同题另一份回答。把不同题目的回答硬凑成偏好对会破坏前面消去归一化常数的条件。现在直接使用单条好坏反馈，同时明确它与“某回答比另一条更好”不是同一种标签。
+
+KTO 可使用单条 $(x,y,d)$ 数据，$d\in\{D,U\}$ 是 desirable/undesirable 标签，不要求同 prompt 的偏好对。x 为题目、y 为回答，$\pi_{\rm ref}$ 冻结。沿用原文的未缩放 log-ratio：
 
 $$r_\theta(x,y)=\log\frac{\pi_\theta(y|x)}{\pi_{\rm ref}(y|x)},\qquad
 z_0(x)=D_{\rm KL}(\pi_\theta(\cdot|x)\|\pi_{\rm ref}(\cdot|x))$$
 
-把参考点在反向时冻结，令 $s=\beta(r_\theta-\operatorname{sg}(z_0))$，正权重 $\lambda_D,\lambda_U$ 表达两类反馈的重要性。最小化效用缺口，不是二元交叉熵：
+这里 $z_0$ 是策略相对 reference 的 KL 参考点，不是某条回答的偏好标签。以相对参考点的增幅构造有界效用：把参考点在反向时冻结，令 $s=\beta(r_\theta-\operatorname{sg}(z_0))$，正权重 $\lambda_D,\lambda_U$ 表达两类反馈的重要性。最小化效用缺口，不是二元交叉熵：
 
 $$L_{\rm KTO}=\mathbb E_D\left[
 \begin{cases}
@@ -227,7 +245,9 @@ $$\hat z_0=\operatorname{sg}\left[
 
 j 是无自身的循环移位、$B>1$。这是方便的有偏参考点估计，不是当前序列 KL 的无偏计算；clamp 相对原始均值提高估计，但整体相对真实 KL 的偏差不保证为正。这里 z0 是效用饱和的参考点，不是额外加在总 loss 外的 KL penalty。
 
-把 pair 的 winner 当“好”、loser 当“坏”是额外标签假设：两条可能都坏，或都好但一条更好。类别不均衡时要记录采样比例与 $\lambda_D,\lambda_U$，不能用一个总准确率概括校准。`,
+把 pair 的 winner 当“好”、loser 当“坏”是额外标签假设：两条可能都坏，或都好但一条更好。类别不均衡时要记录采样比例与 $\lambda_D,\lambda_U$，不能用一个总准确率概括校准。
+
+在参考点上的同一回答，两类 loss 都为 0.5，却分别给出 -0.05 与 +0.05 的 log-ratio 导数；标签决定方向，参考点决定效用所在区域。错配估计只是实现这个参考点的近似，不能读成新的真实奖励。无论用成对还是单条离线反馈，更新后助手访问的新错误前缀仍可能没有监督，第 19 章将让教师直接在这些学生前缀上给出分布。`,
     },
     {
       id: "code",

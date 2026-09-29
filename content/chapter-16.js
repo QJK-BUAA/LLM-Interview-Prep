@@ -18,23 +18,12 @@ const chapter = {
     "经典 RLHF 先把人类偏好拟合为奖励模型，再用 PPO 提高高奖励回答的概率；价值模型降低方差，reference KL 与 clip 分别约束长期偏移和单批更新。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：偏好评分、信任域与 PPO 更新",
-      body: String.raw`先修第 15 章的 score function、GAE 与停梯度。先从 Bradley-Terry 得到奖励模型梯度，再分清 reference、old、current 三个策略；用 TRPO 理解 KL 的二阶几何，再推 PPO 正负优势的四种边界。最后把 actor、critic、entropy 和可选 KL 放进一个有明确符号的训练 loss。`,
-      links: [
-        { label: "RM 与 RLHF 目标", sectionId: "derivation", level: "必会" },
-        { label: "KL 估计器与采样条件", sectionId: "math-kl-estimators", level: "推导" },
-        { label: "TRPO 与 Fisher", sectionId: "math-trpo-fisher", level: "推导" },
-        { label: "PPO 四种边界及完整损失", sectionId: "math-ppo-update", level: "必会" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：先学会评分，再谨慎提高高分回答概率",
-      body: String.raw`指令微调（SFT）让模型模仿高质量答案，但很多要求很难写成唯一标准答案。例如“更有帮助且不过度承诺”更适合比较两个回答。经典 RLHF（Reinforcement Learning from Human Feedback）先收集同一 prompt 下的回答偏好，用 chosen/rejected 对训练奖励模型，再把奖励模型当环境反馈优化语言模型。
+      body: String.raw`学习助手给出了两份解题说明：一份解释清楚并承认不确定处，另一份语气肯定却漏掉条件。第 15 章已经会用评分更新回答概率，但“有帮助且不过度承诺”没有唯一答案可直接核对。现在既要从人的比较中学会评分，又要避免模型反复追逐这个评分后丢失原有能力。
+
+指令微调（SFT）让模型模仿高质量答案，但上述要求更适合比较两个回答。经典 RLHF（Reinforcement Learning from Human Feedback）先收集同一 prompt 下的回答偏好，用 chosen/rejected 对训练奖励模型，再把奖励模型当环境反馈优化语言模型。
 
 奖励模型把 prompt 与完整回答映射为标量。它只是人类偏好的代理，不能直接当真理。PPO 让策略生成新回答、得到奖励，再提高高于预期的动作概率；因为策略一旦离开奖励模型训练分布，可能找到评分漏洞，所以还用 SFT reference policy 的 KL 惩罚限制漂移。
 
@@ -42,13 +31,15 @@ const chapter = {
 
 PPO 的“proximal”不是保证永不退化，而是用旧策略采样后，对新旧动作概率比做截断，限制一次数据复用期间的激进更新。训练稳定还依赖奖励尺度、优势估计、KL 系数、数据分布和实现细节。
 
-RLHF 与 RLVR 描述奖励来源，PPO 与 GRPO 描述更新算法。PPO 可以使用可验证的奖励而不训练神经奖励模型；GRPO 也能接收学习型 RM 的分数。去掉 critic 和去掉 reward model 是两项独立设计。开放式写作、对话和安全规范难用唯一标准答案评价，可以用人类偏好、Constitutional AI 的规则批评与修订、或 rubric 分维度反馈，但都需要检查评审偏差。`,
+RLHF 与 RLVR 描述奖励来源，PPO 与 GRPO 描述更新算法。PPO 可以使用可验证的奖励而不训练神经奖励模型；GRPO 也能接收学习型 RM 的分数。去掉 critic 和去掉 reward model 是两项独立设计。开放式写作、对话和安全规范难用唯一标准答案评价，可以用人类偏好、Constitutional AI 的规则批评与修订、或 rubric 分维度反馈，但都需要检查评审偏差。下面先看一个已获正优势的 token 应该增加到什么程度，再回头补齐评分、KL 和优化目标的整条计算链。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：一个 token 的 PPO clip",
-      body: String.raw`某 token 在 rollout 的旧策略概率为 0.20，更新后的当前策略概率为 0.26，概率比为：
+      body: String.raw`假设助手的一条解释已经被判为好于预期。连续训练同一批回答时，某个生成 token 的概率已经增加，还要不要继续给它同样的奖励？这里选另一个采样位置演示更新幅度，概率与优势不沿用上一章的两 token 数字。
+
+某 token 在 rollout 的旧策略概率为 0.20，更新后的当前策略概率为 0.26，概率比为：
 
 $$r_t(\theta)=\frac{\pi_\theta(a_t|s_t)}
 {\pi_{\theta_{\mathrm{old}}}(a_t|s_t)}
@@ -58,7 +49,20 @@ $$r_t(\theta)=\frac{\pi_\theta(a_t|s_t)}
 
 若优势是 -2，策略应降低该动作概率。此时 min 的方向会阻止概率比过度降到 0.8 以下：PPO 的写法对正负优势产生不同边界，不能简单理解为“把所有 ratio 数值夹进区间再乘”。
 
-再看 reference KL。即使当前策略与本轮 old policy 很接近，它们都可能已经逐轮远离最初 SFT reference。PPO clip 约束一次更新；reference KL 约束累计行为偏移。两者比较对象与时间尺度都不同。`,
+2.4 是这一样本的目标贡献，不是把实际概率强制改成 0.24；共享参数上的其他样本仍可能继续改变它。再看 reference KL。即使当前策略与本轮 old policy 很接近，它们都可能已经逐轮远离最初 SFT reference。PPO clip 约束一次更新；reference KL 约束累计行为偏移。两者比较对象与时间尺度都不同。接下来的路线会先说明这个“好于预期”的评分从哪里来，再分别处理两种距离。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：偏好评分、信任域与 PPO 更新",
+      body: String.raw`先把两份解题说明的偏好变成奖励模型的似然损失，再用第 15 章的 GAE 把奖励送到生成位置。评分可能被利用，因此接着计算相对冻结 reference 的 KL，并检查采样来自哪个策略。然后用 TRPO 的局部二阶约束说明“谨慎更新”在分布空间里意味着什么，最后回到更易实现的 PPO，逐一检查正负优势的四种裁剪边界。这样完整训练 loss 的每一项都对应一个已出现的问题，而不是先背四个模型名称。`,
+      links: [
+        { label: "RM 与 RLHF 目标", sectionId: "derivation", level: "必会" },
+        { label: "KL 估计器与采样条件", sectionId: "math-kl-estimators", level: "推导" },
+        { label: "TRPO 与 Fisher", sectionId: "math-trpo-fisher", level: "推导" },
+        { label: "PPO 四种边界及完整损失", sectionId: "math-ppo-update", level: "必会" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -94,12 +98,14 @@ rollout 与 update 必须区分。回答由冻结的 old policy 采样；一次 
       id: "derivation",
       type: "derivation",
       title: "奖励模型、KL 正则与 PPO 目标",
-      body: String.raw`对 prompt $x$、偏好回答 $y_w$ 和非偏好回答 $y_l$，Bradley-Terry 模型假设：
+      body: String.raw`标注者只告诉我们哪份解题说明更好，并没有给每条回答一个绝对分数。要把这种比较接到上一章的策略梯度上，先学习能解释偏好顺序的评分器，再用评分与偏移代价构造回报，最后才决定每次更新幅度。
+
+对 prompt $x$、偏好回答 $y_w$ 和非偏好回答 $y_l$，$r_\phi(x,y)$ 是参数为 $\phi$ 的标量奖励模型，$\sigma$ 是 logistic sigmoid。Bradley-Terry 模型假设：
 
 $$P(y_w\succ y_l|x)
 =\sigma(r_\phi(x,y_w)-r_\phi(x,y_l))$$
 
-奖励模型损失为负对数似然：
+分差越大，模型越相信偏好标签；因此对观察到的胜负最小化负对数似然，奖励模型损失为：
 
 $$L_{\mathrm{RM}}(\phi)=
 -\mathbb E\log\sigma(r_\phi(x,y_w)-r_\phi(x,y_l))$$
@@ -114,7 +120,7 @@ $$\nabla_\phi\ell=-\sigma(-d)
 
 二阶导 $\sigma(d)(1-\sigma(d))\geq0$，但神经网络参数空间不因此整体凸。$d=1$ 时 loss≈0.313262，两侧梯度约为 -0.268941 和 +0.268941。给所有回答加同一个 prompt 相关常数不改变偏好；奖励尺度则会改变 sigmoid 概率，不能说也任意不可辨识。
 
-策略阶段常优化：
+训练完评分器后，冻结它，让助手生成新解释。如果只追求评分，模型可能学会迎合评分器；因此再给偏离参考策略的回答扣分。令 $\pi_\theta$ 为当前生成策略、$\pi_{\rm ref}$ 为冻结基准，$\beta>0$ 为偏移代价权重，策略阶段常优化：
 
 $$\max_\theta\ \mathbb E_{y\sim\pi_\theta(\cdot|x)}
 \left[r_\phi(x,y)-\beta
@@ -122,7 +128,7 @@ $$\max_\theta\ \mathbb E_{y\sim\pi_\theta(\cdot|x)}
 
 第二项是 sample-based KL 代价的常见形式，$\beta$ 控制离 reference 的代价。实际实现可把每 token log-ratio 作为 shaping reward，再用 critic 和 GAE 得到优势。
 
-对旧策略采样动作，定义 $r_t(\theta)=\pi_\theta(a_t|s_t)/\pi_{\mathrm{old}}(a_t|s_t)$。PPO clipped surrogate 为：
+上述目标描述希望得到什么策略，但一次 rollout 后还要用同批数据做多步训练。令 $s_t$ 为已生成前缀、$a_t$ 为实际 token，$\hat A_t$ 为第 15 章算好的冻结优势，$\epsilon$ 为裁剪宽度。对旧策略采样动作，定义 $r_t(\theta)=\pi_\theta(a_t|s_t)/\pi_{\mathrm{old}}(a_t|s_t)$。这里的 r 是概率比，不是前面的奖励分数。PPO clipped surrogate 为：
 
 $$L^{\mathrm{clip}}(\theta)=
 \mathbb E_t\left[
@@ -132,13 +138,17 @@ $$L^{\mathrm{clip}}(\theta)=
 
 Actor 最大化它，critic 则回归 value target。熵 bonus、value clipping、优势标准化和 adaptive KL 都是常见实现选项，但不能在报告算法时省略，因为它们会显著改变训练行为。
 
-reference $\pi_{\rm ref}$ 通常是冻结的 SFT 基准；old $\pi_{\rm old}$ 是本批实际采样策略；current $\pi_\theta$ 是正在优化的策略。old 在本批多 epoch 中保持固定，到下一轮 rollout 才刷新；不能每个 minibatch 都重算 old 并当作行为概率。奖励模型在策略更新阶段也冻结，actor 不沿 RM 的评分反传，而用 score-function 信号。`,
+reference $\pi_{\rm ref}$ 通常是冻结的 SFT 基准；old $\pi_{\rm old}$ 是本批实际采样策略；current $\pi_\theta$ 是正在优化的策略。old 在本批多 epoch 中保持固定，到下一轮 rollout 才刷新；不能每个 minibatch 都重算 old 并当作行为概率。奖励模型在策略更新阶段也冻结，actor 不沿 RM 的评分反传，而用 score-function 信号。
+
+把分差 1 的手算放回开场：评分器给 preferred 一侧的负梯度约 -0.268941，梯度下降便提高其分数，并压低另一侧；这不是直接修改回答概率。评分进入奖励与 GAE 后，才产生开场优势 2 所代表的策略信号，再由 ratio=1.3 的 clip 贡献 2.4。下一节单独计算这条链里的 KL 代价，防止把 reference 和 old 混为一谈。`,
     },
     {
       id: "math-kl-estimators",
       type: "derivation",
       title: "KL reward、k1/k2/k3 与无偏性的条件",
-      body: String.raw`先固定一个前缀，令 $p=\pi_\theta(\cdot|s)$、$q=\pi_{\rm ref}(\cdot|s)$，两者同词表且严格为正。采样动作 $a\sim p$，设 $u(a)=q(a)/p(a)$：
+      body: String.raw`助手可能越来越偏好奖励模型喜欢的措辞，我们想衡量它离初始语言行为有多远。但训练日志里只有采到的 token，不一定保存整个词表。能否用一个 token 的数值估计分布距离？这个问题还必须区分“估计距离”和“对距离求梯度”。
+
+先固定一个前缀，令 $p=\pi_\theta(\cdot|s)$、$q=\pi_{\rm ref}(\cdot|s)$，两者同词表且严格为正。采样动作 $a\sim p$，设 $u(a)=q(a)/p(a)$；$k_1,k_2,k_3$ 是三个候选的单样本估计量：
 
 $$k_1=-\log u,\qquad k_2=\tfrac12(\log u)^2,\qquad
 k_3=u-1-\log u$$
@@ -153,15 +163,17 @@ $k_1$ 单样本可负；$k_3\geq0$ 来自 $\log u\leq u-1$。$k_2$ 只在 $u$ �
 
 **无偏数值不等于无偏梯度。** $p$ 依赖参数，故 $\nabla\mathbb E_p[k]=\mathbb E_p[k\nabla\log p+\nabla k]$。如果把采样动作当常量只对 $k_3$ 求导，其期望为 $\sum_a(p_a-q_a)\nabla\log p_a$，是该固定前缀下 $D_{\rm KL}(q\|p)$ 的梯度，而非一般的 reverse-KL 梯度。不能因 k3 数值无偏就省略这个区别。
 
-**RLHF shaping。** rollout 时冻结 $\ell_t^{\rm old}$、$\ell_t^{\rm ref}$，给每个动作奖励 $-\beta(\ell_t^{\rm old}-\ell_t^{\rm ref})$，终局再加 RM 分数。它在 old 轨迹期望下估计 old-to-reference 的序列 KL；进入 GAE 后成为冻结奖励，随后多 epoch 是 PPO surrogate，不是每一步都精确优化 current-to-reference KL。
+**RLHF shaping。** 回到实际训练时，先固定本轮生成策略，而不是假装旧 token 来自每一步更新后的模型。记 $\ell_t^{\rm old}$、$\ell_t^{\rm ref}$ 为所选 token 的两种 log-prob。rollout 时冻结 $\ell_t^{\rm old}$、$\ell_t^{\rm ref}$，给每个动作奖励 $-\beta(\ell_t^{\rm old}-\ell_t^{\rm ref})$，终局再加 RM 分数。它在 old 轨迹期望下估计 old-to-reference 的序列 KL；进入 GAE 后成为冻结奖励，随后多 epoch 是 PPO surrogate，不是每一步都精确优化 current-to-reference KL。
 
-教学例 old 选中概率 0.2、ref 为 0.1、$\beta=0.1$，该 token 的 KL reward 为 $-0.1\log2\approx-0.069315$。一次 token 的惩罚为负不代表整条任务奖励为负；KL 的比较基准也绝不是本轮 old/current ratio。`,
+沿用开场 old 概率 0.2，再补充该位置在初始 reference 中概率 0.1：教学例 old 选中概率 0.2、ref 为 0.1、$\beta=0.1$，该 token 的 KL reward 为 $-0.1\log2\approx-0.069315$。它惩罚的是相对 reference 的两倍增幅，而 PPO 看到的 current/old 是 1.3。一次 token 的惩罚为负不代表整条任务奖励为负；KL 的比较基准也绝不是本轮 old/current ratio。下一节换到 old 与 current 的距离，解释局部更新约束怎样选步长。`,
     },
     {
       id: "math-trpo-fisher",
       type: "derivation",
       title: "TRPO：从 KL 二阶约束到自然梯度方向",
-      body: String.raw`TRPO 使用 old 状态分布上的局部 surrogate，目标是限制改进步而非直接限制欧氏参数距离。记 $\Delta=\theta-\theta_{\rm old}$，$g=\nabla_\theta L(\theta_{\rm old})$：
+      body: String.raw`同样把一个参数改动一点，有的位置几乎不影响回答，有的位置却会让 token 概率突变。助手的更新预算应该限制行为分布，而不只是参数向量的长度。先求解一个局部 KL 约束问题，才能理解 PPO 为什么选择较便宜的近似目标。
+
+TRPO 使用 old 状态分布上的局部 surrogate，目标是限制改进步而非直接限制欧氏参数距离。令 $L$ 为待最大化的局部策略目标，$d_{\rm old}$ 为旧策略状态分布，$\delta>0$ 为 KL 预算。记 $\Delta=\theta-\theta_{\rm old}$，$g=\nabla_\theta L(\theta_{\rm old})$：
 
 $$\max_\Delta g^\top\Delta,\qquad
 \mathbb E_{s\sim d_{\rm old}}
@@ -184,21 +196,23 @@ $$\Delta=\eta^{-1}F^{-1}g,\quad
 
 若 F 奇异，应说明有效子空间或 damping $(F+\xi I)$；$g=0$ 时没有这个归一化方向。有限步的二阶近似并不精确，TRPO 还需要实际 KL 与 surrogate 的回溯检查。
 
-教学例 $g=[1,2]^\top,F=\operatorname{diag}(2,8),\delta=0.01$，$F^{-1}g=[0.5,0.25]^\top$、$g^\top F^{-1}g=1$，故 $\Delta^*\approx[0.070711,0.035355]$，二次 KL 正好 0.01。
+为手算助手两个可训练方向的更新，把局部梯度和曲率简化成二维：教学例 $g=[1,2]^\top,F=\operatorname{diag}(2,8),\delta=0.01$，$F^{-1}g=[0.5,0.25]^\top$、$g^\top F^{-1}g=1$，故 $\Delta^*\approx[0.070711,0.035355]$，二次 KL 正好 0.01。第二方向虽然原始梯度更大，分布对它也更敏感，因此实际步幅反而较小；这些数是局部二次模型的解，不是某个真实语言模型的已测参数步。
 
-PPO 继承“更新不要太远”的动机，以一阶优化和 clipped surrogate 替代显式二阶约束。PPO clip 不是上述约束的代数等价解，也不提供逐状态 KL 的严格上界。`,
+PPO 继承“更新不要太远”的动机，以一阶优化和 clipped surrogate 替代显式二阶约束。PPO clip 不是上述约束的代数等价解，也不提供逐状态 KL 的严格上界。下一节回到开场实际采到的 token，检查这个替代目标何时继续纠偏、何时停止额外奖励，避免把 0.01 的严格局部预算误读成 clip 的保证。`,
     },
     {
       id: "math-ppo-update",
       type: "derivation",
       title: "PPO 四种边界、log-prob 梯度与完整训练 loss",
-      body: String.raw`令 $\rho=\exp(\ell_\theta-\operatorname{sg}(\ell_{\rm old}))$，优势 $A$ 冻结，$l=1-\epsilon,u=1+\epsilon$。单 token 最大化目标：
+      body: String.raw`开场的好 token 已经增加了三成，所以正优势项封顶；如果同一个 token 实际不好，概率却增加了三成，训练还必须把它压回去。现在逐一推导这两类情况，并把策略、价值和正则项接成可最小化的训练损失。
+
+$\ell_\theta,\ell_{\rm old}$ 分别是当前与采样时所选 token 的 log-prob，$\operatorname{sg}$ 冻结采样记录。令 $\rho=\exp(\ell_\theta-\operatorname{sg}(\ell_{\rm old}))$，优势 $A$ 冻结，$l=1-\epsilon,u=1+\epsilon$。单 token 最大化目标：
 
 $$f(\rho,A)=\min(\rho A,\operatorname{clip}(\rho,l,u)A)
 =\begin{cases}A\min(\rho,u),&A\geq0\\
 A\max(\rho,l),&A<0\end{cases}$$
 
-除不可导边界外，$\partial f/\partial\ell_\theta=M A\rho$，不是只有 $MA$。$M=0$ 当 $A>0,\rho>u$ 或 $A<0,\rho<l$，其余为 1。取 $\epsilon=0.2$：
+先按优势符号决定 min 选择哪一支，再用指数的导数把 ratio 导数转成 log-prob 导数。除不可导边界外，$\partial f/\partial\ell_\theta=M A\rho$，不是只有 $MA$。$M=0$ 当 $A>0,\rho>u$ 或 $A<0,\rho<l$，其余为 1。M 是裁剪支路门控，不是 response mask。取 $\epsilon=0.2$：
 
 | 优势 A | ratio | 目标 f | 对当前 log-prob 的导数 |
 |---|---|---|---|
@@ -215,13 +229,15 @@ $$L_{\rm train}=-\langle f(\rho,\operatorname{sg}(\hat A))\rangle_m
 +c_V\left\langle\tfrac12(V_\phi-\hat R)^2\right\rangle_m
 -c_H\langle H(\pi_\theta)\rangle_m+c_K\langle K_\theta\rangle_m$$
 
-这里 $K_\theta$ 若使用，须明确是固定前缀全词表 KL 还是特定采样 surrogate。已把 KL 计入 rollout reward 的约定可取 $c_K=0$；若两处都用，要解释双重惩罚。可选 value clipping：
+这里 $c_V,c_H,c_K$ 分别控制价值拟合、熵和额外 KL 的权重；$K_\theta$ 若使用，须明确是固定前缀全词表 KL 还是特定采样 surrogate。已把 KL 计入 rollout reward 的约定可取 $c_K=0$；若两处都用，要解释双重惩罚。价值预测若一次移动过大，还可另设阈值 $\epsilon_V$，使用可选 value clipping：
 
 $$V_{\rm clip}=V_{\rm old}+\operatorname{clip}(V_\phi-V_{\rm old},-\epsilon_V,\epsilon_V)$$
 $$L_V=\tfrac12\left\langle
 \max\{(V_\phi-\hat R)^2,(V_{\rm clip}-\hat R)^2\}\right\rangle_m$$
 
-它不是必需组成部分。old log-prob、old value、奖励、GAE、returns、mask 都冻结；当前 log-prob、当前 value 和熵保留梯度。多 epoch 固定同一 old 分母，重新采样后才刷新。ratio 仅修正旧前缀上的动作分布，不自动修正整个状态占用分布；评估仍需真实新 rollout。`,
+它不是必需组成部分。old log-prob、old value、奖励、GAE、returns、mask 都冻结；当前 log-prob、当前 value 和熵保留梯度。多 epoch 固定同一 old 分母，重新采样后才刷新。ratio 仅修正旧前缀上的动作分布，不自动修正整个状态占用分布；评估仍需真实新 rollout。
+
+四行手算中，负优势且 ratio=1.3 的导数为 -2.6，仍会压低这个被错误强化的 token；正优势且 ratio=1.3 才是零。关闭其他项时，对应的最小化 policy loss 分别为 2.6 和 -2.4，符号与最大化目标相反。至此我们能实现一轮 PPO；第 17 章进一步问，如果前缀 critic 太贵或不准，能否让同一道题的多条回答互相提供基准。`,
     },
     {
       id: "code",

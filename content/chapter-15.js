@@ -18,39 +18,30 @@ const chapter = {
     "策略梯度用回报加权所采动作的 log 概率梯度，直接提高好轨迹、降低坏轨迹的概率；Actor-Critic 用价值网络构造低方差优势，GAE 再通过参数 λ 调节 bootstrap 偏差与 Monte Carlo 方差。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：从概率求导到可实现的优势估计",
-      body: String.raw`先修条件期望、softmax 梯度与 Bellman 方程。学习顺序为 score function → 因果性消去过去奖励 → baseline 无偏性 → TD 与 GAE → actor/critic 的计算图。面试要把“估计值无偏”“梯度无偏”和“方差降低”分开，并能从末端边界逐步展开 GAE。`,
-      links: [
-        { label: "策略梯度与因果性", sectionId: "derivation", level: "必会" },
-        { label: "Baseline 证明与最优值", sectionId: "math-baseline", level: "推导" },
-        { label: "GAE 望远镜展开", sectionId: "math-gae-telescoping", level: "推导" },
-        { label: "Actor/Critic 停梯度", sectionId: "math-actor-critic-detach", level: "进阶" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：奖励为每个采样动作调音量",
-      body: String.raw`策略网络输出动作概率。我们从中采样一条轨迹，环境给出回报；若回报高，就增加这条轨迹中已选动作的概率，若回报低于基准，就降低它们的概率。这就是策略梯度最核心的方向。
+      body: String.raw`学习助手现在不只挑一道题，还要用语言解释解法。第 14 章要先给每个候选动作估计长期分数；换成整个词表后，这件事很难，而语言模型已经能给出下一个词的概率。能否让它先生成一次回答，再利用最终评分直接调整这些概率？本章从一条简短答题轨迹开始解决这个问题。
+
+策略网络输出动作概率。我们从中采样一条轨迹，环境给出回报；若回报高，就增加这条轨迹中已选动作的概率，若回报低于基准，就降低它们的概率。这就是策略梯度最核心的方向。
 
 为什么优化 log 概率？概率乘法描述整条轨迹，但许多时间步相乘会很小；取 log 后变成求和，而且 $\nabla\log\pi$ 能把采样概率的梯度写成可估计形式。训练不是把奖励当可微函数穿过环境，而是用奖励作为权重乘在 log 概率梯度上。
 
 纯 REINFORCE 用实际回报 $G_t$ 加权，理论直接但方差很高。同一动作可能因后续随机事件得到完全不同回报。减去合适的状态 baseline 可降低方差，不改变期望梯度；最常见 baseline 是价值函数 $V(s)$，于是权重成为优势估计。任意 baseline 并不保证降方差。
 
-Actor-Critic 同时训练两个角色：actor 是策略 $\pi_\theta$，决定动作；critic 用参数 $\phi$ 估计价值，帮助判断结果比预期好多少。critic 可以降低方差，但估计错误也会引入偏差。GAE（Generalized Advantage Estimation）在短期 TD 与长期回报之间连续调节。`,
+Actor-Critic 同时训练两个角色：actor 是策略 $\pi_\theta$，决定动作；critic 用参数 $\phi$ 估计价值，帮助判断结果比预期好多少。critic 可以降低方差，但估计错误也会引入偏差。GAE（Generalized Advantage Estimation）在短期 TD 与长期回报之间连续调节。我们先算“同样得分、不同预期”的更新，再证明这种比较在什么条件下保留正确方向。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：同样奖励在不同基准下含义不同",
-      body: String.raw`模型生成两个 token 后得到最终奖励 $R=1.0$。在第一个位置，所选 token 概率为 0.8；第二个位置为 0.6。先忽略折扣，轨迹 log 概率是：
+      body: String.raw`把助手的一次算术回答简化成两个生成位置：它选完两个 token 后，验证器才检查最终答案。这里的长度只是为了手算；我们关心的是同一个终局反馈怎样作用于两个不同置信度的位置。
+
+模型生成两个 token 后得到最终奖励 $R=1.0$。在第一个位置，所选 token 概率为 0.8；第二个位置为 0.6。先忽略折扣，轨迹 log 概率是：
 
 $$\log p_\theta(\tau)=\log0.8+\log0.6=\log0.48$$
 
-若没有 baseline，两个 token 都用权重 1.0 增加 log 概率。但假设 critic 认为该状态通常能得到 $V=0.4$，优势估计为 $A=1.0-0.4=0.6$，更新仍朝增加概率方向，幅度更小。
+若没有 baseline，两个 token 都用权重 1.0 增加 log 概率。为只观察概率差异，假设 critic 在两个前缀上都给出同一估计：该状态通常能得到 $V=0.4$，优势估计为 $A=1.0-0.4=0.6$，更新仍朝增加概率方向，幅度更小。
 
 对 softmax 中被选动作的 logit $z_a$，有：
 
@@ -62,7 +53,20 @@ $$0.6(1-0.8)=0.12,\qquad 0.6(1-0.6)=0.24$$
 
 第二个 token 当前概率更低，同样优势下增加空间更大。完整 softmax 梯度还会降低其他 token logits，并通过共享参数影响多个位置。
 
-若实际奖励只有 0.1、baseline 仍是 0.4，则优势为 -0.3，梯度方向反转，降低这些动作概率。奖励绝对为正不代表一定鼓励；关键是它相对 baseline 的高低。`,
+若把验证反馈换成部分得分，实际奖励只有 0.1、baseline 仍是 0.4，则优势为 -0.3，梯度方向反转，降低这些动作概率。奖励绝对为正不代表一定鼓励；关键是它相对 baseline 的高低。0.12 和 0.24 是最大化目标对所选 logit 的导数，不是更新后的概率，也不说明第二个 token 对正确答案有两倍因果贡献。下面从期望回报推导这些系数，再检查 baseline 和轨迹长度会怎样影响它们。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：从概率求导到可实现的优势估计",
+      body: String.raw`先从回答被采到的概率推导奖励加权梯度，利用“已经发生的事不受当前动作影响”只保留未来奖励。然后单独证明减去状态基准为何不改期望方向，避免把这件事误读成任意基准都降方差。回答变长后，用第 13–14 章的 TD 残差构造 GAE，并从末端倒推检查每个位置。最后把 actor 与 critic 的两个损失接进计算图，明确哪些目标必须冻结。条件期望回看第 03 章，softmax 与反传回看第 05、08 章；这些基础分别解释统计方向和实际参数梯度。`,
+      links: [
+        { label: "策略梯度与因果性", sectionId: "derivation", level: "必会" },
+        { label: "Baseline 证明与最优值", sectionId: "math-baseline", level: "推导" },
+        { label: "GAE 望远镜展开", sectionId: "math-gae-telescoping", level: "推导" },
+        { label: "Actor/Critic 停梯度", sectionId: "math-actor-critic-detach", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -99,7 +103,9 @@ $$0.6(1-0.8)=0.12,\qquad 0.6(1-0.6)=0.24$$
       id: "derivation",
       type: "derivation",
       title: "从期望回报到策略梯度与 GAE",
-      body: String.raw`目标是最大化策略产生轨迹的期望回报；先假设有限时域、环境与奖励不依赖 $\theta$、策略在固定支持集上可微，且可交换微分与积分：
+      body: String.raw`验证器只在回答完成后给分，而且未必可微。开场仍然用这个分数更新 token 概率，依据是什么？本节对“回答出现的概率”求导，不穿过验证器求导，再解释如何把终局反馈分配给先前动作。
+
+令 $\theta$ 为策略参数，$\tau$ 为包含状态、动作和奖励的轨迹，$p_\theta(\tau)$ 为其采样概率，$R(\tau)$ 为整条轨迹的目标回报。目标是最大化策略产生轨迹的期望回报；先假设有限时域、环境与奖励不依赖 $\theta$、策略在固定支持集上可微，且可交换微分与积分：
 
 $$J(\theta)=\mathbb E_{\tau\sim p_\theta(\tau)}[R(\tau)]$$
 
@@ -110,7 +116,7 @@ $$\nabla_\theta J=\nabla_\theta\int p_\theta(\tau)R(\tau)d\tau
 =\mathbb E_{\tau}\left[
 R(\tau)\nabla_\theta\log p_\theta(\tau)\right]$$
 
-轨迹概率为 $p_\theta(\tau)=\rho_0(s_0)\prod_t\pi_\theta(a_t|s_t)P(s_{t+1},r_{t+1}|s_t,a_t)$。环境转移不依赖策略参数时，轨迹 log 概率中只有动作项：
+令 $\rho_0$ 为初始状态分布，$P$ 为环境的一步转移与奖励分布，$s_t,a_t$ 分别是前缀状态和选中的动作。轨迹概率为 $p_\theta(\tau)=\rho_0(s_0)\prod_t\pi_\theta(a_t|s_t)P(s_{t+1},r_{t+1}|s_t,a_t)$。乘积取 log 后变成求和；环境转移不依赖策略参数时，轨迹 log 概率中只有动作项：
 
 $$\nabla_\theta\log p_\theta(\tau)
 =\sum_t\nabla_\theta\log\pi_\theta(a_t|s_t)$$
@@ -121,9 +127,9 @@ $$\nabla J
 =\mathbb E\left[\sum_t u_t\sum_{k=t}^{T-1}\gamma^kr_{k+1}\right]
 =\mathbb E\left[\sum_t\gamma^t u_tG_t\right]$$
 
-减去状态 baseline 得 $\hat g=\sum_t\gamma^tu_t(G_t-b(s_t))$。LLM 有限回答常取 $\gamma=1$，此时省略 $\gamma^t$；若采用折扣状态占用分布，也可将此权重吸收到状态采样中。不能在一般折扣 episodic 目标里无说明地删去外层 $\gamma^t$。
+这里 $G_t$ 是第 13 章从时刻 t 起算的折扣回报，$b(s_t)$ 是在采样当前动作前给出的状态基准。减去状态 baseline 得 $\hat g=\sum_t\gamma^tu_t(G_t-b(s_t))$。LLM 有限回答常取 $\gamma=1$，此时省略 $\gamma^t$；若采用折扣状态占用分布，也可将此权重吸收到状态采样中。不能在一般折扣 episodic 目标里无说明地删去外层 $\gamma^t$。
 
-一步 TD residual 为：
+等待完整回答才能计算回报；若希望借助 critic 的前缀预测降低采样噪声，可像第 14 章一样用一步奖励加下一状态价值构造目标。令 $V_\phi$ 为 critic、$d_t$ 为真正终止标记，一步 TD residual 为：
 
 $$\delta_t=r_{t+1}+\gamma(1-d_t)V_\phi(s_{t+1})-V_\phi(s_t)$$
 
@@ -132,13 +138,15 @@ GAE 用参数 $\lambda\in[0,1]$ 加权未来 residual：
 $$\hat A_t^{GAE}=\sum_{l=0}^{T-t-1}
 (\gamma\lambda)^l\delta_{t+l}$$
 
-$\lambda$ 较小通常更依赖 critic bootstrap，方差较低但偏差可能大；$\lambda$ 接近 1 更接近 Monte Carlo。这个权衡不是所有奖励相关结构下的方差单调定理；必须检查 critic 与末端价值误差。`,
+$\lambda$ 较小通常更依赖 critic bootstrap，方差较低但偏差可能大；$\lambda$ 接近 1 更接近 Monte Carlo。这个权衡不是所有奖励相关结构下的方差单调定理；必须检查 critic 与末端价值误差。回到两 token 回答，终局奖励 1 减去基准 0.4 给每个 score 乘 0.6，接上 softmax 导数便得到开场的 0.12、0.24。推导说明它们为何可从不可微评分产生；下一节先证明减基准的合法性，再展开更长回答的 GAE。`,
     },
     {
       id: "math-baseline",
       type: "derivation",
       title: "Baseline 无偏性与为什么 V 不一定方差最优",
-      body: String.raw`对固定状态，baseline $b(s)$ 作为一个停止梯度的标量：
+      body: String.raw`开场把答对的奖励从 1 减到优势 0.6，这会不会把真正该学的方向也减掉？我们先固定助手已经生成的前缀，只在下一 token 的随机选择上取平均；随后再问，保持方向的基准是否也一定降低方差。
+
+$s$ 为固定前缀，$a$ 为下一动作，$\pi_\theta$ 为动作分布。对固定状态，baseline $b(s)$ 作为一个停止梯度的标量：
 
 $$\mathbb E_{a\sim\pi_\theta}[b(s)\nabla\log\pi_\theta(a|s)]
 =b(s)\sum_a\nabla\pi_\theta(a|s)
@@ -155,13 +163,17 @@ b^*(s)=\frac{\mathbb E[\|u\|^2G|s]}{\mathbb E[\|u\|^2|s]}$$
 
 分母为零时该状态没有策略梯度，baseline 任意。只有 score 范数对动作不变，或相应加权相关项消失时，$b^*=\mathbb E[G|s]=V^\pi(s)$。整条轨迹多个梯度项的协方差还会影响全局最优 baseline，上式针对单步条件目标。
 
-**反例。** Bernoulli 动作 $a\in\{0,1\}$，$\pi(a=1)=0.8$，logit 参数的 score 是 $u=a-0.8$，奖励 $G=a$。真实梯度 0.16，$V=0.8$，但 $b^*=0.2$。取 b=0.2 时两个动作的 $u(G-b)$ 都是 0.16，方差为 0；b=0 时方差为 0.0064；b=V 时方差反而为 0.0576。价值 baseline 很常用，但“价值准确就一定达到最小梯度方差”是错误命题。`,
+**反例。** 为隔离开场第一个位置的 0.8 概率，把整段回答简化成一次二元选择：选到正确动作立即得 1，否则得 0。这是新的单步诊断环境，不再沿用两 token 例中的基准 0.4。Bernoulli 动作 $a\in\{0,1\}$，$\pi(a=1)=0.8$，logit 参数的 score 是 $u=a-0.8$，奖励 $G=a$。真实梯度 0.16，$V=0.8$，但 $b^*=0.2$。取 b=0.2 时两个动作的 $u(G-b)$ 都是 0.16，方差为 0；b=0 时方差为 0.0064；b=V 时方差反而为 0.0576。价值 baseline 很常用，但“价值准确就一定达到最小梯度方差”是错误命题。
+
+这里三个合法基准都保留平均梯度 0.16，只是单次更新的波动不同；停止梯度也不能补救基准偷看当前动作造成的统计偏差。接下来不再只减一个终局基准，而是利用回答各前缀的价值预测，构造可逐步倒推的优势。`,
     },
     {
       id: "math-gae-telescoping",
       type: "derivation",
       title: "GAE 的望远镜求和与有限轨迹端点",
-      body: String.raw`固定一条从 t 到 T 的采样片段，先不跨 episode，所有价值预测来自冻结的 rollout critic。令 $N=T-t$，$V_k=V_{\phi_{\rm old}}(s_k)$。n-step advantage 定义为：
+      body: String.raw`助手回答较长时，第一个 token 要等很久才知道最后是否答对。只看一步预测会依赖 critic，等到结尾又可能噪声很大；现在把不同等待长度的估计混在一起，并检查最后一个位置是否被漏掉。
+
+固定一条从 t 到 T 的采样片段，先不跨 episode，所有价值预测来自冻结的 rollout critic。令 $N=T-t$，$V_k=V_{\phi_{\rm old}}(s_k)$，$r_{k+1}$ 是第 k 个动作后的奖励，$\gamma$ 为奖励折扣；$n$ 表示先用多少步真实奖励，再接预测价值。n-step advantage 定义为：
 
 $$\hat A_t^{(n)}=\sum_{l=0}^{n-1}\gamma^lr_{t+l+1}
 +\gamma^nV_{t+n}-V_t$$
@@ -184,20 +196,26 @@ $$\hat A_t=\sum_{l=0}^{N-1}\gamma^lr_{t+l+1}
 
 真正终止 $V_T=0$ 时才是完整 MC return 减 baseline；纯截断仍有 $\gamma^NV_T$ 的误差。
 
-**教学手算。** $r=[0,0,1]$，$V=[0.2,0.3,0.5,0]$，$\gamma=0.9,\lambda=0.8$。$\delta=[0.07,0.15,0.5]$，倒推得 $\hat A_2=0.5$、$\hat A_1=0.15+0.72(0.5)=0.51$、$\hat A_0=0.07+0.72(0.51)=0.4372$。value target $\hat A+V=[0.6372,0.81,1]$。改为 $\lambda=1$ 得 $[0.61,0.6,0.5]$，恰好是 MC 回报 $[0.81,0.9,1]$ 减原价值。`,
+**教学手算。** 把开场回答扩展为三个生成位置，仍只在答对后得 1；为看清回传衰减，这次启用折扣，并让 critic 随前缀改变预测。$r=[0,0,1]$，$V=[0.2,0.3,0.5,0]$，$\gamma=0.9,\lambda=0.8$。$\delta=[0.07,0.15,0.5]$，倒推得 $\hat A_2=0.5$、$\hat A_1=0.15+0.72(0.5)=0.51$、$\hat A_0=0.07+0.72(0.51)=0.4372$。value target $\hat A+V=[0.6372,0.81,1]$。改为 $\lambda=1$ 得 $[0.61,0.6,0.5]$，恰好是 MC 回报 $[0.81,0.9,1]$ 减原价值。
+
+第一个位置的 0.4372 不只是当地残差 0.07，还吸收了后两个位置超出预期的部分；最后的价值目标为 1，因为那里已观察到真实终局奖励。这个检查只证明有限和与端点一致，不证明 critic 已经准确。下一节把这些已算出的数冻结后分别交给策略和价值网络，避免训练时目标也被偷偷改变。`,
     },
     {
       id: "math-actor-critic-detach",
       type: "derivation",
       title: "Actor 与 Critic 的损失、停梯度和双 mask",
-      body: String.raw`令 $m_t$ 是有效动作 mask，$M=\sum_tm_t>0$。以下写有限回答 $\gamma=1$ 的常见批平均 surrogate；严格折扣目标需另保留外层权重。rollout 后一次性计算并冻结 $\hat A_t$ 和 $\hat R_t=\hat A_t+V_{\phi_{\rm old}}(s_t)$：
+      body: String.raw`现在已有每个生成位置的优势，真正训练时却还可能把它接错：策略可以通过改变价值预测让损失变小，而不改善回答。我们要给策略和 critic 各自明确的目标，并排除 prompt、补齐位置以及另一条回答的残差。
+
+令 $m_t$ 是有效动作 mask，$M=\sum_tm_t>0$，$\theta$ 与 $\phi$ 分别为 actor 和 critic 参数，$\operatorname{sg}$ 表示停止梯度。以下写有限回答 $\gamma=1$ 的常见批平均 surrogate；严格折扣目标需另保留外层权重。rollout 后一次性计算并冻结 $\hat A_t$ 和 $\hat R_t=\hat A_t+V_{\phi_{\rm old}}(s_t)$：
 
 $$L_{\rm actor}=-\frac1M\sum_tm_t\operatorname{sg}(\hat A_t)
 \log\pi_\theta(a_t|s_t)-c_H H(\pi_\theta)$$
 $$L_{\rm critic}=\frac1{2M}\sum_tm_t
 [V_\phi(s_t)-\operatorname{sg}(\hat R_t)]^2$$
 
-这里 H 表示相同有效状态上的平均熵。actor 梯度为 $-\hat A_t\nabla\log\pi$，critic 梯度为 $(V_\phi-\hat R_t)\nabla V_\phi$。若写 $\hat A=R-V_\theta$ 却不 detach，actor 会多出 $\log\pi\,\nabla V_\theta$，模型可通过改基线降低 loss，而非改善动作。共享 backbone 可以同时接收两个明确的损失梯度，但不能通过 advantage 偷接一个目标。
+这里 H 表示相同有效状态上的平均熵，$c_H$ 控制熵项强度。忽略共同的批平均系数，actor 梯度为 $-\hat A_t\nabla\log\pi$，critic 梯度为 $(V_\phi-\hat R_t)\nabla V_\phi$。若写 $\hat A=R-V_\theta$ 却不 detach，actor 会多出 $\log\pi\,\nabla V_\theta$，模型可通过改基线降低 loss，而非改善动作。共享 backbone 可以同时接收两个明确的损失梯度，但不能通过 advantage 偷接一个目标。
+
+代入开场两个 token 的概率 0.8、0.6，优势都为 0.6、价值都为 0.4，关闭熵项：平均 actor loss 约为 0.220191，平均 critic loss 为 0.18，后者的固定目标都是 1。critic 应把预测从 0.4 往 1 推；actor 则由正优势提高已选动作概率，二者不是同一条梯度。
 
 **终止 mask 与递推 mask 不同。** 令 $d_t$ 表示真正终止，$c_t$ 表示 episode 或采集片段边界：
 
@@ -206,7 +224,7 @@ $$\delta_t=r_{t+1}+\gamma(1-d_t)V_{t+1}-V_t,\qquad
 
 截断处 $d=0,c=1$：保留 bootstrap，但不把下一片段/另一局的 residual 接上。prompt、padding、环境观察都不应当作 actor 动作；末 token 的奖励写到每条回答的真实末位置，不是 padding 后的最后一列。
 
-重要性重加权、多轮旧数据复用、有限 batch advantage whitening 都会改变估计器；“减状态 baseline 无偏”的证明不能替它们担保。至少记录 mask、归一化分母、是否按 token/序列平均和采样策略版本。`,
+重要性重加权、多轮旧数据复用、有限 batch advantage whitening 都会改变估计器；“减状态 baseline 无偏”的证明不能替它们担保。至少记录 mask、归一化分母、是否按 token/序列平均和采样策略版本。到这里，一批刚生成的回答已能正确更新；第 16 章接着处理两个尚未解决的问题：开放式回答由谁评分，以及同一批回答被多次使用时怎样限制策略变化。`,
     },
     {
       id: "code",

@@ -656,9 +656,20 @@ progress::-moz-progress-bar {
   background: var(--surface-muted);
 }
 
-.formula-index h2 {
-  margin: 0 0 8px;
+.formula-index > summary {
+  cursor: pointer;
+  color: var(--brand);
   font-size: 17px;
+  font-weight: 700;
+}
+
+.formula-index[open] > summary {
+  margin-bottom: 12px;
+}
+
+.formula-index > summary:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 5px;
 }
 
 .formula-index p {
@@ -770,6 +781,12 @@ progress::-moz-progress-bar {
   grid-template-columns: minmax(0, 1fr);
   gap: 34px;
   margin-top: 42px;
+}
+
+.lesson-sections > .chapter-objectives,
+.lesson-sections > .formula-index {
+  margin-top: 0;
+  min-width: 0;
 }
 
 .lesson-section {

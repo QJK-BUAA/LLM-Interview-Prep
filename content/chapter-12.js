@@ -18,36 +18,24 @@ const chapter = {
     "LoRA 冻结基座权重，只训练两个低秩矩阵表示任务增量；QLoRA 再把基座量化到 4 bit 以降低微调显存，而秩、缩放、目标模块与数据质量共同决定效果。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：低秩梯度、量化误差与实际账单",
-      body: String.raw`先修：第 02 章矩阵秩与乘法、第 06 章优化器状态、第 11 章显存账单。学习顺序为 LoRA 参数/缩放 → A/B 完整梯度与零初始化 → rank 和合并条件 → 量化/反量化 → QLoRA 分项内存。面试不能停在“训练两个小矩阵”：要证明初始哪一支能更新、冻结基座如何传输入梯度，以及 4-bit 究竟修饰存储还是计算。`,
-      links: [
-        { label: "参数、rank 与合并", sectionId: "derivation", level: "必会" },
-        { label: "A/B 梯度及零初始化", sectionId: "math-lora-gradients", level: "推导" },
-        { label: "缩放与合并边界", sectionId: "math-rank-scale-merge", level: "推导" },
-        { label: "量化和反量化误差", sectionId: "math-quantization", level: "进阶" },
-        { label: "QLoRA 内存账单", sectionId: "math-peft-memory", level: "必会" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：不重写整本书，只贴一组可训练批注",
-      body: String.raw`全参数微调会为基座模型的每个权重计算梯度并保存优化器状态，成本很高。LoRA（Low-Rank Adaptation）假设下游任务所需的权重变化主要位于低维子空间，因此冻结原权重 $W$，只学习增量 $\Delta W=BA$。
+      body: String.raw`一个预训练模型已经会处理大部分输入，现在只想让它适应一个特定任务，却承担不起上一章算出的全参数训练状态。能不能保留原有权重，只训练一条小的修正分支？本章先用八个数构造一个四乘四的增量，再检查这种节省带来的表达、梯度和部署限制。
 
-若原矩阵大小为 $d_{out}\times d_{in}$，完整增量需要 $d_{out}d_{in}$ 个参数；LoRA 使用 $A\in\mathbb{R}^{r\times d_{in}}$ 与 $B\in\mathbb{R}^{d_{out}\times r}$，只需 $r(d_{in}+d_{out})$。当秩 $r$ 远小于输入输出维时，训练参数和对应优化器状态显著减少。
+LoRA（Low-Rank Adaptation）把任务所需的变化约束到低维子空间：冻结原权重 $W$，只学习增量 $\Delta W=BA$。若原矩阵大小为 $d_{out}\times d_{in}$，完整增量需要 $d_{out}d_{in}$ 个参数；LoRA 使用 $A\in\mathbb{R}^{r\times d_{in}}$ 与 $B\in\mathbb{R}^{d_{out}\times r}$，只需 $r(d_{in}+d_{out})$。当秩 $r$ 远小于输入输出维时，训练参数和对应优化器状态显著减少。这是对更新空间的约束，不保证所有任务都恰好需要低秩变化。
 
-LoRA 省的是可训练参数相关内存，并不自动消除基座权重和前向激活。QLoRA 把冻结基座以 4-bit 形式保存，计算时按块反量化到 bf16 等计算 dtype，再让梯度通过量化权重流向 LoRA 参数；基座量化码本本身不更新。
+少训练参数以后，基座权重和前向激活仍在。QLoRA 再把冻结基座以 4-bit 形式保存，计算时按块反量化到 bf16 等计算 dtype；低秩分支用较高精度学习，梯度仍需穿过冻结基座传向更早的可训练模块。我们会先算低秩梯度，再用明确非 NF4 的均匀量化例解释存储代码与计算权重的区别。
 
-适配器像一层可插拔增量：可以为多个任务保存不同小文件，也可在部署前把增量合并进浮点基座。它不是免费能力压缩。rank 太小、目标层太少或数据与任务差异太大时，低秩约束会限制性能。`,
+最后回到第 11 章的账单，把全部目标矩阵的 adapter 状态、量化元数据、激活和临时空间加起来。多个任务可以保存不同适配器，也可在部署前合并到浮点基座；选择取决于质量与部署需求，不是单看文件小了多少。rank 太小、目标层太少或任务差异太大时，仍需用验证集检查约束是否过强。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：一个 4×4 权重只训练 8 个数",
-      body: String.raw`设冻结权重 $W\in\mathbb{R}^{4\times4}$，输入列向量 $x\in\mathbb{R}^{4}$。完整微调要训练 16 个权重。取 LoRA rank $r=1$：
+      body: String.raw`只允许训练八个数，怎样给一个四乘四线性层提供修正？先让输入被压成一个标量，再用这个标量生成四维输出修正。这个例子展示低秩分支能做什么，也暴露它不能自由选择十六个独立增量。
+
+设冻结权重 $W\in\mathbb{R}^{4\times4}$，输入列向量 $x\in\mathbb{R}^{4}$。完整微调要训练 16 个权重。取 LoRA rank $r=1$：
 
 $$A=[1,-1,0,2]\in\mathbb{R}^{1\times4}$$
 
@@ -63,7 +51,23 @@ $$BAx=B(-3)=[-1.5,0,1.5,-3]^\top$$
 
 $$y=Wx+\frac{\alpha}{r}BAx$$
 
-若 $\alpha=2,r=1$，LoRA 分支贡献变成 $[-3,0,3,-6]^\top$。真实训练通常把 A 随机初始化、B 初始化为零，使初始 $\Delta W=0$，模型一开始与基座完全一致，同时 A 的非零值让 B 能在第一步获得梯度。`,
+若 $\alpha=2,r=1$，LoRA 分支贡献变成 $[-3,0,3,-6]^\top$。四个输出修正都由同一个中间标量 -3 驱动，方向受 B 的列空间限制，这正是节省参数的代价。这里指定非零 A/B 是为展示前向，不是推荐的初始状态；真实训练通常把 A 随机初始化、B 初始化为零，使初始 $\Delta W=0$，模型一开始与基座完全一致，同时 A 的非零值让 B 能在第一步获得梯度。后面的反向例会直接检验为什么不能把两者都置零。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：低秩梯度、量化误差与实际账单",
+      body: String.raw`八个数已经生成了一个修正，放大到真实模型时究竟省了多少，又能否正常开始学习？先将单层参数比例和前向写清，再沿两条分支反传，解释一零一随机的初始化；随后检查秩、缩放和合并的条件。
+
+低秩分支正确以后，再压缩冻结基座：量化节区分存储代码、尺度和计算权重，最后把所有目标矩阵与量化元数据一起计入显存。矩阵秩与乘法需要时回看第 02 章，梯度累积回看第 05 章，优化器状态和峰值账单分别接第 06、11 章。先得到可复算的预算与合并一致性检查，再比较不同 PEFT 方案的任务效果。`,
+      links: [
+        { label: "参数、rank 与合并", sectionId: "derivation", level: "必会" },
+        { label: "A/B 梯度及零初始化", sectionId: "math-lora-gradients", level: "推导" },
+        { label: "缩放与合并边界", sectionId: "math-rank-scale-merge", level: "推导" },
+        { label: "量化和反量化误差", sectionId: "math-quantization", level: "进阶" },
+        { label: "QLoRA 内存账单", sectionId: "math-peft-memory", level: "必会" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -98,7 +102,9 @@ QLoRA 把主矩阵替换为分块 4-bit 存储。前向时小块反量化参与�
       id: "derivation",
       type: "derivation",
       title: "参数量、缩放与合并",
-      body: String.raw`原线性层使用 $W\in\mathbb{R}^{d_{out}\times d_{in}}$：
+      body: String.raw`四乘四例只把可训练数目减半，真实的宽矩阵能省多少？我们把相同的降维、升维结构放到一个 4096 维线性层，先数独立可训练参数，再检查推理时能否把旁路并回原矩阵。
+
+原线性层使用 $W\in\mathbb{R}^{d_{out}\times d_{in}}$，输入 x、输出 h 均采用列向量：
 
 $$h=Wx$$
 
@@ -108,7 +114,7 @@ $$h=Wx+sBAx,\qquad
 A\in\mathbb{R}^{r\times d_{in}},\quad
 B\in\mathbb{R}^{d_{out}\times r}$$
 
-经典缩放 $s=\alpha/r$。LoRA 参数比例为：
+冻结 W 不计入可训练参数；A 有 r 行输入系数，B 有 r 列输出方向，两者相加而不是相乘。经典缩放 $s=\alpha/r$。LoRA 参数比例为：
 
 $$\rho=
 \frac{r(d_{in}+d_{out})}{d_{in}d_{out}}$$
@@ -121,13 +127,15 @@ $$W'=W+sBA$$
 
 之后前向仍是 $W'x$，没有额外旁路延迟。多个 adapter 动态切换时通常保持未合并，服务需要管理额外矩阵乘法和批内 adapter 分组。
 
-rsLoRA（rank-stabilized LoRA）使用与 $\alpha/\sqrt r$ 相关的缩放，使提高 rank 时更新幅度不至于按 $1/r$ 过快减小。它改变的是缩放规律，不是把矩阵从低秩变成满秩。rank、alpha 和学习率相互作用，比较实验时必须同时报告。`,
+0.78125% 表示这个目标矩阵的可训练参数比例，不是总训练显存比例；冻结基座和激活还需保留。rsLoRA（rank-stabilized LoRA）使用与 $\alpha/\sqrt r$ 相关的缩放，使提高 rank 时更新幅度不至于按 $1/r$ 过快减小。它改变的是缩放规律，不是把矩阵从低秩变成满秩。rank、alpha 和学习率相互作用，比较实验时必须同时报告。先确认这条旁路能收到正确梯度，下一节再由此判断哪种零初始化可以启动训练。`,
     },
     {
       id: "math-lora-gradients",
       type: "derivation",
       title: "LoRA 反向：A/B 梯度、输入梯度与零初始化",
-      body: String.raw`**明确矩阵约定。** 单样本列向量 $x\in\mathbb R^{d_{in}}$，$W\in\mathbb R^{d_{out}\times d_{in}}$ 冻结，$A\in\mathbb R^{r\times d_{in}}$、$B\in\mathbb R^{d_{out}\times r}$ 可训练，$s=\alpha/r$，$y=Wx+sBAx$。给定上游 $g=\nabla_yL\in\mathbb R^{d_{out}}$，令 $u=Ax\in\mathbb R^r$。
+      body: String.raw`想让初始模型与基座完全一致，可以把低秩分支的两个矩阵都置零吗？输出确实不会改变，但乘法结构也可能让两边都学不动。我们先对非零分支求导，再只把升维矩阵置零，对比第一步到底谁能更新。
+
+单样本列向量 $x\in\mathbb R^{d_{in}}$，$W\in\mathbb R^{d_{out}\times d_{in}}$ 冻结，$A\in\mathbb R^{r\times d_{in}}$、$B\in\mathbb R^{d_{out}\times r}$ 可训练，$s=\alpha/r$，$y=Wx+sBAx$。给定上游 $g=\nabla_yL\in\mathbb R^{d_{out}}$，令 $u=Ax\in\mathbb R^r$。
 
 微分 $dy=Wdx+s(dB)Ax+sB(dA)x+sBA\,dx$。将 $g^\top dy$ 中各参数的系数收集，得到：
 
@@ -135,9 +143,9 @@ $$\nabla_BL=s\,g\,u^\top,\qquad
 \nabla_AL=s(B^\top g)x^\top,\qquad
 \nabla_xL=W^\top g+sA^\top B^\top g.$$
 
-batch 列堆叠 $X\in\mathbb R^{d_{in}\times n}$、上游 $G\in\mathbb R^{d_{out}\times n}$ 时，梯度为 $sG(AX)^\top$ 与 $sB^\top GX^\top$；若 G 已含均值缩放，不再除一次 n。冻结 W 只是不更新 W，不代表可跳过 $W^\top g$。
+B 的梯度需要 A 产生的中间输入，A 的梯度需要 B 将误差传回；输入梯度则要合并主路与旁路。batch 列堆叠 $X\in\mathbb R^{d_{in}\times n}$、上游 $G\in\mathbb R^{d_{out}\times n}$ 时，梯度为 $sG(AX)^\top$ 与 $sB^\top GX^\top$；若 G 已含均值缩放，不再除一次 n。冻结 W 只是不更新 W，不代表可跳过 $W^\top g$。
 
-**手算。** $W=I_2,A=[1,-1],B=[1/2,1]^\top,x=[2,1]^\top,s=2$，$u=1$，$y=[3,3]^\top$。取 $L=3y_1-2y_2$，$g=[3,-2]^\top$，$B^\top g=-1/2$：
+为逐坐标检查反向，把开场四维例缩成两维，并指定一个线性损失作为固定上游；低秩机制不变。取 $W=I_2,A=[1,-1],B=[1/2,1]^\top,x=[2,1]^\top,s=2$，$u=1$，$y=[3,3]^\top$。取 $L=3y_1-2y_2$，$g=[3,-2]^\top$，$B^\top g=-1/2$：
 
 $$\nabla_A L=[-2,-1],\quad
 \nabla_B L=[6,-4]^\top,\quad
@@ -145,59 +153,67 @@ $$\nabla_A L=[-2,-1],\quad
 
 **为什么一零一随机。** 保留同一 A 和 x，把 B 初始化为 0，则 $BA=0$，初始输出等于基座；$\nabla_A=0$，但 $\nabla_B=s\,g(Ax)^\top=[6,-4]^\top$，通常非零。第一步 B 更新后，A 才可能获得非零梯度。若 A=B=0，两支任务梯度都为 0，会困在乘法参数化的驻点；不能说“两者都可能没梯度”，本设定下就是零。随机 A 也不保证每个 batch 的 $Ax$ 或聚合梯度必非零，例如 x=0。
 
-**追问。** 若 adapter 输入带 dropout，A/B 梯度使用同一丢弃后的输入，传回 x 时再乘该 mask 的缩放；基座分支不应同时被误丢弃。`,
+这组数中，只把 B 置零后，B 仍收到 [6,-4]，A 则暂时收到零；所以“初始增量为零”不等于“整个旁路没有训练信号”。若 adapter 输入带 dropout，A/B 梯度使用同一丢弃后的输入，传回 x 时再乘该 mask 的缩放；基座分支不应同时被误丢弃。接下来沿用这个两维例，检查训练出的固定增量怎样合并，以及提高 rank 究竟放宽了什么约束。`,
     },
     {
       id: "math-rank-scale-merge",
       type: "derivation",
       title: "Rank 与缩放：可表达空间和合并的成立条件",
-      body: String.raw`**秩约束来自像空间。** 对任何 x，$BAx$ 都在 B 的 r 列张成的空间内，因此 $\operatorname{rank}(BA)\le\min(r,d_{in},d_{out})$。原权重 $W+sBA$ 仍可能满秩；低秩约束的是增量而非整个层。r=0 时经典 $\alpha/r$ 未定义，禁用 adapter 应走独立路径。
+      body: String.raw`把 rank 加大是在增加整个模型的秩，还是只增加可学习修正的方向？训练好以后，两条分支又能否无损合成一条？这两个问题都要先看低秩增量实际能到达的空间，再区分固定线性映射与随机训练行为。
+
+对任何 x，$BAx$ 都在 B 的 r 列张成的空间内，因此 $\operatorname{rank}(BA)\le\min(r,d_{in},d_{out})$。原权重 $W+sBA$ 仍可能满秩；低秩约束的是增量而非整个层。r=0 时经典 $\alpha/r$ 未定义，禁用 adapter 应走独立路径。
 
 参数化并不唯一：可逆 $C\in\mathbb R^{r\times r}$ 给 $(BC)(C^{-1}A)=BA$，函数相同但 A/B 的梯度尺度和优化轨迹可不同。不能只由有效 rank 判断训练难度。
 
 **为什么缩放影响比较。** 粗略假设 r 项独立、零均值且方差相同，则未缩放 $(BAx)_i$ 的方差随 r 增长。经典 $s=\alpha/r$ 后分支方差约正比 $\alpha^2/r$；$s=\alpha/\sqrt r$ 后约正比 $\alpha^2$。这是解释 rsLoRA 的尺度启发，不是零初始化 B 时的非零输出方差，也不保证训练中独立假设持续成立。改变 rank 应同时报告 alpha、学习率、目标模块和初始化。
 
-**合并条件。** eval 时若分支是固定线性映射、dropout 关闭：
+秩决定可表达方向，缩放决定同样因子值形成多大的修正；两者都不能绕过部署时的计算规则。eval 时若分支是固定线性映射、dropout 关闭，分配律给：
 
 $$Wx+sBAx=(W+sBA)x.$$
 
 上节 $W=I,A=[1,-1],B=[1/2,1]^\top,s=2$，合并矩阵为 $\begin{bmatrix}2&-1\\2&-1\end{bmatrix}$，对 $[2,1]^\top$ 给 $[3,3]^\top$，与两支相加相同。训练 dropout 的 mask 随样本变化，不能合并成一个固定矩阵。
 
-**部署追问。** 多 adapter 加权求和的增量秩最多为各自 rank 之和，不保证仍为原 rank；用 SVD 截断回小 rank 是额外近似。QLoRA 若重新量化合并权重，$\operatorname{dequant}(\operatorname{quant}(W+sBA))$ 通常不等于原浮点合并值，必须重新做误差和任务评估。`,
+两种执行方式都输出 [3,3]，检验的是这个固定线性分支的代数一致性；示例中的合并矩阵恰好秩为 1，也不能据此声称所有合并权重都低秩。多 adapter 加权求和的增量秩最多为各自 rank 之和，不保证仍为原 rank；用 SVD 截断回小 rank 是额外近似。QLoRA 若重新量化合并权重，$\operatorname{dequant}(\operatorname{quant}(W+sBA))$ 通常不等于原浮点合并值，必须重新做误差和任务评估。下面用一个四元素块算出这类量化误差来自哪里。`,
     },
     {
       id: "math-quantization",
       type: "derivation",
       title: "QLoRA 的量化链：存储代码、尺度与计算权重",
-      body: String.raw`**先用可手算的均匀例解释误差，不能把它冒充 NF4。** 一块权重 $w\in\mathbb R^n$，对称 4-bit 教学量化使用整数区间 [-7,7]（15 个值），scale $s=\max_i|w_i|/7$：
+      body: String.raw`冻结基座已经不用保存梯度，权重本身却仍然太大。若用少量代码代替浮点数，实际矩阵乘法会用到什么值，误差有多大？先选能手算的均匀量化说明编码与反量化，再明确它和 QLoRA 所用 NF4 的区别。
+
+一块权重 $w\in\mathbb R^n$，对称 4-bit 教学量化使用整数区间 [-7,7]（15 个值），scale $s=\max_i|w_i|/7$。本段 s 是量化尺度，不是上一节的 LoRA 缩放：
 
 $$q_i=\operatorname{clip}(\operatorname{round}(w_i/s),-7,7),\qquad
 \hat w_i=sq_i.$$
 
 无饱和时舍入误差 $\lvert\hat w_i-w_i\rvert\le s/2$。全零块单独处理，不能除以 0。取 $w=[-1,-0.2,0.3,1]$，$s=1/7$，整数代码为 $[-7,-1,2,7]$，反量化 $[-1,-1/7,2/7,1]$，最大误差 $2/35\approx0.057143<1/14$。对输入全 1，精确点积为 0.1，量化后为 $1/7\approx0.142857$。
 
-**NF4 不同在哪里。** 它使用非均匀的 16 个码本值 $c_0,\ldots,c_{15}$，针对近似正态权重分布设计。归一化到块尺度 a 后，示意编码 $q_i=\arg\min_j|w_i/a-c_j|$，反量化为 $\hat w_i=a\,c_{q_i}$。代码占 4 bit，但 a、计算输入、LoRA 权重及累积器不因此都变成 4 bit；具体码本、block size、偏移和 scale dtype 按库实现核对。
+点积从 0.1 变成约 0.142857，是计算权重经过舍入后的真实变化；代码 [-7,-1,2,7] 本身不应直接拿来与原输入相乘。这个例子不是 NF4。NF4 使用非均匀的 16 个码本值 $c_0,\ldots,c_{15}$，针对近似正态权重分布设计。归一化到块尺度 a 后，示意编码 $q_i=\arg\min_j|w_i/a-c_j|$，反量化为 $\hat w_i=a\,c_{q_i}$。代码占 4 bit，但 a、计算输入、LoRA 权重及累积器不因此都变成 4 bit；具体码本、block size、偏移和 scale dtype 按库实现核对。
 
 若 $E=\hat W-W$，线性层误差满足 $\|\hat Wx-Wx\|_2\le\|E\|_2\|x\|_2$。小权重量化误差可被大输入范数或多层累积放大，因此不能仅看单块 MSE 就保证下游质量。块内 outlier 会拉大均匀 scale，是非均匀表示和更细分块的重要动机之一。
 
-**QLoRA 反向。** 训练函数是 $y=\hat Wx+sBAx$，冻结量化代码和 scale，计算时按块恢复 $\hat W$。无需对 round 求导，因为任务不更新这些代码；输入梯度仍含 $\hat W^\top g$，A/B 仍按高精度链式法则更新。这与要更新量化前权重、常使用 straight-through estimator 的量化感知训练不同。`,
+回到 QLoRA 分支，此处 s 恢复为 LoRA 缩放，训练函数是 $y=\hat Wx+sBAx$，冻结量化代码和 scale，计算时按块恢复 $\hat W$。无需对 round 求导，因为任务不更新这些代码；输入梯度仍含 $\hat W^\top g$，A/B 仍按高精度链式法则更新。这与要更新量化前权重、常使用 straight-through estimator 的量化感知训练不同。下一步不能只按每参数半字节报显存，还要把块尺度和可训练分支的状态计入预算。`,
     },
     {
       id: "math-peft-memory",
       type: "derivation",
       title: "PEFT 显存：低秩状态、量化元数据与激活",
-      body: String.raw`**训练参数逐层求和。** 目标矩阵集合 $\mathcal M$ 的 adapter 参数量为 $P_A=\sum_{m\in\mathcal M}r_m(d_{in,m}+d_{out,m})$。同一 4096 方阵、r=16 时为 131,072 参数；若 32 层每层仅适配 Q/V 两个同形矩阵，共 $32\times2\times131072=8,388,608$，不是整个模型都只需 13 万参数。此例假设 Q/V 同形，GQA 的 V 矩阵要按实际较小输出维重算。
+      body: String.raw`单矩阵只训练约 13 万参数，能否据此宣布整个 7B 模型微调只要很小显存？还不能：每层可能有多个目标矩阵，低比特权重也带量化元数据。我们把这些重复项全部展开，再接回上一章的激活与临时空间账单。
+
+目标矩阵集合 $\mathcal M$ 的 adapter 参数量为 $P_A=\sum_{m\in\mathcal M}r_m(d_{in,m}+d_{out,m})$。同一 4096 方阵、r=16 时为 131,072 参数；若 32 层每层仅适配 Q/V 两个同形矩阵，共 $32\times2\times131072=8,388,608$，不是整个模型都只需 13 万参数。此例假设 Q/V 同形，GQA 的 V 矩阵要按实际较小输出维重算。
 
 如果 adapter 每参数仍用权重2、梯度2、主副本4、Adam8 字节，总状态是 $16P_A=134,217,728$ 字节，即 128 MiB。冻结 7B 基座的理想 4-bit payload 为 3.5 十进制 GB，另外有 scale、码本、未量化模块、激活与临时空间。
 
-**双重量化的元数据例。** 每 k=64 个权重共享一个 fp32 scale，则仅一级 scale 开销为 $32/64=0.5$ bit/parameter，总计 4.5 bit。教学上假设把 scale 再用 8-bit 代码存储，每 256 个 scale 共享一个 fp32 二级 scale，则：
+128 MiB 是这些 adapter 的训练状态，并未包含基座。基座的 3.5 GB 又只是四位代码负载：每块还需尺度才能恢复权重。每 k=64 个权重共享一个 fp32 scale，则仅一级 scale 开销为 $32/64=0.5$ bit/parameter，总计 4.5 bit。教学上假设把 scale 再用 8-bit 代码存储，每 256 个 scale 共享一个 fp32 二级 scale，则：
 
 $$b_{\rm effective}=4+\frac8{64}+\frac{32}{64\times256}
 =4.126953125\text{ bit/parameter}.$$
 
 7B 参数在这个理想化布局约占 $7\times10^9\times4.126953125/8=3.611084$ GB。这里忽略 offset、对齐、码本和未量化模块，只解释 double quantization 为何能省元数据，不是特定库/模型的实测峰值。
 
-**总账单与追问。** QLoRA 总显存约为量化基座及元数据 + adapter 训练状态 + 保存激活 + 临时反量化/矩阵乘 workspace + 分配器余量。基座冻结仍需为更早的 adapter 回传，长序列激活不会消失。paged optimizer 把峰值压力转移到统一内存迁移，降低 OOM 风险但可能增加 CPU/GPU 传输；它不会把理论状态字节凭空消除，也不保证比浮点 LoRA 更快。`,
+4.126953125 bit 说明二次压缩的是量化尺度元数据，不是把所有训练状态变成四位；3.611084 GB 因此也只是所设布局的小计。QLoRA 总显存约为量化基座及元数据 + adapter 训练状态 + 保存激活 + 临时反量化/矩阵乘 workspace + 分配器余量。基座冻结仍需为更早的 adapter 回传，长序列激活不会消失。paged optimizer 把峰值压力转移到统一内存迁移，降低 OOM 风险但可能增加 CPU/GPU 传输；它不会把理论状态字节凭空消除，也不保证比浮点 LoRA 更快。
+
+实际选型时先打印全部目标矩阵和 dtype，逐项求和，再测目标长度下的峰值与验证集效果。这样才闭合了开场的问题：低秩与量化分别节省哪一笔，代价是否可接受；它们决定可训练的参数和资源，不代替后续课程要讨论的数据与训练目标。`,
     },
     {
       id: "code",

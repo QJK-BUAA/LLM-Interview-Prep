@@ -57,9 +57,6 @@ function validateCatalog(chapters, { partial }) {
     if (!chapter.sections.some(section => section.type === "code" && /~~~[\w-]*\n[\s\S]+?~~~/.test(section.body))) {
       errors.push(`${chapter.id}: missing substantive fenced code`);
     }
-    if (chapter.sections[0]?.type !== "roadmap") {
-      errors.push(`${chapter.id}: must begin with a knowledge roadmap`);
-    }
     const whiteboard = chapter.sections.find(section => section.id === "whiteboard");
     if (whiteboard?.type !== "quiz" || whiteboard.questions?.length < 3 ||
         !whiteboard?.questions?.every(question => question.a.includes("得分点"))) {

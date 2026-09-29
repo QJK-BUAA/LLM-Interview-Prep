@@ -92,7 +92,7 @@ test("filters sections for interview mode", () => {
   assert.equal(visibleSections(chapter, "learn").length, 8);
   assert.deepEqual(
     visibleSections(chapter, "interview").map((section) => section.type),
-    ["roadmap", "example", "derivation", "pitfall", "comparison", "interview", "quiz"],
+    ["roadmap", "intuition", "example", "derivation", "pitfall", "comparison", "interview", "quiz"],
   );
 });
 
@@ -149,4 +149,31 @@ test("interview formulas are open, indexed and linked to folded whiteboard answe
   assert.match(html, /href="#99\/whiteboard"/);
   assert.match(html, /class="quiz-answer"><summary>/);
   assert.match(html, /data-action="set-derivations" data-open="false"/);
+});
+
+test("both reading modes introduce the problem and example before the formula index", () => {
+  const chapter = {
+    id: "99", title: "学习时长与分数", subtitle: "", part: "", level: "", duration: 30,
+    summary: "先预测，再检查误差。", objectives: ["计算三个预测的误差"], sources: [],
+    sections: [
+      { id: "intuition", type: "intuition", title: "怎样预测分数", body: "我们有三位同学的记录。" },
+      { id: "example", type: "example", title: "比较预测与记录", body: "预测少了两分。" },
+      { id: "roadmap", type: "roadmap", title: "怎样继续学习", body: "从误差进入导数。",
+        links: [{ label: "平方误差", sectionId: "derivation", level: "推导" }] },
+      { id: "derivation", type: "derivation", title: "计算误差", body: "$$L=e^2$$" },
+    ],
+  };
+  for (const mode of ["learn", "interview"]) {
+    const html = renderChapter(chapter, { mode });
+    const positions = [
+      'id="intuition"', 'class="chapter-objectives"', 'id="example"',
+      'id="roadmap"', 'class="formula-index"', 'id="derivation"',
+    ].map(marker => html.indexOf(marker));
+    assert.ok(positions.every(position => position >= 0), mode);
+    assert.deepEqual([...positions].sort((a, b) => a - b), positions, mode);
+    assert.equal((html.match(/class="chapter-objectives"/g) ?? []).length, 1);
+    assert.equal((html.match(/class="formula-index"/g) ?? []).length, 1);
+    assert.equal(html.includes('<details class="formula-index" open>'), mode === "interview");
+    assert.match(html, /<details class="derivation-disclosure" open>/);
+  }
 });

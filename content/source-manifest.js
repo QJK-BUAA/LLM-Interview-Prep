@@ -4,11 +4,11 @@ export { SOURCE_REVISION };
 export const SOURCE_REPOSITORY = "https://github.com/XavierZhang2002/agentic-rl-analysis";
 const anchor = (chapterId, sectionId, ...terms) => ({ chapterId, sectionId, terms });
 const mapping = [
-  ["README.md", ["00"], "两份报告的学习入口", [anchor("00", "intuition", "Post-Training", "Agentic RL")]],
+  ["README.md", ["00"], "两份报告的学习入口", [anchor("00", "diagram", "Post-Training", "Agentic RL")]],
   ["README_zh.md", ["00"], "中文学习路线与来源说明", [anchor("00", "comparison", "完整路线", "Agentic RL")]],
-  ["docs/index.md", ["00", "24", "29"], "算法、工业与Agent三层全景", [anchor("00", "intuition", "30 章"), anchor("24", "intuition", "PPO"), anchor("29", "intuition", "两份报告")]],
+  ["docs/index.md", ["00", "24", "29"], "算法、工业与Agent三层全景", [anchor("00", "diagram", "30 章"), anchor("24", "intuition", "PPO"), anchor("29", "intuition", "两份报告")]],
   ["docs/post-training/index.md", ["00", "24"], "算法基础、工业实践与综合选择", [anchor("00", "comparison", "后训练面试路线"), anchor("24", "comparison", "选型")]],
-  ["docs/post-training/ch1/1.1-training-landscape.md", ["00"], "Pre/Mid/Post训练的任务与边界", [anchor("00", "intuition", "Mid-Training", "数据分布")]],
+  ["docs/post-training/ch1/1.1-training-landscape.md", ["00"], "Pre/Mid/Post训练的任务与边界", [anchor("00", "diagram", "Mid-Training", "数据分布")]],
   ["docs/post-training/ch1/1.2-rlhf-rlvr.md", ["16", "25"], "奖励来源与多轮任务独立于更新算法", [anchor("16", "intuition", "RLHF", "RLVR"), anchor("25", "intuition", "RL")]],
   ["docs/post-training/ch1/1.3-dpo.md", ["18"], "隐式奖励、离线分布与工业位置", [anchor("18", "derivation", "Bradley-Terry", "DPO"), anchor("18", "comparison", "工业 Pipeline")]],
   ["docs/post-training/ch1/1.4-ppo.md", ["16"], "PPO、GAE、old/reference与clip", [anchor("16", "derivation", "PPO", "GAE")]],
@@ -30,7 +30,7 @@ const mapping = [
   ["docs/post-training/ch2/2.8-cross-model.md", ["24"], "跨模型经验、奖励和阶段比较", [anchor("24", "comparison", "六条跨模型经验")]],
   ["docs/post-training/ch2/2.9-data-engineering.md", ["21", "28"], "数据获取、质量、课程与环境", [anchor("21", "intuition", "SFT", "RL"), anchor("28", "example", "环境")]],
   ["docs/post-training/ch2/2.10-agentic-training.md", ["19", "23", "25", "28"], "从ARC基座到多轮Agent训练系统", [anchor("19", "intuition", "Cross-Stage"), anchor("23", "intuition", "GLM"), anchor("25", "diagram", "环境"), anchor("28", "derivation", "策略")]],
-  ["docs/post-training/ch3/3.1-timeline-paradigms.md", ["00", "24", "25"], "训练阶段与有条件的历史脉络", [anchor("00", "intuition", "Pre-Training"), anchor("24", "intuition", "2017", "2023"), anchor("25", "intuition", "Agentic RL")]],
+  ["docs/post-training/ch3/3.1-timeline-paradigms.md", ["00", "24", "25"], "训练阶段与有条件的历史脉络", [anchor("00", "diagram", "Pre-Training"), anchor("24", "intuition", "2017", "2023"), anchor("25", "intuition", "Agentic RL")]],
   ["docs/post-training/ch3/3.2-challenges-future.md", ["20", "24", "26", "28"], "信任域、critic、反馈、粒度和遗忘", [anchor("20", "pitfall", "梯度"), anchor("24", "pitfall", "五个挑战"), anchor("26", "intuition", "奖励"), anchor("28", "pitfall", "训练")]],
   ["docs/post-training/ch3/3.3-opinions.md", ["24", "29"], "九条作者观点作为可检验假设", [anchor("24", "pitfall", "九条观点"), anchor("29", "pitfall", "观点")]],
   ["docs/agentic-rl/index.md", ["25", "29"], "四挑战与有边界的方法索引", [anchor("25", "intuition", "Agentic RL"), anchor("29", "comparison", "索引表")]],

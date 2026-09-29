@@ -9,7 +9,8 @@ import { DEFAULT_STATE, getProgress, loadState, STORAGE_KEY } from "../app/store
 test("every chapter has a connected learning path and worked whiteboard exercises", () => {
   for (const chapter of CHAPTERS) {
     assert.deepEqual(validateChapter(chapter), [], chapter.id);
-    assert.equal(chapter.sections[0].type, "roadmap", chapter.id);
+    assert.deepEqual(chapter.sections.slice(0, 3).map(section => section.id),
+      ["intuition", "example", "roadmap"], chapter.id);
     const whiteboard = chapter.sections.find(section => section.id === "whiteboard");
     assert.equal(whiteboard?.type, "quiz", chapter.id);
     assert.ok(whiteboard.questions.length >= 3, chapter.id);
@@ -31,7 +32,7 @@ test("all formulas and examples remain reachable in interview mode and by deep l
   for (const chapter of CHAPTERS) {
     const visible = visibleSections(chapter, "interview");
     for (const section of chapter.sections) {
-      if (!["derivation", "example", "roadmap"].includes(section.type)) continue;
+      if (!["intuition", "derivation", "example", "roadmap"].includes(section.type)) continue;
       assert.ok(visible.includes(section), `${chapter.id}/${section.id}`);
       assert.deepEqual(parseRoute(`#${chapter.id}/${section.id}`), {
         chapterId: chapter.id, sectionId: section.id,

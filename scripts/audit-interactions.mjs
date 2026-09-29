@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { getChapter } from "../content/catalog.js";
 import { visibleSections } from "../app/renderer.js";
 
-const session = "roadmap-interview-actions";
+const session = "roadmap-narrative-actions";
 const base = process.env.ROADMAP_URL || "http://127.0.0.1:8010/";
 const clickTrace = [];
 const run = (args, input) => {
@@ -69,6 +69,12 @@ try {
     assert.equal(migrated.version, 2);
     assert.deepEqual(migrated.completed, { "00": ["intuition"], "19": ["quiz"] });
     assert.equal(evaluate("document.querySelector('#course-count').textContent"), "30 章课程");
+    assert.equal(evaluate("document.querySelector('.lesson-section').id"), "intuition");
+    assert.equal(evaluate("document.querySelector('.formula-index').open"), false);
+    run(["click", ".formula-index > summary"]);
+    assert.equal(evaluate("document.querySelector('.formula-index').open"), true);
+    run(["click", ".formula-index > summary"]);
+    assert.equal(evaluate("document.querySelector('.formula-index').open"), false);
 
     if (width < 760) clickRef(".app-header", /button "打开课程目录"/);
     const searchSnapshot = run(["snapshot", "-i", "-s", "#course-nav"]);
@@ -85,6 +91,8 @@ try {
     clickRef(".app-header", /button "面试"/);
     const chapter = getChapter("27");
     const mathCount = chapter.sections.filter(s => s.type === "derivation").length;
+    assert.equal(evaluate("document.querySelector('.lesson-section').id"), "intuition");
+    assert.equal(evaluate("document.querySelector('.formula-index').open"), true);
     assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), visibleSections(chapter, "interview").length);
     assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), mathCount);
     clickRef(".formula-index", /button "收起全部推导"/);
@@ -155,6 +163,7 @@ try {
     assert.equal(evaluate("location.hash"), "#00");
     report.viewports.push({ width, height, passed: true, tested: [
       "v1 migration", "default chapter/count", "search directly to chapter 27 section", "learn/interview",
+      "problem first in both modes", "index folded in learn and open in interview", "native index summary toggle",
       "formulas open by default", "collapse/expand all", "formula index reopens destination",
       "whiteboard answer and completion persistence", "hidden deep link switches to learn",
       "TOC jump", "derivation disclosure", "completion preserving disclosure", "refresh persistence",
@@ -172,6 +181,6 @@ try {
   console.error(error.stack);
   process.exitCode = 1;
 } finally {
-  writeFileSync(new URL("../artifacts/interview-interaction-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
+  writeFileSync(new URL("../artifacts/narrative-interaction-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
   run(["close"]);
 }

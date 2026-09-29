@@ -1,7 +1,7 @@
 export const REQUIRED_SECTION_TYPES = Object.freeze([
-  "roadmap",
   "intuition",
   "example",
+  "roadmap",
   "diagram",
   "derivation",
   "code",
@@ -119,6 +119,11 @@ export function validateChapter(chapter) {
   if (!Array.isArray(chapter.sections)) {
     errors.push("sections must be an array");
     return errors;
+  }
+
+  if (chapter.sections.slice(0, 3).map(section => section?.id).join(",") !==
+      "intuition,example,roadmap") {
+    errors.push("chapter must begin with intuition, example, roadmap in that order");
   }
 
   const sectionIds = new Set();

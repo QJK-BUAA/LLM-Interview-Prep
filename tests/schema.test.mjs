@@ -113,7 +113,7 @@ test("rejects broken learning paths but allows multiple independent derivations"
     id: "math-gradient", type: "derivation", title: "求导", body: "完整推导。",
   });
   assert.deepEqual(validateChapter(chapter), []);
-  chapter.sections[0].links[0].sectionId = "missing-math";
+  chapter.sections.find(section => section.type === "roadmap").links[0].sectionId = "missing-math";
   assert.ok(validateChapter(chapter).some(error => error.includes("invalid roadmap link")));
 });
 

@@ -3,6 +3,7 @@ import { sourcesForChapter } from "../content/source-manifest.js";
 import { SECTION_LABELS } from "../content/schema.js";
 
 const INTERVIEW_SECTION_TYPES = new Set([
+  "intuition",
   "roadmap",
   "example",
   "derivation",
@@ -379,8 +380,8 @@ export function renderChapter(chapter, state = {}) {
   const derivations = sections.filter(section => section.type === "derivation");
   const whiteboard = sections.find(section => section.id === "whiteboard");
   const formulaIndex = derivations.length ? (
-    `<nav class="formula-index" aria-label="本章公式与白板练习">` +
-    `<h2>本章公式与白板练习</h2>` +
+    `<details class="formula-index"${mode === "interview" ? " open" : ""}>` +
+    `<summary>本章公式与白板练习</summary>` +
     `<p>${mode === "interview"
       ? "先写定义与公式，再推导、手算，最后用白板题检查薄弱点。"
       : "按知识路线学习，也可以直接进入一个公式主题。"}公式默认展开。</p>` +
@@ -393,11 +394,25 @@ export function renderChapter(chapter, state = {}) {
       `data-section-link="whiteboard">进入白板练习</a>` : "") +
     `<button type="button" data-action="set-derivations" data-open="true">展开全部推导</button>` +
     `<button type="button" data-action="set-derivations" data-open="false">收起全部推导</button>` +
-    `</div></nav>`
+    `</div></details>`
   ) : "";
+  const summaryHtml = renderInline(chapter.summary, markdownOptions, []);
+  const objectivesHtml =
+    `<section class="chapter-objectives" aria-labelledby="objectives-title">` +
+    `<h2 id="objectives-title">学完能做什么</h2>` +
+    `<ul>${chapter.objectives
+      .map((objective) => `<li>${escapeHtml(objective)}</li>`)
+      .join("")}</ul></section>`;
+  const lessonHtml = sections.map(section => {
+    const html = renderSection(section, chapter.id, completed, markdownOptions);
+    if (section.id === "intuition") return html + objectivesHtml;
+    if (section.type === "roadmap") return html + formulaIndex;
+    return html;
+  }).join("");
   const readingLinks = sourceDocs.length
     ? `<details class="source-map"><summary>本章扩展阅读（${sourceDocs.length} 篇）</summary>` +
-      `<p>改编自 Xavier / Agentic RL Analysis Contributors 的调研；课程中的原论文引用用于核验定义与结论。</p><ul>` +
+      `<p>以下列出与本章相关的调研原文；数学和经典模型基础由课程补充，原论文引用用于核验定义与结论。` +
+      `<a href="./docs/research/source-reading-2026-09-30.md" target="_blank" rel="noreferrer">逐篇阅读与改编说明</a></p><ul>` +
       sourceDocs.map(source => `<li><a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.topics)}</a></li>`).join("") +
       `</ul></details>`
     : "";
@@ -411,25 +426,11 @@ export function renderChapter(chapter, state = {}) {
     `<p class="chapter-number">CHAPTER ${escapeHtml(chapter.id)}</p>` +
     `<h1>${escapeHtml(chapter.title)}</h1>` +
     `<p class="chapter-subtitle">${escapeHtml(chapter.subtitle)}</p>` +
-    `<p class="chapter-summary">${renderInline(
-      chapter.summary,
-      markdownOptions,
-      [],
-    )}</p>` +
+    `<p class="chapter-summary">${summaryHtml}</p>` +
     `<div class="chapter-progress" aria-label="本章进度 ${progress}%">` +
     `<span style="width:${progress}%"></span></div>` +
     `</header>` +
-    `<section class="chapter-objectives" aria-labelledby="objectives-title">` +
-    `<h2 id="objectives-title">学完能做什么</h2>` +
-    `<ul>${chapter.objectives
-      .map((objective) => `<li>${escapeHtml(objective)}</li>`)
-      .join("")}</ul></section>` +
-    formulaIndex +
-    `<div class="lesson-sections">${sections
-      .map((section) =>
-        renderSection(section, chapter.id, completed, markdownOptions),
-      )
-      .join("")}</div>` +
+    `<div class="lesson-sections">${lessonHtml}</div>` +
     `<footer class="chapter-sources"><h2>来源与证据</h2><ol>${chapter.sources
       .map(
         (source) =>

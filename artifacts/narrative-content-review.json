@@ -1,0 +1,308 @@
+{
+  "baseline": "ba8cf3255683463c4ab5db20d45b37766c355b0d",
+  "chapters": [
+    {
+      "id": "00",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "01",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 5,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "02",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 7,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "03",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 6,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "04",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 13,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "05",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "06",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "07",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "08",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 5,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "09",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 5,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "10",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 6,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "11",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 5,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "12",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 5,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "13",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "14",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 3,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "15",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "16",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "17",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 3,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "18",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "19",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "20",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 3,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "21",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "22",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "23",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "24",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "25",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "26",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 5,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "27",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "28",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    },
+    {
+      "id": "29",
+      "idsPreserved": true,
+      "questionsPreserved": true,
+      "sourceUrlsPreserved": true,
+      "roadmapFollowsText": true,
+      "derivations": 4,
+      "firstParagraphsWithoutMath": true,
+      "lostOriginalDerivationMath": []
+    }
+  ],
+  "readingPathsMatch": true,
+  "sourceErrors": [],
+  "passed": true
+}

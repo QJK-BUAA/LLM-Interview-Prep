@@ -18,36 +18,24 @@ const chapter = {
     "现代 LLM 不是单一新发明，而是围绕位置表示、训练稳定性、KV 共享、稀疏计算与长序列效率的一组组合选择；每个选择都在质量、显存、吞吐和实现复杂度之间交换。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：把组件收益落实到代数和资源量",
-      body: String.raw`先修：第 06 章归一化、第 09 章 Attention 前后向与 FLOPs。学习顺序为 RoPE 相对位置代数 → RMSNorm 导数 → SwiGLU 参数匹配 → GQA/MLA 缓存布局 → MoE 路由和负载目标。不要只报组件名称；要说明哪个张量被改变、节省哪笔账、哪些性质只是特定假设下成立。Mamba/NSA 等扩展保留在比较部分，不把研究路线写成无条件替代结论。`,
-      links: [
-        { label: "RoPE 相对位移", sectionId: "math-rope-relative", level: "推导" },
-        { label: "RMSNorm 完整导数", sectionId: "math-rmsnorm-backward", level: "推导" },
-        { label: "SwiGLU 等参数比较", sectionId: "math-swiglu-budget", level: "必会" },
-        { label: "MHA/GQA/MQA/MLA 缓存", sectionId: "math-kv-mla", level: "进阶" },
-        { label: "MoE 路由与辅助损失", sectionId: "math-moe-routing", level: "进阶" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：组件是在替不同瓶颈付账",
-      body: String.raw`标准 Transformer 给出骨架，现代 LLM 则逐项处理实际瓶颈。RoPE 或 ALiBi 告诉注意力“相隔多远”；RMSNorm 和残差布局让深层训练稳定；SwiGLU 提升 FFN 的条件化表达；GQA、MLA 压缩生成时反复读取的 KV Cache；MoE 用稀疏路由扩大总参数但限制每 token 计算；Mamba 和稀疏注意力尝试降低长序列成本。
+      body: String.raw`上一章的 Transformer 已能读取历史，可当提示变长、同时服务的请求变多，保存历史键值就可能占满显存。能否让多个查询共用历史，而不把所有查询也合成一个？本章先算这笔缓存账，再沿同一个 decoder 块检查位置、尺度和特征变换，理解现代架构为什么会改这些部件。
 
-这些组件不能按论文热度任意拼装。一个改动会影响其他边界：位置编码决定外推方式，注意力结构决定缓存布局，MoE 决定通信模式，量化又可能改变算子支持。工程上更可靠的做法是先确认模型家族的完整配方，再做受控消融。
+减少 K/V 头数的 GQA、压缩缓存表示的 MLA，都保留“根据内容读取历史”的任务，却存下不同的张量。下面先看到一个从 8192 到 2048 个元素的例子，随后说明哪些计算并没有随之减少。这样，“省缓存”就有了明确对象，而不是“模型整体快四倍”的承诺。
 
-截至当前，RoPE、RMSNorm、SwiGLU 和 GQA 已在多种公开大模型中形成成熟实践；MoE 也已大规模部署，但路由与通信调优复杂。MLA 在特定模型家族中有明确实证，Mamba/SSM 与 NSA（Native Sparse Attention）仍属于快速演进的替代或混合路线，不能笼统说已经取代全注意力。
+缓存以外，还有三项局部问题：注意力怎样区分位置，子层输入怎样控制尺度，FFN 怎样按内容调节特征。RoPE、RMSNorm、SwiGLU 分别给出一种答案；MoE 则进一步把 FFN 计算分配给少数专家。它们会影响彼此的 shape、梯度和实现，不能按名称随意拼装，应该先理解完整模型配方再做受控消融。
 
-评价组件时至少问四件事：训练时节省什么，推理时节省什么，质量在哪个任务上验证，硬件是否有高效 kernel。只有公式复杂度下降，不代表真实延迟一定下降。`,
+本章沿各组件的原始论文和技术报告补充基础，不把上游后训练综述当成这些公式的首发来源。Mamba/SSM 和 NSA 等替代或混合路线留在比较部分；无论组件是否已有大规模应用，都要分别检查质量、训练成本、推理成本和 kernel 支持，不能把某个模型的实证扩大成无条件替代结论。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：GQA 怎样缩小 KV Cache",
-      body: String.raw`设隐藏维 $H=4096$，query 头数 $N_q=32$，每头维度 $D=128$。标准 MHA（Multi-Head Attention）也有 32 个 K/V 头，每个 token 每层需缓存：
+      body: String.raw`每生成一个新 token，模型都要保留它的键和值供后续查询。如果四个 query 头共享一份键值，究竟省掉多少存储，又有哪些工作还在？先只数每层每个 token 的元素，暂不乘请求数、长度和字节数。
+
+设隐藏维 $H=4096$，query 头数 $N_q=32$，每头维度 $D=128$。标准 MHA（Multi-Head Attention）也有 32 个 K/V 头，每个 token 每层需缓存：
 
 $$32\times128\times2=8192\text{ 个元素}$$
 
@@ -57,7 +45,24 @@ $$8\times128\times2=2048\text{ 个元素}$$
 
 恰好缩小 4 倍。MQA（Multi-Query Attention）让所有 query 头共享唯一 K/V 头，只需 $1\times128\times2=256$ 个元素，压缩 32 倍，但共享更强，质量与训练迁移需要验证。
 
-GQA 的计算仍有 32 个 query 头，每组 query 读取同一 K/V。它主要减少 KV 投影、缓存容量和内存带宽，不把整个注意力矩阵的查询工作降为八分之一。生成阶段经常受内存带宽限制，所以缓存压缩可能显著提升并发。`,
+GQA 的计算仍有 32 个 query 头，每组 query 读取同一 K/V。2048 相比 8192 是四分之一的缓存，不是四分之一的查询次数；它主要减少 KV 投影、缓存容量和读取带宽。若每元素为两字节，这一局部账目从 16 KiB 降到 4 KiB，完整服务再乘层数、长度和并发。后面的缓存推导会沿用这组头数，并加入 MLA，比较不同表示而非只比较缩写。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：把组件收益落实到代数和资源量",
+      body: String.raw`缓存例已经指出一个瓶颈，但在替换注意力前，还要确认查询和键怎样编码位置、进入子层的输入怎样缩放。先沿 decoder 图定位三个局部前向公式，再分别证明 RoPE 的相对位移、RMSNorm 的分母梯度和 SwiGLU 的预算与反向。
+
+有了这些定义，才回到刚才的 GQA 缓存账，并解释 MLA 为什么要保留独立位置项；最后把 FFN 扩成可路由的专家集合，检查实际负载与梯度来源。第 06 章提供归一化工具，第 09 章提供注意力前后向和主算术量。比较部分的 Mamba/NSA 是另行评估的结构路线，不是这条推导链默认必选的下一代组件。`,
+      links: [
+        { label: "定位三个局部前向公式", sectionId: "derivation", level: "必会" },
+        { label: "RoPE 相对位移", sectionId: "math-rope-relative", level: "推导" },
+        { label: "RMSNorm 完整导数", sectionId: "math-rmsnorm-backward", level: "推导" },
+        { label: "SwiGLU 等参数比较", sectionId: "math-swiglu-budget", level: "必会" },
+        { label: "MHA/GQA/MQA/MLA 缓存", sectionId: "math-kv-mla", level: "进阶" },
+        { label: "MoE 路由与辅助损失", sectionId: "math-moe-routing", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -93,7 +98,9 @@ Mamba/SSM 不是给这个注意力块换一个 mask，而是用输入相关的�
       id: "derivation",
       type: "derivation",
       title: "RoPE、RMSNorm 与 SwiGLU 的核心公式",
-      body: String.raw`RoPE（Rotary Position Embedding）把向量相邻两维看成二维平面。位置 $m$ 对向量对 $(x_{2i},x_{2i+1})$ 施加旋转：
+      body: String.raw`同一个 token 移到另一个位置，怎样让匹配分数感知位置变化，同时不改变向量长度？进入子层前怎样缩放输入，离开注意力后又怎样按内容调节特征？先把这三个问题各写成一个局部操作，后面的专题再分别追踪其证明、梯度和成本。
+
+RoPE（Rotary Position Embedding）把向量相邻两维看成二维平面。位置编号为 $m$，第 i 对通道的旋转频率为 $\theta_i$，对向量对 $(x_{2i},x_{2i+1})$ 施加旋转：
 
 $$R_{\theta_i,m}
 \begin{bmatrix}x_{2i}\\x_{2i+1}\end{bmatrix}
@@ -106,13 +113,13 @@ $$R_{\theta_i,m}
 
 当 query 在位置 $m$、key 在位置 $n$ 时，旋转后的点积满足 $q^\top R_{n-m}k$ 的形式，因此自然依赖相对位移。长于训练窗口时，旋转频率落入未见区域；YaRN 等方法通过频率插值和尺度修正扩展上下文，但仍需长上下文数据与评估。
 
-RMSNorm 对隐藏向量 $x\in\mathbb{R}^{H}$ 计算：
+例如将 [1,0] 旋转四分之一圈得到 [0,1]，长度仍是 1，改变的是与另一个旋转向量的相对夹角。位置变换不负责控制整个 token 的幅度，这由归一化处理。RMSNorm 对隐藏向量 $x\in\mathbb{R}^{H}$ 计算：
 
 $$\operatorname{RMS}(x)=\sqrt{\frac1H\sum_{i=1}^{H}x_i^2+\epsilon}$$
 
 $$y_i=g_i\frac{x_i}{\operatorname{RMS}(x)}$$
 
-它不像 LayerNorm 那样减去均值，减少部分计算。正缩放不变性在 $\epsilon=0$、输入非零时精确成立；非零 epsilon 下是近似性质。
+其中 $g_i$ 是可学习缩放。它不像 LayerNorm 那样减去均值，减少部分计算。正缩放不变性在 $\epsilon=0$、输入非零时精确成立；非零 epsilon 下是近似性质。输入 [1,2]、缩放全为 1 且忽略 epsilon 时，分母约 1.5811，输出约 [0.6325,1.2649]，可见它不是把每个数裁到 0 与 1 之间。
 
 SwiGLU 使用两条投影：
 
@@ -120,13 +127,15 @@ $$\operatorname{SwiGLU}(x)
 =\operatorname{SiLU}(xW_g)\odot(xW_u),\qquad
 y=\operatorname{SwiGLU}(x)W_d$$
 
-$W_g$ 产生门，$W_u$ 产生内容，逐元素相乘后由 $W_d$ 压回隐藏维。为保持与普通 FFN 相近的参数量，其中间宽度通常不会直接照搬原来的 $4H$。`,
+$W_g$ 产生门，$W_u$ 产生内容，逐元素相乘后由 $W_d$ 压回隐藏维。例如门的预激活为 0、内容为 2 时，该坐标乘积为 0；这说明前向内容被抑制，却还不能推断门的梯度为零。为保持与普通 FFN 相近的参数量，其中间宽度通常不会直接照搬原来的 $4H$。接下来的三个专题依次证明位置性质、追踪分母反向、计算门控的三矩阵预算，不把这三个公式当成互不相干的清单。`,
     },
     {
       id: "math-rope-relative",
       type: "derivation",
       title: "RoPE：从旋转矩阵证明相对位置",
-      body: String.raw`**定义与维度。** 每头的旋转维度 $d_R$ 为偶数，$R_m\in\mathbb R^{d_R\times d_R}$ 是由 $2\times2$ 旋转块组成的块对角矩阵，第 $i$ 对角度为 $m\theta_i$，常见频率 $\theta_i=b^{-2i/d_R}$。令 $\tilde q_m=R_mq_m,\tilde k_n=R_nk_n$。
+      body: String.raw`把同一对 query 和 key 一起向后移动一个位置，旋转产生的匹配关系应不应该改变？如果只移动其中一个，又会怎样？固定内容向量后证明这两个关系，才能准确理解 RoPE 的“相对位置”，而不是误以为距离决定了全部注意力。
+
+每头的旋转维度 $d_R$ 为偶数，$R_m\in\mathbb R^{d_R\times d_R}$ 是由 $2\times2$ 旋转块组成的块对角矩阵，第 $i$ 对角度为 $m\theta_i$，常见频率 $\theta_i=b^{-2i/d_R}$。令 $\tilde q_m=R_mq_m,\tilde k_n=R_nk_n$。
 
 二维旋转满足 $R(a)^\top=R(-a)$ 和 $R(a)R(b)=R(a+b)$，因此逐块有：
 
@@ -134,24 +143,26 @@ $$\tilde q_m^\top\tilde k_n
 =q_m^\top R_m^\top R_nk_n
 =q_m^\top R_{n-m}k_n.$$
 
-相同平移 $m\mapsto m+c,n\mapsto n+c$ 不改变旋转带来的相对位移，但内容向量 $q_m,k_n$ 仍依赖文本，不能说“注意力只与距离有关”。旋转正交，也保长度：$\|R_mq\|_2=\|q\|_2$。
+点积中的 query 旋转先因转置变为逆旋转，再与 key 的旋转相加，留下的正是位置差。相同平移 $m\mapsto m+c,n\mapsto n+c$ 不改变旋转带来的相对位移，但内容向量 $q_m,k_n$ 仍依赖文本，不能说“注意力只与距离有关”。旋转正交，也保长度：$\|R_mq\|_2=\|q\|_2$。
 
 **数值例。** 仅一对通道，$q=k=[1,0]^\top,\theta=\pi/2,m=1,n=2$，旋转后 q 为 $[0,1]$、k 为 $[-1,0]$，点积 0，等于 $\cos((n-m)\theta)=0$；$m=0,n=2$ 时点积为 -1。这也说明“距离越远权重严格越小”并不成立，因为旋转相位是周期的。
 
 **反向与边界。** 位置和频率固定时，$\nabla_qL=R_m^\top\nabla_{\tilde q}L$，只需逆旋转。未参与旋转的通道照常点积。实现的 interleaved 与 split-half 配对必须与 checkpoint 一致，否则长度保持仍成立但模型语义错误。
 
-**追问外推。** 统一把位置缩成 $m/s$ 会改变频率分辨率和局部相位；YaRN 等采用更细的频段策略。相对位置代数不等于分布外长序列质量保证，需单独测长程召回、位置偏差与 PPL。`,
+例中相邻位置点积为 0，相差两个位置为 -1，再增加完整周期又会回到原值，所以不能把它解释成单调距离惩罚。统一把位置缩成 $m/s$ 会改变频率分辨率和局部相位；YaRN 等采用更细的频段策略。相对位置代数不等于分布外长序列质量保证，需单独测长程召回、位置偏差与 PPL。位置部分查清后，下一节回到 decoder 输入尺度，检查归一化是否把正确的梯度传回来了。`,
     },
     {
       id: "math-rmsnorm-backward",
       type: "derivation",
       title: "RMSNorm：归一化分母也必须反传",
-      body: String.raw`**定义。** $x,g\in\mathbb R^H$，$r=\sqrt{H^{-1}\sum_jx_j^2+\epsilon}$，$y_i=g_ix_i/r$。上游 $a_i=\partial L/\partial y_i$，记 $u_i=a_ig_i$。由 $dr=(Hr)^{-1}\sum_jx_jdx_j$，先求局部 Jacobian：
+      body: String.raw`如果只想提高归一化输出的第一个坐标，为什么第二个输入也会收到梯度？因为它参与了共享分母。我们用两个输入检查这条容易漏掉的路径，并与把分母当常数的错误实现直接比较。
+
+输入与可学习缩放为 $x,g\in\mathbb R^H$，$r=\sqrt{H^{-1}\sum_jx_j^2+\epsilon}$，$y_i=g_ix_i/r$。上游 $a_i=\partial L/\partial y_i$，记 $u_i=a_ig_i$。由 $dr=(Hr)^{-1}\sum_jx_jdx_j$，先求局部 Jacobian：
 
 $$\frac{\partial y_i}{\partial x_j}
 =g_i\left(\frac{\delta_{ij}}r-\frac{x_ix_j}{Hr^3}\right).$$
 
-将上游对输出维求和得：
+第一项是改变分子的直接影响，第二项是输入改变均方根后对所有输出的间接影响。将上游对输出维求和得：
 
 $$\nabla_xL=\frac ur-\frac{x}{Hr^3}(x^\top u),\qquad
 \frac{\partial L}{\partial g_i}=a_i\frac{x_i}r.$$
@@ -166,13 +177,15 @@ $$\nabla_xL=[0.8/r,-0.4/r]
 
 $x^\top\nabla_xL=0$，对应无 epsilon 时对正尺度的精确不变性。若错误把 r detach，输入梯度将变成 $[1/r,0]$，沿径向出现不该有的梯度。
 
-**数值边界。** 取 $\epsilon>0$ 时，$x^\top\nabla_xL=\epsilon(x^\top u)/r^3$，不再严格为 0；$x=0$ 时 Jacobian 为 $\operatorname{diag}(g)/\sqrt\epsilon$，可能很大但有限。移位 $x+c\mathbf1$ 会改变 RMSNorm，不能把 LN 的平移不变性搬过来。实际平方和通常提高累积精度，避免低精度溢出。`,
+第二个坐标的梯度约 -0.252982 正是分母路径；忽略它就会错误改变本应消除的整体尺度方向。取 $\epsilon>0$ 时，$x^\top\nabla_xL=\epsilon(x^\top u)/r^3$，不再严格为 0；$x=0$ 时 Jacobian 为 $\operatorname{diag}(g)/\sqrt\epsilon$，可能很大但有限。移位 $x+c\mathbf1$ 会改变 RMSNorm，不能把 LN 的平移不变性搬过来。实际平方和通常提高累积精度，避免低精度溢出。通过这个局部梯度检查后，下一节沿两条投影路径计算 FFN 门控的梯度。`,
     },
     {
       id: "math-swiglu-budget",
       type: "derivation",
       title: "SwiGLU：三矩阵预算与门控梯度",
-      body: String.raw`**维度。** 对行向量 $x\in\mathbb R^{1\times H}$，$a=xW_g,b=xW_u\in\mathbb R^{1\times F}$，$W_g,W_u\in\mathbb R^{H\times F}$，$W_d\in\mathbb R^{F\times H}$。输出 $y=(\operatorname{SiLU}(a)\odot b)W_d$。
+      body: String.raw`给普通 FFN 加一条门控投影，会不会把收益和增加参数混在一起？先固定参数预算，算出三矩阵结构应使用多宽的中间层；再回到前面“门输出为零”的例子，检查被关闭的门还能不能学习。
+
+对行向量 $x\in\mathbb R^{1\times H}$，门和内容预激活为 $a=xW_g,b=xW_u\in\mathbb R^{1\times F}$，$W_g,W_u\in\mathbb R^{H\times F}$，$W_d\in\mathbb R^{F\times H}$。输出 $y=(\operatorname{SiLU}(a)\odot b)W_d$。
 
 普通宽度 $4H$ 的两矩阵 FFN 参数为 $8H^2$；SwiGLU 为 $3HF$。等参数预算解：
 
@@ -180,7 +193,7 @@ $$3HF=8H^2\quad\Longrightarrow\quad F=8H/3.$$
 
 忽略 bias 时，线性主项的 FLOPs 分别为 $16H^2$ 与 $6HF$，在这个宽度也匹配，实际还多出门控激活和乘法。$H=12$ 时普通 FFN 宽度 48、参数 1152，SwiGLU 宽度 32、参数也为 1152。真实硬件需把宽度对齐到合适倍数，匹配通常是近似。
 
-**反向为什么有两路。** 设输出上游 $G_y$，$u=G_yW_d^\top$。由 $\operatorname{SiLU}(a)=a\sigma(a)$：
+宽度从 48 降到 32 后，例中两种结构都有 1152 个参数，才是在比较相近线性预算下的结构差异。接着问这些参数怎样学：设输出上游 $G_y$，$u=G_yW_d^\top$，先把梯度穿过下投影。乘积对两支分别求导，再由 $\operatorname{SiLU}(a)=a\sigma(a)$ 得：
 
 $$G_a=u\odot b\odot[\sigma(a)+a\sigma(a)(1-\sigma(a))],\quad
 G_b=u\odot\operatorname{SiLU}(a),$$
@@ -190,13 +203,15 @@ G_{W_d}=(\operatorname{SiLU}(a)\odot b)^\top G_y.$$
 
 另外 $G_{W_g}=x^\top G_a,G_{W_u}=x^\top G_b$。标量 $a=0,b=2,u=3$，SiLU 导数为 $1/2$，所以 $G_a=3,G_b=0$。门输出为 0 不代表门参数完全没有梯度；这与把两支都初始化为零的乘法结构有不同后果。
 
-**追问。** SwiGLU 的“门”不在 [0,1] 内，因为使用的是 SiLU，不是单独 sigmoid；不能把它当成概率路由。`,
+例中内容分支梯度为 0，门分支梯度却为 3：改变门仍能打开现有内容，所以前向零输出不等于所有参数失去学习信号。SwiGLU 的“门”不在 [0,1] 内，因为使用的是 SiLU，不是单独 sigmoid；不能把它当成概率路由。局部位置、归一化和 FFN 现在都已定义，下面回到开场的历史缓存问题，将 GQA 与需要位置解耦的 MLA 放在同一口径比较。`,
     },
     {
       id: "math-kv-mla",
       type: "derivation",
       title: "KV 布局：GQA 共享头与 MLA 潜变量吸收",
-      body: String.raw`**普通缓存账单。** 层数 L、batch B、缓存长度 S、每元素 b 字节。Q 头数 $N_q$、KV 头数 $N_{kv}$、每头维度 D 时：
+      body: String.raw`开场通过共享键值把缓存缩小四倍；如果不存展开后的键值，而存能重建它们的潜变量，还能怎样省？我们先把每 token 的账目扩到整批请求，再检查 MLA 哪些投影可以合并，哪些位置项不能被吸收。
+
+层数 L、batch B、缓存长度 S、每元素 b 字节。Q 头数 $N_q$、KV 头数 $N_{kv}$、每头维度 D 时：
 
 $$M_{KV}=2LBSN_{kv}Db.$$
 
@@ -207,7 +222,7 @@ MHA 为 $N_{kv}=N_q$，MQA 为 1，GQA 介于两者之间。投影参数忽略 b
 $$ (q_{s,i}^C)^\top W_i^{UK}c_t
 =\left((W_i^{UK})^\top q_{s,i}^C\right)^\top c_t.$$
 
-总分数还需加入 $(q_{s,i}^R)^\top k_t^R$ 并按完整 key 维度缩放；不能把位置旋转不加区分地吸收进一组与位置无关的权重。value 聚合满足 $\sum_ta_{st,i}W_i^{UV}c_t=W_i^{UV}\sum_ta_{st,i}c_t$，可把 $W_i^{UV}$ 与输出投影组合。
+上式只是矩阵乘法结合律：把原本逐历史 token 展开的 key 投影转移到当前 query 一侧。总分数还需加入 $(q_{s,i}^R)^\top k_t^R$ 并按完整 key 维度缩放；不能把位置旋转不加区分地吸收进一组与位置无关的权重。value 聚合满足 $\sum_ta_{st,i}W_i^{UV}c_t=W_i^{UV}\sum_ta_{st,i}c_t$，可把 $W_i^{UV}$ 与输出投影组合。
 
 这样解码无需永久缓存每头展开后的 K/V，理想每 token 每层存 $d_c+d_R$ 个元素：
 
@@ -215,13 +230,15 @@ $$M_{MLA}=LBS(d_c+d_R)b.$$
 
 **统一数字例。** $N_q=32,D=128$，MHA/GQA(8 heads)/MQA 分别缓存 8192/2048/256 个元素。示意 MLA 取 $d_c=512,d_R=64$，缓存 576 个元素，比 MHA 少约 14.22 倍，但比此例 MQA 多。不能无条件声称 MLA 总比 MQA 更省。临时展开、页表、量化 scale 和 padding 另计；压缩后的矩阵尺寸也会改变 kernel 算力效率。
 
-**追问。** 仅知道压缩维度不能反推出吞吐；必须知道 Q 的内容/旋转维度、是否采用投影吸收、缓存 dtype 和服务 batch。`,
+576 是潜变量加旋转 key 的存储量，不是把所有头的展开 K/V 分别压成 576；也正因如此，它不能直接替代 query 计算量的估算。仅知道压缩维度不能反推出吞吐；必须知道 Q 的内容/旋转维度、是否采用投影吸收、缓存 dtype 和服务 batch。缓存优化解决的是历史存储，下一节的 MoE 则转到 FFN，问怎样扩展总参数而不让每个 token 使用全部参数。`,
     },
     {
       id: "math-moe-routing",
       type: "derivation",
       title: "MoE：Top-k 路由、辅助损失与容量",
-      body: String.raw`**定义。** T 个 token，E 个专家，router 权重 $W_r\in\mathbb R^{H\times E}$，$p_t=\operatorname{softmax}(x_tW_r)$。选取集合 $\mathcal K_t=\operatorname{TopK}(p_t,k)$，本节选择后重归一化：
+      body: String.raw`想增加 FFN 的总容量，又不想让每个 token 都计算全部新增参数，能否只派给少数专家？这会引出两个新问题：谁来学会分配，热门专家装不下怎么办？我们分别计算选中专家的混合、路由学习信号和容量，避免只用激活参数量判断成本。
+
+设 T 个 token、E 个专家，router 权重 $W_r\in\mathbb R^{H\times E}$，概率 $p_t=\operatorname{softmax}(x_tW_r)$。选取集合 $\mathcal K_t=\operatorname{TopK}(p_t,k)$，本节选择后重归一化，专家函数记为 $F_e$：
 
 $$\tilde p_{te}=\frac{p_{te}}{\sum_{j\in\mathcal K_t}p_{tj}},\quad
 y_t=\sum_{e\in\mathcal K_t}\tilde p_{te}F_e(x_t).$$
@@ -234,7 +251,7 @@ $$f_e=\frac1T\sum_t\mathbf1[\arg\max_jp_{tj}=e],\quad
 P_e=\frac1T\sum_tp_{te},\quad
 L_{aux}=\alpha E\sum_ef_eP_e.$$
 
-$f_e$ 作为离散统计 stop-gradient，$P_e$ 保留梯度。对第 t 个 token 的 router logit $z_{tj}$：
+$f_e$ 记录实际派了多少任务，$P_e$ 记录平均想派多少概率；只有后者对 logits 连续可微。因此 $f_e$ 作为离散统计 stop-gradient，$P_e$ 保留梯度。对第 t 个 token 的 router logit $z_{tj}$：
 
 $$\frac{\partial L_{aux}}{\partial z_{tj}}
 =\frac{\alpha E}{T}p_{tj}\left(f_j-\sum_ef_ep_{te}\right).$$
@@ -243,7 +260,7 @@ $$\frac{\partial L_{aux}}{\partial z_{tj}}
 
 **手算与边界。** E=4，完全均匀的 $f=P=[1/4,1/4,1/4,1/4]$ 得 $L_{aux}=\alpha$。若全部 token 选专家 0、$P=[0.7,0.1,0.1,0.1]$，则 $L_{aux}=2.8\alpha$，$\alpha=0.01$ 时为 0.028；不应把均匀值误写成 0。
 
-每专家容量常按 $C=\lceil c\,kT/E\rceil$ 设定，c 是 capacity factor。T=8、E=4、k=2、c=1.25 时 C=5，总容量 20 个分配槽，实际有 16 次路由；即使总容量够，热门专家仍可超过 5。溢出可丢弃、重路由或采用 dropless 调度，语义和通信不同。总专家参数约 E 倍，激活 FFN 计算约 k 倍，但全部权重仍要存储，all-to-all 和尾部负载可能主导延迟。`,
+0.028 比均匀配置的 0.01 大，表示这项辅助目标对拥挤分配给出了更高代价，并不是任务正确率下降了 0.018。每专家容量常按 $C=\lceil c\,kT/E\rceil$ 设定，c 是 capacity factor。T=8、E=4、k=2、c=1.25 时 C=5，总容量 20 个分配槽，实际有 16 次路由；即使总容量够，热门专家仍可超过 5。溢出可丢弃、重路由或采用 dropless 调度，语义和通信不同。总专家参数约 E 倍，激活 FFN 计算约 k 倍，但全部权重仍要存储，all-to-all 和尾部负载可能主导延迟。下一章据此把模型状态、激活、缓存和通信分别列账，检验局部节省能否成为系统收益。`,
     },
     {
       id: "code",

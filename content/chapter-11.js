@@ -18,37 +18,26 @@ const chapter = {
     "大模型系统优化的第一步是把显存和时间拆成可计算部件：训练主要受参数状态、激活和通信约束，生成主要受 KV Cache、内存带宽、批处理与调度约束。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：先算账，再讨论 kernel 和并行",
-      body: String.raw`先修：第 06 章优化器状态，第 09 章 Attention 的矩阵计算，第 10 章 KV 布局。学习顺序是逐项显存与 ZeRO 分片 → FlashAttention 在线 softmax → prefill/decode 的计算和带宽 → 集合通信与流水线气泡。面试回答必须写单位、dtype、分片对象和峰值假设；“除以卡数”“线性显存”“更高吞吐”都不能替代完整账单。`,
-      links: [
-        { label: "显存与 ZeRO 分片", sectionId: "math-memory-zero", level: "必会" },
-        { label: "FlashAttention 在线递推", sectionId: "math-flashattention-online", level: "推导" },
-        { label: "Prefill/Decode 与 KV 带宽", sectionId: "math-prefill-decode", level: "推导" },
-        { label: "通信与流水线气泡", sectionId: "math-parallel-communication", level: "进阶" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
       title: "先建立直觉：参数只是显存账单的一部分",
-      body: String.raw`看到“70 亿参数”，不能直接用参数量判断能否训练。推理只需权重和运行时状态；全参数训练还要保存梯度、优化器一阶矩、二阶矩、可能的 fp32 主权重，以及等待反向使用的中间激活。激活又随 batch、序列长度、层数和隐藏宽度增长。
+      body: String.raw`一个 70 亿参数模型的低精度权重能放进设备，为什么一开始训练就显存不足，或者并发生成时又突然装不下？第 10 章已经算过每 token 的历史缓存，本章把镜头拉到完整运行：哪些对象要长期保存，哪些只在某一步短暂出现，哪些又需要反复搬运？
 
-混合精度让大部分矩阵乘法使用 fp16 或 bf16，降低存储和提高 Tensor Core 吞吐，同时在必要位置保留 fp32 数值范围。梯度检查点不保存所有激活，反向时重算部分前向；ZeRO/FSDP 则把参数、梯度和优化器状态分片到多张卡。一个用计算换显存，一个用通信与编排换单卡显存。
+先比较两份账单。全参数训练除权重外，还保存第 06 章优化器使用的梯度和一二阶矩、可能的高精度主权重，以及第 05 章反传要用的中间激活。生成不需要这套训练状态，却随请求数和历史长度累积键值缓存。下面用同一个 7B 规模和一条 4096-token 请求，先把量级算出来。
 
-推理有两个性质不同的阶段。prefill 一次处理完整提示词，矩阵规模大、并行度高，常更偏计算受限；decode 每步只产生一个新 token，却需要读取大量模型权重和历史 KV，常更偏内存带宽受限。优化首 token 延迟和优化每 token 延迟因此不是同一个问题。
+确定大头之后再选工具：混合精度降低部分存储和计算成本；梯度检查点丢弃一些激活、反向时重算；ZeRO/FSDP 把模型状态分摊到多卡；FlashAttention 避免把完整注意力中间矩阵写回显存。它们删除、分摊或重算的对象不同，因此不能用一个“省显存倍数”代替整张账单。
 
-系统指标也要分清：吞吐是单位时间完成的 token 或请求数；延迟是单个请求等待多久；TTFT 是首 token 时间；TPOT 是后续 token 间隔。动态批处理可以提高吞吐，却可能增加排队和尾延迟。
+放得下以后还要等得起。prefill 一次处理提示词，decode 则每步读取权重和历史、生成一个 token；前者常更偏计算受限，后者常更偏带宽受限。首 token 时间 TTFT、后续间隔 TPOT 和单位时间吞吐回答不同问题，增大 batch 可能提高吞吐却增加等待。我们会在存储账单之后继续计算搬运、通信和流水线等待。
 
-进入 RL 后还要检查训推一致性。rollout 引擎采样动作，trainer 重算动作概率，两边必须对应同一 token、前缀、采样设置和行为策略版本。TITO（Token-In-Token-Out）直接传递 token IDs，减少文本解码后重新分词引入的序列变化。异步 RL 把采样与更新解耦以减少等待，但会增加策略版本滞后；吞吐提高不代表有效样本数提高。第 28 章将展开 token 对齐、离散路由、确定性与过期样本控制。`,
+本章先处理系统基础。到第 28 章，rollout 引擎采样与 trainer 重算概率还要对应同一 token、前缀、采样设置和行为策略版本；TITO（Token-In-Token-Out）传递原始 token IDs，减少文本往返引起的序列变化，异步执行则另需处理版本滞后。这是后续应用入口，不要求初读时预先掌握 RL，也不把更高吞吐当成更高有效样本数。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：7B 训练状态与一条 KV Cache",
-      body: String.raw`先估算 70 亿参数模型的 AdamW 全参数训练。假设每参数保存 bf16 权重 2 字节、bf16 梯度 2 字节、fp32 主权重 4 字节、两个 fp32 Adam 状态共 8 字节，总计约 16 字节：
+      body: String.raw`“权重能放下”离“可以训练”还有多远？先固定每类状态的精度，算 70 亿参数的训练常驻状态；再切到生成场景，单独计算一条请求的历史缓存。两份账单服务不同阶段，不把它们不加说明地相加。
+
+对 AdamW 全参数训练，假设每参数保存 bf16 权重 2 字节、bf16 梯度 2 字节、fp32 主权重 4 字节、两个 fp32 Adam 状态共 8 字节，总计约 16 字节：
 
 $$7\times10^9\times16\text{ bytes}\approx112\text{ GB}$$
 
@@ -61,7 +50,23 @@ $$M_{KV}=2LBSN_{kv}D\times2\text{ bytes}$$
 $$=2\times32\times1\times4096\times8\times128\times2
 =536{,}870{,}912\text{ bytes}\approx512\text{ MiB}$$
 
-这只是一条请求。并发 100 条且都接近该长度时，缓存约 50 GiB，因此分页管理、连续批处理和 KV 量化会直接决定服务容量。`,
+112 GB 说明训练状态已远超仅权重的 14 GB，而 512 MiB 是生成时一条请求的缓存，不是整个模型显存。并发 100 条且都接近该长度时，缓存约 50 GiB，因此分页管理、连续批处理和 KV 量化会影响服务容量。接下来先解释每一笔该归入哪个公式，再判断分片、重算或压缩能改变它的哪一部分。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：先算账，再讨论 kernel 和并行",
+      body: String.raw`已经发现训练状态和并发缓存都可能成为大头，下一步该分片参数、丢弃激活，还是降低读取成本？先建立完整显存分解，再按对象逐项分析，避免把不同阶段的收益混在一起。
+
+ZeRO 节算哪些状态真正除以卡数；FlashAttention 节用两块分数证明不存完整概率矩阵也能得到同一输出；prefill/decode 节沿第 09 章的 FLOPs 和第 10 章的 KV 布局估算时间下界；最后补上跨卡传输和流水气泡。单位、dtype、常驻量与峰值贯穿每一步，数值用于形成 profiler 检查假设，不替代目标硬件实测。`,
+      links: [
+        { label: "建立训练与运行时总账", sectionId: "derivation", level: "必会" },
+        { label: "显存与 ZeRO 分片", sectionId: "math-memory-zero", level: "必会" },
+        { label: "FlashAttention 在线递推", sectionId: "math-flashattention-online", level: "推导" },
+        { label: "Prefill/Decode 与 KV 带宽", sectionId: "math-prefill-decode", level: "推导" },
+        { label: "通信与流水线气泡", sectionId: "math-parallel-communication", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -95,48 +100,54 @@ $$=2\times32\times1\times4096\times8\times128\times2
       id: "derivation",
       type: "derivation",
       title: "显存公式、并行通信与注意力复杂度",
-      body: String.raw`设参数量为 $P$，每类状态每参数字节数分别为 $b_w,b_g,b_m,b_v,b_{\text{master}}$。不分片时，仅模型状态近似：
+      body: String.raw`开场算出了 112 GB，为什么仍不能据此决定需要几张卡？因为它只覆盖模型状态，还没有记录前向保存、临时聚合和算子工作区。先给这些对象分别列项，后面每项优化才有明确的减法对象。
+
+设参数量为 $P$，每类状态每参数字节数分别为 $b_w,b_g,b_m,b_v,b_{\text{master}}$，依次对应权重、梯度、两个 Adam 矩和主副本。不分片时，仅模型状态近似：
 
 $$M_{\text{state}}=P(b_w+b_g+b_m+b_v+b_{\text{master}})$$
 
-训练总显存还包括激活 $M_{\text{act}}$、临时工作区 $M_{\text{temp}}$ 和碎片：
+将开场的 2、2、4、4、4 字节代入，就回到每参数 16 字节和 112 GB 的状态小计。训练总显存还包括激活 $M_{\text{act}}$、临时工作区 $M_{\text{temp}}$ 和碎片；下式先写前三项，碎片与分配器预留仍须另加余量：
 
 $$M_{\text{total}}\approx M_{\text{state}}+M_{\text{act}}+M_{\text{temp}}$$
 
 ZeRO-1 主要分片优化器状态，ZeRO-2 再分片梯度，ZeRO-3/FSDP 还分片参数。理想均分到 $G$ 张卡时，对应部分接近除以 $G$，但 all-gather、reduce-scatter 缓冲和短暂峰值不能忽略。
 
-标准注意力要形成 $S\times S$ 分数，算术复杂度约 $O(BNS^2D)$，朴素实现还把中间矩阵写回显存。FlashAttention 使用分块和在线 softmax，在片上 SRAM 中处理小块，避免物化完整分数矩阵到高带宽显存；它计算的是精确注意力，不是稀疏近似。
+即使将 112 GB 状态理想分到八卡，每卡 14 GB 也只是第一项，不能直接称为训练峰值。标准注意力要形成 $S\times S$ 分数，算术复杂度约 $O(BNS^2D)$，朴素实现还把中间矩阵写回显存。FlashAttention 使用分块和在线 softmax，在片上 SRAM 中处理小块，避免物化完整分数矩阵到高带宽显存；它计算的是精确注意力，不是稀疏近似，主要改变激活和 IO 这一项。
 
-数据并行每卡处理不同样本并同步梯度，适合模型单卡可放下；张量并行切分层内矩阵，每层都有通信；流水线并行按层分段，通信频率较低但存在气泡；序列并行沿 token 轴分摊部分激活。实际大训练常组合多维并行。`,
+数据并行每卡处理不同样本并同步梯度，适合模型单卡可放下；张量并行切分层内矩阵，每层都有通信；流水线并行按层分段，通信频率较低但存在气泡；序列并行沿 token 轴分摊部分激活。实际大训练常组合多维并行。此时先标清每种方案触及哪一项，不急着选组合；下一节从最容易复算的模型状态开始，逐阶段核对 ZeRO 的 14 GB 是怎样得到的。`,
     },
     {
       id: "math-memory-zero",
       type: "derivation",
       title: "训练显存账单：ZeRO 各阶段究竟除哪一项",
-      body: String.raw`**先固定实现假设。** P 个参数，每参数 bf16 权重 2B、bf16 梯度 2B、fp32 主副本 4B、Adam m/v 共 8B，模型状态共 16P 字节。将主副本计入优化器侧状态，G 卡等量分片、忽略临时聚合和对齐时，每卡：
+      body: String.raw`同样使用八张卡，为什么 ZeRO 的三个阶段给出的每卡显存不同？因为不是每个阶段都切分所有状态。我们把开场的每参数 16 字节拆开，看哪些仍然复制、哪些才由多卡共同保存，再补上不能随卡数直接消失的激活。
+
+P 个参数，每参数 bf16 权重 2B、bf16 梯度 2B、fp32 主副本 4B、Adam m/v 共 8B，模型状态共 16P 字节。这里 B 表示字节，后面的激活公式里 B 才表示 batch 大小。将主副本计入优化器侧状态，G 卡等量分片、忽略临时聚合和对齐时，每卡：
 
 $$M_0=16P,\quad M_1=4P+\frac{12P}{G},\quad
 M_2=2P+\frac{14P}{G},\quad M_3=\frac{16P}{G}.$$
 
-ZeRO-1 只分片优化器及主副本；ZeRO-2 再分片梯度；ZeRO-3 再分片低精度参数。若框架保留 fp32 梯度或不保存主副本，应从字节表重算，不是把 16 当物理常数。
+ZeRO-1 只分片优化器及主副本，留下权重和梯度的 4 字节复制；ZeRO-2 再分片梯度，留下权重的 2 字节；ZeRO-3 才将低精度参数也分片。若框架保留 fp32 梯度或不保存主副本，应从字节表重算，不是把 16 当物理常数。
 
 **数值例。** $P=7\times10^9,G=8$，上述状态分别为 112、38.5、26.25、14 十进制 GB。ZeRO-3 的 14 GB 不是总峰值：层/flat buffer all-gather、reduce-scatter、预取和参数重建会临时增加占用。
 
 **激活不能漏算。** 一份 bf16 的稠密 attention 概率张量占 $2BNS^2$ 字节。$B=1,N=32,S=4096$ 时单层仅此张量就为 $1,073,741,824$ 字节，即 1 GiB。同例 H=4096 的 Q/K/V 共 $3BSH\times2=96$ MiB，此外还有输出、FFN 中间量、norm 状态及反向保存。FlashAttention 可去掉完整概率张量，不能去掉所有 $BSH$ 激活。
 
-最终账单应为状态+保存激活+临时算子/通信空间+分配器碎片，报告 allocated 与 reserved 的口径。checkpointing 减少保存激活但增加重算；梯度累积降低单次 micro-batch 激活，却不会按累积步数压缩常驻参数。**追问：**两个配置 state bytes 相同，仍可因最长序列、预取深度和通信重叠产生不同峰值。`,
+因此状态即使降到 14 GB，单层的一张概率表仍可能占 1 GiB；此时继续只分片优化器不是针对最大新增项。最终账单应为状态+保存激活+临时算子/通信空间+分配器碎片，报告 allocated 与 reserved 的口径。checkpointing 减少保存激活但增加重算；梯度累积降低单次 micro-batch 激活，却不会按累积步数压缩常驻参数。两个配置 state bytes 相同，仍可因最长序列、预取深度和通信重叠产生不同峰值。下面专门研究这张大概率表能否不存下来。`,
     },
     {
       id: "math-flashattention-online",
       type: "derivation",
       title: "FlashAttention：在线 Softmax 的精确递推与内存",
-      body: String.raw`**一行的目标。** 给一条 query 与 n 个键的分数 $s_j=q^\top k_j/\sqrt d$ 和 value $v_j\in\mathbb R^{d_v}$，目标是 $o=\sum_je^{s_j}v_j/\sum_je^{s_j}$。不把全部分数存入 HBM，而逐块维护最大值 m、缩放分母 $\ell$、未归一化分子 $u\in\mathbb R^{d_v}$：
+      body: String.raw`上一节的一张注意力概率表就有 1 GiB，能否只看一小块分数，算完就丢掉，还保持原来的加权输出？难点是 softmax 的分母依赖全部键，而且后来的块可能出现更大分数。我们用两块数据推导怎样同步修正旧分子和旧分母。
+
+给一条 query 与 n 个键的分数 $s_j=q^\top k_j/\sqrt d$ 和 value $v_j\in\mathbb R^{d_v}$，目标是 $o=\sum_je^{s_j}v_j/\sum_je^{s_j}$。不把全部分数存入 HBM，而逐块维护最大值 m、缩放分母 $\ell$、未归一化分子 $u\in\mathbb R^{d_v}$：
 
 $$m=\max_{\text{已处理 }j}s_j,\quad
 \ell=\sum_{\text{已处理 }j}e^{s_j-m},\quad
 u=\sum_{\text{已处理 }j}e^{s_j-m}v_j.$$
 
-新块 $\mathcal B$ 到来，先把旧统计换到新的指数基准：
+这三个量摘要了所有已处理位置；它们没有丢弃某个键，只是用共同最大值缩放以避免指数溢出。新块 $\mathcal B$ 到来，先把旧统计换到新的指数基准：
 
 $$m'=\max(m,\max_{j\in\mathcal B}s_j),\quad a=e^{m-m'},$$
 
@@ -147,15 +158,17 @@ u'=au+\sum_{j\in\mathcal B}e^{s_j-m'}v_j,\qquad o=u/\ell.$$
 
 **两块手算。** 第一块分数 $[\log2,0]$、标量 values $[2,4]$，得到 $m=\log2,\ell=1.5,u=4$。第二块分数 $\log3$、value=10，$m'=\log3,a=2/3$，所以 $\ell'=2,u'=38/3$，最终 $o=19/3\approx6.333333$。直接计算 $(2\times2+1\times4+3\times10)/(2+1+3)$ 相同。只更新分母却忘记把旧分子乘 a，会得到错误输出。
 
-**从一行到 tile。** 在 SRAM 中保留一块 Q 和输出累积，流过 K/V tile，分数临时块为 $B_q\times B_k$，最终把输出与每行 log-sum-exp 写回 HBM。Q/K/V/O 与行统计的存储随 S 线性增长，不再物化 $BNS^2$ 的分数/概率矩阵；tile 暂存受片上空间约束。反向用保存的行统计和 Q/K 重新计算局部概率，再用第 09 章的同一梯度式。
+最终 19/3 与全量计算一致，说明旧分数不必长期保存；保留正确缩放的摘要已经足够。推广到 tile 时，在 SRAM 中保留一块 Q 和输出累积，流过 K/V tile，分数临时块为 $B_q\times B_k$，最终把输出与每行 log-sum-exp 写回 HBM。Q/K/V/O 与行统计的存储随 S 线性增长，不再物化 $BNS^2$ 的分数/概率矩阵；tile 暂存受片上空间约束。反向用保存的行统计和 Q/K 重新计算局部概率，再用第 09 章的同一梯度式。
 
-**边界与追问。** 稠密精确 Attention 的算术量仍为 $O(BNS^2d)$，改变的是 IO 和中间保存；浮点加法顺序不同，等价不是 bitwise 相同。dropout 反向还要重建同一随机 mask。不能因注意力中间显存近线性，就宣称整个训练只需 O(S) 总资源或吞吐一定提升固定倍数。`,
+稠密精确 Attention 的算术量仍为 $O(BNS^2d)$，改变的是 IO 和中间保存；浮点加法顺序不同，等价不是 bitwise 相同。dropout 反向还要重建同一随机 mask。不能因注意力中间显存近线性，就宣称整个训练只需 O(S) 总资源或吞吐一定提升固定倍数。下面转到生成阶段：即便不保存概率矩阵，每个新 query 仍要读取历史 K/V，这将进入带宽账单。`,
     },
     {
       id: "math-prefill-decode",
       type: "derivation",
       title: "Prefill 与 Decode：计算量、缓存读取和延迟下界",
-      body: String.raw`**固定口径。** L 层、隐藏维 H、标准普通 FFN 宽度 4H，忽略词表头和逐元素算子。长度 S、batch B 的稠密 prefill 约 $L(24BSH^2+4BS^2H)$ FLOPs；因果优化可减少注意力三角部分。带 KV Cache 的单步 decode 仅对新 token 做投影和 FFN，注意力读 S 个历史位置，约：
+      body: String.raw`模型已经缓存了历史键值，为什么提示越长，后续每个 token 仍可能越慢？缓存省掉的是旧投影重算，不是新查询读取历史的工作。我们把整段提示的 prefill 与单步生成的 decode 分开，分别计算矩阵工作量和数据搬运量。
+
+固定 L 层、隐藏维 H、标准普通 FFN 宽度 4H，忽略词表头和逐元素算子。长度 S、batch B 的稠密 prefill 约 $L(24BSH^2+4BS^2H)$ FLOPs；因果优化可减少注意力三角部分。带 KV Cache 的单步 decode 仅对新 token 做投影和 FFN，注意力读 S 个历史位置，约：
 
 $$F_{\rm decode}\approx L(24BH^2+4BSH).$$
 
@@ -163,19 +176,23 @@ $$F_{\rm decode}\approx L(24BH^2+4BSH).$$
 
 **带宽账单。** 缓存字节 $M_{KV}=2LBSN_{kv}Db$。第一个例子的 L=32、B=1、S=4096、KV 头 8、D=128、bf16 给 512 MiB。理想无重复读取时，一次 decode 扫描这份 KV 也要搬运约这个量级。权重常驻容量为 $Pb_w$，batch 内一次读取可服务多个 token，所以增大 batch 能摊薄每 token 权重带宽。
 
-粗略 roofline 下界：
+运算和搬运可以部分重叠，但不可能比其中更慢的那一项还快。以 F 表示所需 FLOPs、$M_{\rm moved}$ 表示实际搬运字节，得到粗略 roofline 下界：
 
 $$t\ge\max(F/\mathcal C,\ M_{\rm moved}/\mathcal B),$$
 
 $\mathcal C$ 是有效算力、$\mathcal B$ 是有效带宽，实际还含通信、kernel 启动和调度。教学例 P=7B、权重 bf16 14 GB、KV=0.536870912 GB，假定每步各读一次、带宽 1000 GB/s，则内存项下界约 14.5369 ms；这不是任何 GPU 的实测延迟，也没有计词表、临时访问或并行通信。
 
-**延迟指标。** 一条请求生成 T 个 token，理想平均总时长近似 $\operatorname{TTFT}+(T-1)\operatorname{TPOT}$，TTFT 还含排队与 prefill。B 增大可能提高 tokens/s，却增加排队及 KV 容量；只有在目标尾延迟 SLO 下比较吞吐才有服务意义。`,
+14.5369 ms 这个数指出在所设带宽和每步搬运假设下，单纯加快矩阵算术不能越过这条内存下界；真实结果还可能更慢。应先测实际读了多少数据，而不是将下界写成硬件跑分。
+
+一条请求生成 T 个 token，理想平均总时长近似 $\operatorname{TTFT}+(T-1)\operatorname{TPOT}$，TTFT 还含排队与 prefill。B 增大可能提高 tokens/s，却增加排队及 KV 容量；只有在目标尾延迟 SLO 下比较吞吐才有服务意义。下一节补上刚才没有计入的跨卡通信和等待，检查多卡为何不一定按卡数加速。`,
     },
     {
       id: "math-parallel-communication",
       type: "derivation",
       title: "并行：Ring 通信量、张量切分与流水线气泡",
-      body: String.raw`**数据并行通信。** G 卡同步一份 V 字节梯度，ring all-reduce 可分为 reduce-scatter 与 all-gather。每阶段 G-1 步，每步每卡发送 V/G 字节，所以每卡发送量：
+      body: String.raw`把计算分到八张卡以后，为什么还会有设备在等？它们可能在同步梯度、合并矩阵部分和，或者等待流水线上下游。先算一份梯度绕环传输的最低工作量，再用四段流水线看填充和排空占掉多少时间。
+
+G 卡同步一份 V 字节梯度，ring all-reduce 可分为 reduce-scatter 与 all-gather。每阶段 G-1 步，每步每卡发送 V/G 字节，所以每卡发送量：
 
 $$V_{\rm send}=2\frac{G-1}{G}V,\qquad
 t_{\rm ring}\approx2(G-1)\alpha+
@@ -183,7 +200,7 @@ t_{\rm ring}\approx2(G-1)\alpha+
 
 $\alpha$ 是每跳启动延迟、$\mathcal B$ 是有效链路带宽；同量接收不要在全双工模型中再次机械翻倍。G=8、V=1 GiB 时发送 1.75 GiB，带宽 50 GiB/s、$\alpha=5\,\mu s$ 时约 35.07 ms。梯度 bucket 与计算重叠可隐藏一部分通信，但最后尾部和小消息延迟仍在。
 
-**张量并行为何层层通信。** 对 $Y=XW$，若沿 W 输出列切分，卡上得到输出特征切片；若下一矩阵沿输入行切分，各卡产生部分和，必须 all-reduce/reduce-scatter 合并。以 FFN 为例，第一层列切分、局部激活、第二层行切分可把通信放在特定边界，而不是每次乘法都聚合完整矩阵。序列并行可让 norm/dropout 等逐 token 操作的激活分片，但不自动消除全局 Attention 所需的跨分片信息。
+35.07 ms 是这个消息量和链路假设下的通信估计，不是八卡训练一步的总时长。通信为什么发生，还取决于怎么分工：对 $Y=XW$，若沿 W 输出列切分，卡上得到输出特征切片；若下一矩阵沿输入行切分，各卡产生部分和，必须 all-reduce/reduce-scatter 合并。以 FFN 为例，第一层列切分、局部激活、第二层行切分可把通信放在特定边界，而不是每次乘法都聚合完整矩阵。序列并行可让 norm/dropout 等逐 token 操作的激活分片，但不自动消除全局 Attention 所需的跨分片信息。
 
 **流水线气泡。** p 个等速 stage、m 个 micro-batch，非交错 fill-drain 调度、无通信且前后向各 stage 成本均匀时，有效时间比例为：
 
@@ -192,7 +209,7 @@ $$U=\frac{m}{m+p-1},\qquad
 
 p=4、m=8 时 $U=8/11\approx72.73\%$，气泡约 27.27%；m=32 时 $U=32/35\approx91.43\%$。更多 micro-batch 能摊薄填充排空，却影响激活寿命、global batch 和调度；1F1B/交错流水的峰值与气泡应按具体 schedule 重算，不能通用套用。
 
-**追问。** 专家并行主要增加 token dispatch/combine 的 all-to-all，热点专家会形成尾部等待。并行维度与网络拓扑要一起设计，理论通信量相同不代表跨节点与 NVLink 域内延迟相同。`,
+从 8 个 micro-batch 增至 32 个，理想利用率由约 72.73% 升至 91.43%，改善的是填充排空占比，不证明全局 batch、峰值激活或泛化也更合适。专家并行主要增加 token dispatch/combine 的 all-to-all，热点专家会形成尾部等待。并行维度与网络拓扑要一起设计，理论通信量相同不代表跨节点与 NVLink 域内延迟相同。到此应能列出一份有假设的资源预算，再用 profiler 检查；下一章则考虑另一条减负路线：只训练任务增量，而不为全部基座参数保存优化器状态。`,
     },
     {
       id: "code",

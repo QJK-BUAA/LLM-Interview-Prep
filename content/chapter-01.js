@@ -18,38 +18,28 @@ const chapter = {
     "张量只是带多个轴的数字容器；读模型代码时先给每个轴贴上语义标签，再检查运算规则，绝大多数 shape 问题都会变得具体。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线与面试要求",
-      body: String.raw`先修第 00 章的损失与梯度角色，能读 Python 列表和求和符号即可。先用原来的张量例子建立 $[B,S,H]$ 轴语义，再用下标看清矩阵乘法消去哪个轴；反向时同一个参数被用了几次，就累加几条路径。矩阵求导的一般方法留到第 02 章，这里从标量偏导逐项推出结果。
-
-学习顺序为形状规则 → 矩阵反传 → 广播反向求和 → mask 的分母和梯度 → einsum 与布局。最后把注意力的 $[B,N,S,D]$ 作为迁移题，而不是提前记忆一整套 Transformer。读完应能说明形状正确但结果错误的反例，以及空 mask 时为何不能产生 NaN。约 120 分钟包含梯度和编号手算。`,
-      links: [
-        { label: "形状与下标规则", sectionId: "derivation", level: "必会" },
-        { label: "矩阵乘法反向", sectionId: "math-matmul-backward", level: "推导" },
-        { label: "广播反向求和", sectionId: "math-broadcast-backward", level: "推导" },
-        { label: "mask 与权重", sectionId: "math-masked-mean", level: "必会" },
-        { label: "einsum 与布局", sectionId: "math-einsum-layout", level: "进阶" },
-        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
-      title: "先建立直觉：张量是有方向的数字盒子",
-      body: String.raw`标量是一个数字，例如温度 23；向量是一排数字，例如一个学生的三科成绩；矩阵是行列构成的表，例如一个班所有学生的成绩；张量是对这些结构的统一称呼。二维以上并不神秘，只是需要更多轴描述位置。
+      title: "两句话一起计算，怎样不把词和特征混在一起？",
+      body: String.raw`上一章一次输入一个学习时长，现在想让模型同时处理两句话。每句话有多个词，每个词又用多个数字表示：如果把这些数字排错，即使乘法能运行，也可能把第一句话的词当成第二句话的特征。本章先解决“一个数字属于谁”的问题，再追踪共享参数如何接收各位置的反馈。
+
+一个数字是标量，一排特征是向量，行列组成的表是矩阵；张量是这些数字容器的统一称呼。多一个轴，只是多回答一个定位问题，例如先找哪句话，再找哪个 token，最后找该 token 的哪项特征。
 
 在机器学习中，shape 比变量名更可靠。看到形状 $[B,S,H]$，先写下：$B$ 是 batch 中样本数，$S$ 是每条序列的 token 数，$H$ 是每个 token 的隐藏维度。一个位置 $(b,s,h)$ 就对应“第 b 个样本、第 s 个 token、第 h 个特征”。
 
 轴的顺序不是宇宙定律，而是接口约定。有的库使用 $[B,S,H]$，有的算子临时换成 $[B,N,S,D]$，其中 $N$ 是注意力头数、$D=H/N$。只要记住每次 reshape、transpose 前后的轴语义，就不会靠猜。
 
-Python 列表可以存数字，但机器学习框架里的 tensor 还提供统一数据类型、设备位置和并行运算。tensor 可能在 CPU 或 GPU 上，也可能是 fp32、bf16 或整数。shape 相同不代表一定能运算，dtype 和 device 也必须兼容。`,
+Python 列表可以存数字，但机器学习框架里的 tensor 还提供统一数据类型、设备位置和并行运算。tensor 可能在 CPU 或 GPU 上，也可能是 fp32、bf16 或整数。shape 相同不代表一定能运算，dtype 和 device 也必须兼容。
+
+接下来用两句话、每句三个位置、每个位置四个特征的 24 个数字追踪一次线性变换。我们先确定哪些轴保持、哪个轴被求和，再处理短句的补齐位置；这样后面的梯度和平均数都有明确归属。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：两句话如何变成三维张量",
-      body: String.raw`假设一个 batch 有 2 句话，每句补齐到 3 个 token，每个 token 用 4 个数字表示。输入隐藏状态的 shape 是：
+      body: String.raw`为了同时计算两句话，我们把每句补齐到三个 token 位置，并让每个 token 用四个数字表示。现在给每个位置使用同一个线性层，把四个特征换成六个；要检查的是输出仍有两句话、每句仍有三个位置，不能在变换中把它们混起来。
+
+把这一批输入记为 $X$，它的 shape 是：
 
 $$X\in\mathbb{R}^{2\times3\times4}$$
 
@@ -61,7 +51,29 @@ $$[2,3,\mathbf{4}]\times[\mathbf{4},6]\rightarrow[2,3,6]$$
 
 粗体的两个 4 是必须对齐的收缩维。batch 和序列轴被原样保留。若再把 6 维拆成 2 个头，每头 3 维，可以 reshape 为 $[2,3,2,3]$，再 transpose 成 $[2,2,3,3]$，顺序依次是 batch、head、sequence、head dimension。
 
-Padding 只是在短句后补占位 token，使同一批数据形成规则矩形。它不携带语义，所以后续要用 mask 阻止它参与注意力和损失。`,
+输入共有 24 个数，线性层输出共有 $2\times3\times6=36$ 个数；拆头和换轴只是重排这 36 个数，并不产生新的 token。Padding 是短句后的占位 token，需要用 mask 排除其对有效位置注意力和损失的影响。
+
+所以这次变换真正改变的是每个 token 的特征数，句子数和位置数没有变。下面先用下标验证这一点，再问：同一个权重被六个位置共同使用，训练时应怎样汇总六份反馈？`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "从位置归属走到共享参数的反馈",
+      body: String.raw`两句话的例子留下三个具体问题：线性层怎样汇总特征，共享偏置怎样接收多个位置的反馈，补齐位置又该不该计入平均损失？按这个顺序读，比只记操作名称更容易检查代码。
+
+先读形状规则，用 $[B,S,H]$ 标注样本、位置和特征。随后从一个标量损失出发，把“输出变化对损失的影响”记为上游梯度，逐项推出矩阵反传和广播求和。第 00 章只需理解预测与误差，不要求已经会求导；这里的反向部分可与第 02 章的链式法则配合阅读，第一次先看数值路径，学完 02 再复算证明。
+
+接着看 masked mean：同样五个有效 token，按 token 平均是 3.2，按序列平均是 3，分母决定了训练重视谁。最后用 einsum 写出收缩轴，用编号检查 reshape 与 transpose；注意力的 $[B,N,S,D]$ 只作为布局迁移例子，机制到 Transformer 章节再展开。
+
+约 120 分钟包括首轮手算和回访。完成后应能说明 24 个输入数怎样变成 36 个输出数，并在共享权重反向时找对求和轴。带着“这些局部导数为何可以相乘”的问题进入第 02 章。`,
+      links: [
+        { label: "形状与下标规则", sectionId: "derivation", level: "必会" },
+        { label: "矩阵乘法反向", sectionId: "math-matmul-backward", level: "推导" },
+        { label: "广播反向求和", sectionId: "math-broadcast-backward", level: "推导" },
+        { label: "mask 与权重", sectionId: "math-masked-mean", level: "必会" },
+        { label: "einsum 与布局", sectionId: "math-einsum-layout", level: "进阶" },
+        { label: "白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -93,7 +105,9 @@ Padding 只是在短句后补占位 token，使同一批数据形成规则矩形
       id: "derivation",
       type: "derivation",
       title: "三个运算规则：逐元素、矩阵乘法与广播",
-      body: String.raw`**逐元素运算**要求两个位置可以一一对应。两个 $[2,3]$ 矩阵相加，结果仍是 $[2,3]$。它不会像矩阵乘法那样把一行和一列求和。
+      body: String.raw`给两句话的每个 token 换一组特征，然后加上共享偏置，需要两种不同的操作：前者汇总多个输入特征，后者让同一个数在许多位置复用。怎样从下标判断一次运算究竟在做哪件事，而不只看程序是否报错？
+
+先以逐元素加法作对照：它要求两个位置可以一一对应。两个 $[2,3]$ 矩阵相加，结果仍是 $[2,3]$。它不会像矩阵乘法那样把一行和一列求和。
 
 **矩阵乘法**中，$A\in\mathbb{R}^{m\times n}$ 与 $B\in\mathbb{R}^{n\times p}$ 相乘得到 $C\in\mathbb{R}^{m\times p}$：
 
@@ -105,13 +119,17 @@ $$C_{ij}=\sum_{k=1}^{n}A_{ik}B_{kj}$$
 
 例如 $[2,3,4]+[4]$ 合法，后者对 batch 和 sequence 广播；$[2,3,4]+[3]$ 不合法，因为最后轴 4 与 3 不兼容。若本意是给每个序列位置加偏置，应把 $[3]$ 变成 $[1,3,1]$。
 
-**手算与追问。** 若 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$、$B=\begin{bmatrix}2\\-1\end{bmatrix}$，则 $AB=(0,2)^\top$，由每行的两个乘积相加得到。若对 $[2,3,4]$ 最后一轴求和，输出为 $[2,3]$；保留维度则为 $[2,3,1]$，后者可安全广播回原轴。追问 mean 与 sum 的反向差异时，别只说 shape 相同：mean 还会乘被约简元素个数的倒数。`,
+把线性层缩成两行、每行两个特征来手算：若 $A=\begin{bmatrix}1&2\\3&4\end{bmatrix}$、$B=\begin{bmatrix}2\\-1\end{bmatrix}$，则 $AB=(0,2)^\top$，由每行的两个乘积相加得到。若对 $[2,3,4]$ 最后一轴求和，输出为 $[2,3]$；保留维度则为 $[2,3,1]$，后者可安全广播回原轴。mean 与 sum 的输出 shape 虽相同，mean 的反向还会乘被约简元素个数的倒数。
+
+结果 0 和 2 分别属于原来的两行，不能解释成两个特征；加共享标量偏置 1 后，它们变成 1 和 3。下一节沿用这两个输出，看看当目标是 0 和 1 时，误差如何传给输入、权重和偏置。`,
     },
     {
       id: "math-matmul-backward",
       type: "derivation",
       title: "线性层反向：从下标推导三个梯度",
-      body: String.raw`**问题与维度。** 把 batch 和 token 暂时合成 $M=BS$ 行。$X\in\mathbb R^{M\times H}$，$W\in\mathbb R^{H\times O}$，$b\in\mathbb R^O$，$Y=XW+b\in\mathbb R^{M\times O}$，标量损失 $L$ 的上游梯度 $G=\partial L/\partial Y\in\mathbb R^{M\times O}$。这里每行右乘权重；不要和使用列向量 $Wx$ 的约定混用。
+      body: String.raw`前一节的小线性层加偏置后输出 1 和 3，目标却是 0 和 1。若想减小这两条误差，应修改哪个权重、每个输入位置又受到什么影响？本节把每条依赖路径展开，尤其检查一个共享权重收到的反馈是否漏掉了某一行。
+
+把 batch 和 token 暂时合成 $M=BS$ 行。$X\in\mathbb R^{M\times H}$，$W\in\mathbb R^{H\times O}$，$b\in\mathbb R^O$，$Y=XW+b\in\mathbb R^{M\times O}$。将标量损失 $L$ 对每个输出的变化率记为上游梯度 $G=\partial L/\partial Y\in\mathbb R^{M\times O}$。这里每行右乘权重；不要和使用列向量 $Wx$ 的约定混用。
 
 **逐项推导。** $Y_{mo}=\sum_hX_{mh}W_{ho}+b_o$。某个 $X_{mh}$ 影响这一行全部输出，某个 $W_{ho}$ 被全部行共享：
 
@@ -130,13 +148,17 @@ $$\nabla_XL=GW^\top\in\mathbb R^{M\times H},\quad
 $$\nabla_WL=(7,10)^\top,\quad \nabla_bL=3,\quad
 \nabla_XL=\begin{bmatrix}2&-1\\4&-2\end{bmatrix}.$$
 
-**追问。** 若损失改成 $\frac1{2M}\sum e_m^2$，上述梯度全部除以 $M$，不能只缩放权重梯度。回到 $[B,S,H]$ 时，$\nabla_W$ 要跨 $B,S$ 两轴求和；输入梯度仍保留这两轴。若张量同时进入两条支路，分别算贡献后相加，不可覆盖。`,
+若损失改成 $\frac1{2M}\sum e_m^2$，上述梯度全部除以 $M$，不能只缩放权重梯度。回到 $[B,S,H]$ 时，$\nabla_W$ 要跨 $B,S$ 两轴求和；输入梯度仍保留这两轴。若张量同时进入两条支路，分别算贡献后相加，不可覆盖。
+
+权重梯度中的 7 来自第一行的 1 和第二行的 6，10 来自 2 和 8；共享偏置的 3 则汇总两行的 1 和 2。这些正数表示小幅增大对应参数会使当前损失上升，不是参数的新值。下一节把偏置推广到三维张量，专门检查“共享在哪些轴上，就对哪些轴求和”。`,
     },
     {
       id: "math-broadcast-backward",
       type: "derivation",
       title: "广播的伴随操作：前向复用，反向累加",
-      body: String.raw`**目标与假设。** 给 $X\in\mathbb R^{B\times S\times H}$ 加共享偏置 $b\in\mathbb R^H$。广播不是生成了 $BS$ 个独立参数，而是同一个 $b_h$ 在多个输出位置被重复使用。令 $Y_{bsh}=X_{bsh}+b_h$，上游梯度 $G$ 与 $Y$ 同形：
+      body: String.raw`上一节一个偏置服务两行，所以收到了两份反馈。回到两句话、多个 token 的场景，如果偏置按特征共享、按位置共享，或者所有位置共用一个数，反向结果会一样吗？三种写法都可能通过 shape 检查，只有追踪复用位置才能分清它们代表的模型。
+
+先给 $X\in\mathbb R^{B\times S\times H}$ 加共享特征偏置 $b\in\mathbb R^H$。广播不是生成了 $BS$ 个独立参数，而是同一个 $b_h$ 在多个输出位置被重复使用。下标中的 $b$ 表示 batch 编号，$b_h$ 整体表示第 $h$ 个偏置参数。令 $Y_{bsh}=X_{bsh}+b_h$，上游梯度 $G$ 与 $Y$ 同形：
 
 $$\frac{\partial L}{\partial b_h}
 =\sum_{b=1}^B\sum_{s=1}^S
@@ -152,13 +174,17 @@ $$\nabla_bL=(1+3+5+7,\ 2+4+6+8)=(16,20).$$
 
 若是每个位置的偏置 $c\in\mathbb R^{1\times S\times1}$，则跨 batch 和特征求和，得到 $\nabla_cL=(14,22)$，shape 必须保留为 $[1,2,1]$。共享标量的梯度则是所有项之和 36。这三者前向都能广播，但表达的是不同模型。
 
-**追问。** 前向 sum 的反向是把上游梯度广播到每个输入；前向 mean 的反向还除以参与平均的数量。因此广播与求和互为反向规则。实现通用算子时不要用无参数 squeeze 随意删维，它可能把 batch=1 的语义轴也删掉。`,
+前向 sum 的反向是把上游梯度广播到每个输入；前向 mean 的反向还除以参与平均的数量。因此广播与求和互为反向规则。实现通用算子时不要用无参数 squeeze 随意删维，它可能把 batch=1 的语义轴也删掉。
+
+同一份上游反馈给出特征偏置梯度 16、20，位置偏置梯度 14、22，共享标量梯度 36：差别来自参数被哪些位置共同使用，不是反向算法的任意选择。下一节还要决定哪些位置有资格提供反馈，短句的 padding 应被排除在损失平均之外。`,
     },
     {
       id: "math-masked-mean",
       type: "derivation",
       title: "Masked mean：分母决定谁获得多少权重",
-      body: String.raw`**问题与符号。** token 损失 $\ell\in\mathbb R^{B\times S}$，固定非训练二值 mask $m\in\{0,1\}^{B\times S}$，$n_b=\sum_s m_{bs}$，有效 token 总数 $T=\sum_b n_b>0$。按 token 平均的目标是
+      body: String.raw`两句话分别有两个和三个有效 token，短句末尾补了一个占位位置。训练时不仅要去掉这个占位位置，还要决定长句是否应该获得更多权重。我们用同一组损失分别按 token 和按句子平均，看看只改分母会怎样改变优化目标。
+
+把 token 损失记为 $\ell\in\mathbb R^{B\times S}$，固定非训练二值 mask 为 $m\in\{0,1\}^{B\times S}$，其中 1 表示参与损失。第 $b$ 句的有效数 $n_b=\sum_s m_{bs}$，总数 $T=\sum_b n_b>0$。按 token 平均的目标是
 
 $$L_{\rm token}=\frac{\sum_{b,s}m_{bs}\ell_{bs}}{T},\qquad
 \frac{\partial L_{\rm token}}{\partial\ell_{bs}}=\frac{m_{bs}}{T}.$$
@@ -184,23 +210,29 @@ $$L=\frac{\sum_k T_kL_k}{\sum_kT_k},\quad
 
 若上例两行各为一个微批，简单平均两个均值给出 3，而正确 token 平均是 3.2。在跨设备梯度平均时还须核对框架的平均系数，不能再无意除一次设备数。
 
-**边界追问。** 全 mask 为零时目标本来未定义，应跳过该批并记录有效数，而非除零。若 mask 是可训练连续权重 $w$，分母也随权重变，商法则给出 $\partial L/\partial w_i=(\ell_i-L)/\sum_jw_j$；固定 mask 的零梯度结论不能推广到可训练门控。`,
+全 mask 为零时目标本来未定义，应跳过该批并记录有效数，而非除零。若 mask 是可训练连续权重 $w$，分母也随权重变，商法则给出 $\partial L/\partial w_i=(\ell_i-L)/\sum_jw_j$；固定 mask 的零梯度结论不能推广到可训练门控。
+
+所以 3.2 和 3 都算得正确，但回答不同问题：前者让长句占总权重的 3/5，后者让两句话各占 1/2。占位损失 99 对两者都不应有影响。实现前先声明训练单位，再检查累计梯度的分母；下一节用下标记号把这些保留轴和求和轴直接写进算子。`,
     },
     {
       id: "math-einsum-layout",
       type: "derivation",
       title: "einsum 与 reshape：计算下标和存储布局是两件事",
-      body: String.raw`**目标。** 用下标明确乘法保留与收缩哪些轴，再用编号证明布局变化。设 $X\in\mathbb R^{B\times S\times H}$，$W\in\mathbb R^{H\times O}$，则
+      body: String.raw`现在已经知道线性层该在哪个轴求和，但把 token 特征拆成多个头再合并时，仍可能不报错地混入别的位置。怎样同时验证计算对象和元素归属？先用下标写出线性层，再给每个头放入可识别的编号，检查一次错误合并到底拿错了谁的数字。
+
+沿用输入 $X\in\mathbb R^{B\times S\times H}$、权重 $W\in\mathbb R^{H\times O}$，每个输出位置为
 
 $$Y_{bso}=\sum_hX_{bsh}W_{ho}.$$
 
 对应 einsum 记号为 **bsh,ho->bso**：不出现在输出的 $h$ 被求和，$b,s,o$ 保留。上游梯度为 $G_{bso}$，权重梯度记为 **bsh,bso->ho**，输入梯度为 **bso,ho->bsh**，正是前两节的公式。
 
-对 $Q,K\in\mathbb R^{B\times N\times S\times D}$，分数 $A_{bnst}=\sum_dQ_{bnsd}K_{bntd}$ 对应 **bnsd,bntd->bnst**。$s,t$ 是两个不同的序列位置，下标不能都写成 $s$，否则只算同位置相似度。
+把这个记法迁移到位置间的相似度计算：对 $Q,K\in\mathbb R^{B\times N\times S\times D}$，其中 $N$ 是头数、$D$ 是每头特征数，分数 $A_{bnst}=\sum_dQ_{bnsd}K_{bntd}$ 对应 **bnsd,bntd->bnst**。$s,t$ 是两个不同的序列位置，下标不能都写成 $s$，否则只算同位置相似度。这里先检查乘法对象，注意力的完整含义留到后续章节。
 
 **编号手算。** 单个 batch，$S=N=2,D=1$。在 $[S,N,D]$ 顺序放入位置 0 的两个头 $(0,1)$ 和位置 1 的两个头 $(10,11)$，展平为 $[0,1,10,11]$。转为 $[N,S,D]$ 后逻辑顺序变成 $[0,10,1,11]$。若直接合并成 $[S,H]$，得到错误行 $(0,10)$、$(1,11)$，混入别的 token；正确做法先 transpose 回 $[S,N,D]$，再合并，得到 $(0,1)$、$(10,11)$。
 
-**实现与追问。** reshape 保留当前逻辑遍历顺序，必要时可复制；transpose 改变轴到元素的映射，常产生非连续视图；view 还受 stride 条件约束。它们都不自动理解“头”和“token”。元素总数相等只证明形状可容纳，并不能证明语义正确。上例即使 $S=N$ 让 shape 看起来一样，编号仍可揭示错误。`,
+reshape 保留当前逻辑遍历顺序，必要时可复制；transpose 改变轴到元素的映射，常产生非连续视图；view 还受 stride 条件约束。它们都不自动理解“头”和“token”。元素总数相等只证明形状可容纳，并不能证明语义正确。
+
+错误输出的第一行是 0、10，把两个 token 混在一起；正确第一行是 0、1，只含位置 0 的两个头。即使 $S=N$ 使两个 shape 看起来相同，这个编号检查仍能发现错误。下一步运行本章代码，给每次变形写下轴语义；然后到第 02 章把逐项反向整理成通用矩阵求导。`,
     },
     {
       id: "code",

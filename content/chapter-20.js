@@ -18,39 +18,30 @@ const chapter = {
     "VAPO 改进 critic 和长序列信用分配；CISPO 裁剪并冻结 token 重要性权重；GSPO 在长度归一化的序列比率上裁剪；SAPO 用平滑门控替代硬裁剪。它们处理不同故障，不能排成彼此淘汰的升级链。",
   sections: [
     {
-      id: "roadmap",
-      type: "roadmap",
-      title: "知识路线：先信用估计，再比较完整梯度",
-      body: String.raw`先修第 15 章的 score function 与 GAE、第 16 章的 PPO 四象限、第 17 章的组优势。先用两 token 例子分清裁剪对象，再逐步推导 VAPO、CISPO、GSPO、SAPO；原始推导保留全部 stop-gradient、终止边界与论文条件。之后把单项系数还原成带 mask、长度和 batch 分母的参数梯度，最后用有效梯度与相关噪声定位故障。闭卷要求不是背四个缩写，而是解释同一批数据为什么得到不同更新。`,
-      links: [
-        { label: "两 token 与 PPO 四象限", sectionId: "example", level: "必会" },
-        { label: "四种方法的精确推导", sectionId: "derivation", level: "推导" },
-        { label: "统一梯度与目标单位", sectionId: "math-gradient-units", level: "推导" },
-        { label: "梯度集中度与相关噪声", sectionId: "math-update-diagnostics", level: "进阶" },
-        { label: "综合白板验收", sectionId: "whiteboard", level: "必会" },
-      ],
-    },
-    {
       id: "intuition",
       type: "intuition",
-      title: "先建立直觉：老师估分、批改单位和更新力度是三件事",
-      body: String.raw`把一次长推理看作学生交出一份多页解答。验证器只说最终答案对不对；critic 像逐页估计“从这里继续能拿多少分”的老师；策略目标决定收到评价后哪些步骤应该增强、增强多少。老师估分不准、把整篇评价机械复制到每一步、单次更新过猛，是三个不同的问题。
+      title: "先建立直觉：同一批正确解答，为什么没有带来稳定更新？",
+      body: String.raw`你在训练一个数学解题模型：它生成了几百步推理，验证器只在末尾判对错。日志显示正确答案已经出现，但继续训练后成功率却下降了。现在要判断：是中途的成功率估计不准，还是正确步骤被更新规则挡住，或是少数步骤变化过大？这三种故障需要不同的修复，不能看到训练不稳就直接换一个算法名。
+
+第 19 章讨论了如何借教师反馈训练学生；这里回到模型自己探索、由任务反馈评价的情形。先区分产生优势的 critic 和使用优势的策略目标，再逐个替换目标中的部件。这样才能用同一批回答做对照，而不是同时更换数据、奖励和优化器。
 
 **VAPO 从估分开始。** 随机初始化的 value head 没学过推理成功率，却立即给 actor 提供优势，容易让策略追随错误信号。先固定 actor，收集完整轨迹，用实际 return 预训练 critic；之后 critic 尽量用完整回报，actor 则可用带 bootstrap 的低方差优势。两者没有理由强制共用同一个 GAE 参数。VAPO 还让 actor 的有效信用跨度随回答长度增长，并对正确轨迹加正样本 NLL，避免已经找到的正确行为迅速丢失。价值预训练和解耦 GAE 来自 VC-PPO，VAPO 将其组合到长推理方案中。
 
-**CISPO 改的是权重。** PPO 在某些越界方向让 surrogate 变平；CISPO 把 token 的重要性权重压到上限后冻结，仍用这个权重乘优势和 log probability。像“奖金封顶，但正确动作继续得分”，不是“整个动作退出学习”。前提是优势非零、token 未被 mask，且数值计算正常。
+**CISPO 改的是权重。** 先假设优势可信，再检查更新是否真正到达这些步骤。PPO 在某些越界方向让 surrogate 变平；CISPO 把 token 的重要性权重压到上限后冻结，仍用这个权重乘优势和 log probability。权重达到上限的正确 token 仍可参与学习，前提是优势非零、token 未被 mask，且数值计算正常。
 
-**GSPO 改的是单位。** 如果奖励给整份答案，GSPO 也用整份答案的长度归一化 likelihood ratio 决定是否裁剪。一条回答中的 token 共享序列 gate，而不是各自被 token ratio 裁掉。长度归一化使用几何平均，不是把概率直接相乘，也不是 ratio 的算术平均。
+**GSPO 改的是单位。** 即使保留了 token 梯度，还要问最终答案的奖励该对应哪个更新单位。如果奖励给整份答案，GSPO 也用整份答案的长度归一化 likelihood ratio 决定是否裁剪。一条回答中的 token 共享序列 gate，而不是各自被 token ratio 裁掉。长度归一化使用几何平均，不是把概率直接相乘，也不是 ratio 的算术平均。
 
 **SAPO 改的是门控形状。** 不在硬边界突然停止某个方向，而是让偏离旧策略较远的 token 获得较小的平滑权重。理解它不能只看 sigmoid 图像：从 ratio 求导换到 log probability，还必须乘 ratio。正负优势可以用不同温度控制衰减速度。
 
-阅读方法论文时依次问：奖励谁给，优势谁估，ratio 在 token 还是 sequence 上，clip 作用于目标还是冻结权重，最后怎样按 token 聚合。reward model 与 critic 不是同一个角色；GRPO 去掉 critic，不代表不能用 reward model。`,
+回到成功率下降的现场，我们现在有了检查顺序：奖励谁给，优势谁估，ratio 在 token 还是 sequence 上，clip 作用于目标还是冻结权重，最后怎样按 token 聚合。reward model 与 critic 不是同一个角色；GRPO 去掉 critic，不代表不能用 reward model。下面先把长回答压缩为两个 token，亲手算出“有奖励却没有梯度”究竟发生在哪一步。`,
     },
     {
       id: "example",
       type: "example",
       title: "最小例子：四个越界格子与两个 token",
-      body: String.raw`设旧策略下某 token 的概率为 0.2，新策略概率为 0.3，ratio 为 $r=1.5$。取裁剪下界 $l=0.8$、上界 $u=1.2$，优势绝对值为 2。以下讨论最大化目标 $J$；实际最小化 loss 时符号相反。
+      body: String.raw`先从刚才的正确回答中挑一个 token。它在旧策略下的概率为 0.2，更新后变成 0.3；我们想知道，继续用这条回答训练时，它还会不会被增强。再把评价改成负面、把概率改成下降，就能检查四种方向，避免把“超出边界”误读为统一的停止信号。这些数字只用于检验目标函数，不是推荐超参数。
+
+新旧概率之比记作 $r=1.5$。取裁剪下界 $l=0.8$、上界 $u=1.2$，优势 $A$ 的绝对值为 2。以下讨论最大化目标 $J$；实际最小化 loss 时符号相反。表中最后一列才回答“这个 token 还得到多大更新系数”，不能只看目标值一列。
 
 | 优势与 ratio | 原项 $rA$ | 裁剪项 $\operatorname{clip}(r,l,u)A$ | PPO 的较小项 | 对 log probability 的梯度系数 |
 |---|---|---|---|---|
@@ -63,11 +54,25 @@ const chapter = {
 
 CISPO 若教学性地取同样的双侧权重范围，对四格的系数分别为 $2.4,-2.4,1.6,-1.6$；它不做 PPO 的 min 分支。MiniMax-M1 实验实际上只使用有效上界，所以 $r=0.5$ 时权重仍为 0.5，后两格变为 $1,-1$。不能把教学的 0.8/1.2 配置当作论文配置。
 
-再看同一条两 token 回答，两个 ratio 为 $[0.5,2]$，序列优势 $A=1$。几何平均 $s=\sqrt{0.5\times2}=1$，算术平均却是 1.25。GSPO 在 $s=1$ 不裁剪，每个 token 的系数是 $sA/2=0.5$。按 token PPO 再平均时，第一个系数为 $0.5/2=0.25$，第二个因超过上界而为零。GSPO 保留了整条回答的协调更新，也可能掩盖单个 token 的极端 ratio，因此仍须记录 token 尾部分位数。
+单个 token 算清后，再看一个特意让新旧变化互相抵消的两 token 回答，两个 ratio 为 $[0.5,2]$，序列优势 $A=1$。几何平均 $s=\sqrt{0.5\times2}=1$，算术平均却是 1.25。GSPO 在 $s=1$ 不裁剪，每个 token 的系数是 $sA/2=0.5$。按 token PPO 再平均时，第一个系数为 $0.5/2=0.25$，第二个因超过上界而为零。GSPO 保留了整条回答的协调更新，也可能掩盖单个 token 的极端 ratio，因此仍须记录 token 尾部分位数。
 
 最后设 SAPO 的 $A=1,r=1.5,\tau=2$。sigmoid 输入为 1，$p\approx0.7311$，门控导数 $4p(1-p)\approx0.7864$，完整 log-policy 系数为 $1.5\times0.7864\approx1.1797$。写成 0.7864 会漏掉链式法则的 ratio。
 
-这些是用于检查公式的手算数值，不是算法收益或推荐超参数。`,
+现在能给开场问题一个局部回答：相同的正优势，在 PPO 中可能得到零，在 CISPO 中得到封顶后的非零系数，在 GSPO 中又由整条回答共同决定。SAPO 的 1.1797 则提醒我们，平滑门控的图像不是完整梯度。接下来推导这些系数的来处，再恢复整批训练的分母；这些手算数值不表示算法收益。`,
+    },
+    {
+      id: "roadmap",
+      type: "roadmap",
+      title: "知识路线：先信用估计，再比较完整梯度",
+      body: String.raw`两 token 例子已经说明，同一奖励可以产生不同更新。接下来先区分奖励、信用估计和概率重算，学习模式下可结合流程图查看它们的连接；完整推导先用价值回报构造优势，再依次计算冻结权重、序列比率和软门控。这个顺序让每个新目标只改变一个已看清的部件。
+
+局部系数还不能解释实际训练：长短回答的分母可以翻转更新方向，所以之后恢复完整参数梯度；平均比率又可能掩盖少数异常 token，因此最后学习集中度与相关噪声诊断。若链式法则、GAE 或正负优势的裁剪方向不熟，可分别回看第 15、16、17 章。学完后，用白板题复述一次“从异常日志到可归因对照”的排查过程，再进入第 21 章检查数据本身。`,
+      links: [
+        { label: "四种方法的精确推导", sectionId: "derivation", level: "推导" },
+        { label: "统一梯度与目标单位", sectionId: "math-gradient-units", level: "推导" },
+        { label: "梯度集中度与相关噪声", sectionId: "math-update-diagnostics", level: "进阶" },
+        { label: "综合白板验收", sectionId: "whiteboard", level: "必会" },
+      ],
     },
     {
       id: "diagram",
@@ -111,7 +116,9 @@ MoE 另有系统支路：rollout 引擎和训练引擎可能使用不同精度�
       id: "derivation",
       type: "derivation",
       title: "完整推导：GAE、冻结权重、序列比率与软门控",
-      body: String.raw`**统一符号。** $x$ 是 prompt，$y_i$ 是第 $i$ 条回答，$T_i$ 是有效 response token 数；$s_{i,t}=(x,y_{i,<t})$ 是前缀状态，$a_{i,t}=y_{i,t}$ 是采样动作。$\theta$ 是当前 actor 参数，$\phi$ 是 critic 参数，$\pi_{\mathrm{old}}$ 是冻结行为策略。$R_{i,t}$ 是环境或评价器给出的单步奖励，$V_\phi(s)$ 是预期未来 return，$\gamma$ 是折扣，$\lambda$ 是 GAE 衰减，$\hat A$ 是更新时冻结的优势。下文省略 batch 常数、可选 KL 和 response mask 来突出单项梯度，实际实现必须恢复。
+      body: String.raw`继续使用那批只有终局判分的数学回答。刚才直接给定了优势，但实际训练要先把最终结果转成每个前缀的学习信号，再决定这个信号如何进入更新。本节先算价值目标，再固定同一份优势比较三种 ratio 处理方式，输出可供后续梯度核验的局部系数。
+
+**统一符号。** $x$ 是 prompt，$y_i$ 是第 $i$ 条回答，$T_i$ 是有效 response token 数；$s_{i,t}=(x,y_{i,<t})$ 是前缀状态，$a_{i,t}=y_{i,t}$ 是采样动作。$\theta$ 是当前 actor 参数，$\phi$ 是 critic 参数，$\pi_{\mathrm{old}}$ 是冻结行为策略。$R_{i,t}$ 是环境或评价器给出的单步奖励，$V_\phi(s)$ 是预期未来 return，$\gamma$ 是折扣，$\lambda$ 是 GAE 衰减，$\hat A$ 是更新时冻结的优势。下文省略 batch 常数、可选 KL 和 response mask 来突出单项梯度，实际实现必须恢复。
 
 **一、VAPO：先让价值估计值得信任。** 对一次正常终止、长度为 $T$ 的轨迹，令终端 value 为零：
 
@@ -126,6 +133,8 @@ $$\delta_t=R_t+\gamma V(s_{t+1})-V(s_t),\qquad
 \hat A_t^{(\lambda)}=\sum_{j=0}^{T-t}(\gamma\lambda)^j\delta_{t+j}$$
 
 critic 用 $\lambda_{\mathrm{critic}}=1$ 时，$V(s_t)+\hat A_t^{(1)}$ 在正确终止边界下望远镜消去为 $G_t$，不再由不准确的中间 value 充当 target。actor 则可选择较小 $\lambda$，缩短远端噪声的传播，代价是更依赖 bootstrap。**Decoupled GAE** 指二者分开，不是让 actor 学不到 critic。
+
+用代码实验中的三步成功轨迹检验这个消去：奖励为 $[0,0,1]$，value 为 $[0.2,0.3,0.4,0]$，$\gamma=1$，于是 TD residual 为 $[0.1,0.1,0.6]$。取 $\lambda=1$，从末尾累加得到优势 $[0.8,0.7,0.6]$，各自加回 value 后都是 1，正是最终成功回报。这解释了为何 critic 可以学同一个终局目标，而 actor 仍可选择不同的传播跨度。
 
 VAPO 的 length-adaptive GAE 令 actor 的有效跨度随长度变化：
 
@@ -142,7 +151,7 @@ $$L_{\mathrm{NLL}}=-\mathbb E_{(x,y)\sim D_+}
 
 $\mu$ 是混合系数；token/sequence 归一化会改变它的实际尺度，复现实验须一并对齐。NLL 给正确轨迹额外的监督梯度，即使其相对优势较小也能巩固已有能力；但不能把所有“当前相对较好”的负奖励样本当作已验证正确。没有正样本时，该 batch 的 NLL 应为零，不能除以空集合大小。VAPO 的正样本项、Clip-Higher、token 聚合等是组合设计，需分别消融。
 
-**二、PPO 与 CISPO：裁目标还是裁权重。** 定义 token ratio 与冻结权重：
+**二、PPO 与 CISPO：裁目标还是裁权重。** 现在把上一步得到的优势固定，排除 critic 变化的干扰，只问给定动作的新旧概率怎样控制更新。定义 token ratio 与冻结权重：
 
 $$r_t=\exp(\log\pi_\theta(a_t|s_t)-\log\pi_{\mathrm{old}}(a_t|s_t)),
 \qquad \bar r_t=\operatorname{sg}(\operatorname{clip}(r_t,l,u))$$
@@ -156,9 +165,9 @@ $$\frac{\partial J_{\mathrm{PPO},t}}{\partial r_t}=M_t\hat A_t,\qquad
 \frac{\partial J_{\mathrm{PPO},t}}{\partial\log\pi_\theta}=M_t\hat A_t r_t,\qquad
 \frac{\partial J_{\mathrm{CISPO},t}}{\partial\log\pi_\theta}=\bar r_t\hat A_t$$
 
-CISPO 是 detached **TOKEN** 权重，不是 sequence ratio；原报告实验没有有效下界。若忘记 detach，在未裁剪区对 $r\log\pi$ 求导会出现额外的权重导数项，已经不是论文目标。裁剪权重会引入偏差，目的是控制极端权重，不是恢复完全无偏的离策略估计。
+CISPO 是 detached **TOKEN** 权重，不是 sequence ratio；原报告实验没有有效下界。若忘记 detach，在未裁剪区对 $r\log\pi$ 求导会出现额外的权重导数项，已经不是论文目标。裁剪权重会引入偏差，目的是控制极端权重，不是恢复完全无偏的离策略估计。代回开场的 $A=2,r=1.5,u=1.2$：PPO 走平坦分支，系数为零；CISPO 固定权重为 1.2，对 log probability 求导留下 2.4。区别来自求导路径，不是奖励变化。
 
-**三、GSPO：归一化 SEQUENCE 比率。** 对整条回答：
+**三、GSPO：归一化 SEQUENCE 比率。** 前一步仍逐 token 决定是否参与学习。若希望同一最终答案共享一个门控，就先把 token 的 log-ratio 在有效长度上取平均，再指数化。对整条回答：
 
 $$s_i=\left(\frac{\pi_\theta(y_i|x)}{\pi_{\mathrm{old}}(y_i|x)}\right)^{1/T_i}
 =\exp\left(\frac1{T_i}\sum_{t=1}^{T_i}\log r_{i,t}\right)$$
@@ -168,9 +177,9 @@ $$J_{\mathrm{GSPO},i}=\min(s_i\hat A_i,\operatorname{clip}(s_i,l,u)\hat A_i),
 \frac{\partial J_{\mathrm{GSPO},i}}{\partial\log\pi_\theta(y_{i,t}|s_{i,t})}
 =M_i\hat A_i\frac{s_i}{T_i}$$
 
-$M_i$ 按序列比率和序列优势的符号决定，整条回答共享。原始整轨迹重要性比率是 $\prod_t r_{i,t}$；取 $T_i$ 次根后是稳定化 surrogate 的设计，不能继续声称满足原始 IS 恒等式。实现用 log space 求均值，且 $T_i$ 只数有效回答 token，不能把 padding 或 prompt 算进去。
+$M_i$ 按序列比率和序列优势的符号决定，整条回答共享。对某个 token 的 log probability 求导时，平均贡献 $1/T_i$，指数函数贡献 $s_i$，所以得到上式。原始整轨迹重要性比率是 $\prod_t r_{i,t}$；取 $T_i$ 次根后是稳定化 surrogate 的设计，不能继续声称满足原始 IS 恒等式。实现用 log space 求均值，且 $T_i$ 只数有效回答 token，不能把 padding 或 prompt 算进去。两 token 的 $[0.5,2]$ 因而共同给出 $s=1$，正优势为 1 时每个系数是 0.5，而不是两个独立的 clip 决策。
 
-**四、SAPO：软门控仍需链式法则。** 令 $\sigma(z)=1/(1+e^{-z})$，根据优势符号选择 $\tau=\tau_+$ 或 $\tau_-$，两者均为正数。单 token 目标：
+**四、SAPO：软门控仍需链式法则。** 还可以保留 token 单位，但把硬边界换成平滑衰减。令 $\sigma(z)=1/(1+e^{-z})$，根据优势符号选择 $\tau=\tau_+$ 或 $\tau_-$，两者均为正数。单 token 目标：
 
 $$f_\tau(r)=\frac4\tau\sigma(\tau(r-1)),\qquad
 J_{\mathrm{SAPO},t}=f_\tau(r_t)\hat A_t$$
@@ -182,13 +191,17 @@ f_\tau'(r_t)=4p_t(1-p_t),\qquad
 
 在 $r=1$ 处导数 gate 为 1；更大的温度让偏离 1 后衰减更快。论文采用负优势更紧的温度设计，需与奖励噪声和探索需求一起调参。门控导数关于 $r-1$ 对称，但完整系数还有 $r$，不能说增减两侧的更新完全对称。数学上有限正 ratio 的 sigmoid 导数为正，数值饱和、mask、零优势仍会让实际梯度为零。
 
-SAPO 与 GSPO 的联系是有条件的近似：小步更新、同序列 token 的 log-ratio 离散度较小时，平均 token gate 可近似某个序列 gate；不是精确目标等价，更不是任意向量梯度和等价。判断近似是否可信，应测量 intra-sequence log-ratio 方差，而不是只看平均 KL。`,
+SAPO 与 GSPO 的联系是有条件的近似：小步更新、同序列 token 的 log-ratio 离散度较小时，平均 token gate 可近似某个序列 gate；不是精确目标等价，更不是任意向量梯度和等价。判断近似是否可信，应测量 intra-sequence log-ratio 方差，而不是只看平均 KL。
+
+代回 $A=1,r=1.5,\tau=2$，对 ratio 求导得到约 0.7864，再乘 ratio 才得到对 log probability 的 1.1797。至此，三步价值例子说明优势从哪里来，2.4、0.5 和 1.1797 说明优势怎样变成更新系数；它们尚未包含 batch 权重或神经网络的参数导数。下一节恢复这两部分，检验局部结论在长短回答混合后是否还成立。`,
     },
     {
       id: "math-gradient-units",
       type: "derivation",
       title: "统一梯度：单 token 系数怎样变成整批更新",
-      body: String.raw`**问题与维度。** 前面比较的是局部 log-prob 坐标，不是参数空间的完整梯度。设参数 $\theta\in\mathbb R^P$，批次有 $B$ 条回答，最大长度 $T_{\max}$；$\ell,m,A,r$ 均按 $B\times T_{\max}$ 存储，$m_{it}\in\{0,1\}$。有效长度 $T_i=\sum_t m_{it}>0$，总 token 数 $N=\sum_iT_i$，score 向量 $g_{it}=\nabla_\theta\ell_{it}\in\mathbb R^P$。一次更新中，样本、mask、old logprob、优势都固定；以下最大化 $J$，最小化时取负号。
+      body: String.raw`把一条两 token 的短回答和一条六 token 的长回答放进同一批训练：短回答的更新倾向为正，长回答的倾向为负。上一节只给出了每个 token 的系数，还不能判断模型最后朝哪边走。本节要把这些系数、有效长度和网络导数一起聚合，检查“按回答平均”改成“按 token 平均”能否连方向也改变。
+
+**输入与维度。** 前面比较的是局部 log-prob 坐标，不是参数空间的完整梯度。设参数 $\theta\in\mathbb R^P$，批次有 $B$ 条回答，最大长度 $T_{\max}$；$\ell,m,A,r$ 均按 $B\times T_{\max}$ 存储，依次表示当前 log probability、有效 token mask、冻结优势和新旧概率比；$m_{it}\in\{0,1\}$。有效长度 $T_i=\sum_t m_{it}>0$，总 token 数 $N=\sum_iT_i$，score 向量 $g_{it}=\nabla_\theta\ell_{it}\in\mathbb R^P$。一次更新中，样本、mask、old logprob、优势都固定；以下最大化 $J$，最小化时取负号。
 
 **第一步：对每个局部坐标求导。** 令 $c_{it}$ 不含 batch 聚合常数，已核验的三个 token 目标分别给出
 
@@ -198,7 +211,7 @@ c^{\mathrm{SAPO}}_{it}=A_{it}r_{it}\,4p_{it}(1-p_{it}).$$
 
 这三个量再乘 $g_{it}$ 才到参数空间。VAPO 的 actor 使用 PPO 家族系数，但 $A_{it}$ 来自预热 critic 和解耦 GAE；因此它不是第四个仅替换 gate 的算法。共享参数会使不同 token 的向量相抵或相助，局部系数大不保证最终梯度范数大。
 
-**第二步：恢复目标单位。** 同一组 token 项 $j_{it}$，有两个不同目标：
+**第二步：恢复目标单位。** 先固定局部算法，只改变聚合方式，才能隔离长度权重的作用。同一组 token 目标项 $j_{it}$，有两个不同目标；对加权和逐项求导，权重保持不变：
 
 $$J_{\mathrm{seq}}=\frac1B\sum_i\frac1{T_i}\sum_t m_{it}j_{it},
 \qquad J_{\mathrm{tok}}=\frac1N\sum_{i,t}m_{it}j_{it}.$$
@@ -215,15 +228,19 @@ M_i A_i\frac{s_i}{T_i}g_{it}.$$
 
 **第三步：手算一个会翻转方向的批次。** 取 $B=2$、长度 $[2,6]$；沿某个固定参数方向，每个 token 的投影 score 都是 1，局部系数分别整行取 $[1,-0.5]$。序列平均的方向导数为 $(1-0.5)/2=0.25$；token 平均为 $(2-3)/8=-0.125$。这不是整体学习率能修复的比例差，而是长短回答重新加权后连方向都变了。
 
-**第四步：把辅助项放进同一账本。** 若 VAPO 教学实现用正样本 token 均值 $L_+=-\sum_{D_+}\ell/N_+$，则最大化 $J_{\mathrm{PPO}}-\mu L_+$ 时，正 token 额外得到 $\mu/N_+$ 的系数。取 $N=8,N_+=2,\mu=0.1$，每个正 token 额外得到 0.05；若其 PPO 未归一化系数为 1，主项为 0.125，辅助项为主项的 40%。正样本比例改变时，这个相对尺度也会变。空正集合定义辅助项为零。
+**第四步：把辅助项放进同一账本。** 主目标的方向确定后，才有意义问保留正确行为的辅助项占多大比重。若 VAPO 教学实现用正样本 token 均值 $L_+=-\sum_{D_+}\ell/N_+$，其中 $N_+$ 是验证通过轨迹的有效 token 数，则最大化 $J_{\mathrm{PPO}}-\mu L_+$ 时，正 token 额外得到 $\mu/N_+$ 的系数。取 $N=8,N_+=2,\mu=0.1$，每个正 token 额外得到 0.05；若其 PPO 未归一化系数为 1，主项为 0.125，辅助项为主项的 40%。正样本比例改变时，这个相对尺度也会变。空正集合定义辅助项为零。
 
-**追问与边界。** 为什么梯度累积不能把各 microbatch 的 token 均值直接等权平均？因为它实现“等 microbatch”而非全局 token 平均，应按各批 $N$ 加权。为什么改 reward scale 后要复核 NLL 系数？若优势随奖励放大而辅助项不变，两者比重变了；若先做优势标准化则要另算。只有明确聚合、标准化和 stop-gradient，才有可复现的超参数含义。`,
+**追问与边界。** 为什么梯度累积不能把各 microbatch 的 token 均值直接等权平均？因为它实现“等 microbatch”而非全局 token 平均，应按各批 $N$ 加权。为什么改 reward scale 后要复核 NLL 系数？若优势随奖励放大而辅助项不变，两者比重变了；若先做优势标准化则要另算。只有明确聚合、标准化和 stop-gradient，才有可复现的超参数含义。
+
+开场批次的 0.25 与 -0.125 已经给出行动依据：复现时先对齐分母，再谈调整学习率；0.05 的辅助系数也要相对主项的 0.125 来解释。即使这些都对齐，仍可能由少数 token 主导更新。下一节使用归一化后的系数，而不是原始 loss 值，检查这种集中现象。`,
     },
     {
       id: "math-update-diagnostics",
       type: "derivation",
       title: "从公式到诊断：平均 ratio 正常为什么仍会失稳",
-      body: String.raw`**符号与假设。** 在已记录的有效动作上，令 $a_j$ 为包含聚合因子的有符号局部梯度系数，$j=1,\ldots,N$。为衡量更新是否集中在极少数动作，定义非负质量 $v_j=|a_j|$，并假设 $\sum_jv_j>0$：
+      body: String.raw`假设分母已经核对过，训练仍在某一批后突然退化，而日志中的平均新旧概率比接近 1。我们需要分开检查两个可能被平均值掩盖的问题：更新是否集中到一个 token，以及同一回答的概率误差是否一起波动。本节用四个系数和一个长序列噪声模型，算出应该补记哪些诊断量。
+
+**符号与假设。** 在已记录的有效动作上，令 $a_j$ 为包含聚合因子的有符号局部梯度系数，$j=1,\ldots,N$。为衡量更新是否集中在极少数动作，定义非负质量 $v_j=|a_j|$，并假设 $\sum_jv_j>0$；$h_j$ 是该动作占总绝对系数的比例：
 
 $$h_j=\frac{v_j}{\sum_kv_k},\qquad
 N_{\mathrm{eff}}=\frac1{\sum_jh_j^2}
@@ -233,16 +250,18 @@ N_{\mathrm{eff}}=\frac1{\sum_jh_j^2}
 
 手算 $v=[1,1,1,7]$，质量为 $[0.1,0.1,0.1,0.7]$，$N_{\mathrm{eff}}=100/52\approx1.9231$。虽然四个 token 都有梯度，最后一个占绝对系数的 70%。CISPO clip fraction 高也可能四个都活跃；PPO 则需同时记录优势符号与饱和方向；SAPO 应看系数分布和近零质量，不能照搬一个硬裁剪比例。系数的正负相消与网络向量相消还需分别记录。
 
-**GSPO 平均会隐藏什么？** 令 $z_t=\log r_t$，同条回答的均值 $\bar z$ 决定 $s=e^{\bar z}$。对 $r=[0.5,2]$，$\bar z=0,s=1$，但总体离散度为 $(\log2)^2\approx0.480453$。sequence gate 正常不代表所有 token 变化都小。
+**GSPO 平均会隐藏什么？** 集中度只回答“谁占了更新”，还没有回答“比率为何不稳”。回到前面的两 token 回答，令 $z_t=\log r_t$，同条回答的均值 $\bar z$ 决定 $s=e^{\bar z}$。对 $r=[0.5,2]$，$\bar z=0,s=1$，但总体离散度为 $(\log2)^2\approx0.480453$。sequence gate 正常不代表所有 token 变化都小。
 
-进一步假设噪声 $z_t$ 有相同方差 $\sigma^2$，任意不同位置的相关系数为 $\rho$，则
+两 token 的抵消还不能说明长回答中的平均能否降噪。进一步假设长度为 $T$ 的回答中，噪声 $z_t$ 有相同方差 $\sigma^2$，任意不同位置的相关系数为 $\rho$。均值的方差要把 $T$ 个方差项和 $T(T-1)$ 个协方差项都加进去，再除以 $T^2$，因此
 
 $$\operatorname{Var}(\bar z)=\frac{T\sigma^2+T(T-1)\rho\sigma^2}{T^2}
 =\sigma^2\left(\rho+\frac{1-\rho}{T}\right).$$
 
 取 $T=100,\sigma^2=1,\rho=0.2$，得到 0.208；错误地假设独立会得到 0.01。相关项留下噪声下限，所以不能用长度归一化替代 routing replay 或训推概率核验。
 
-**追问：日志该按什么顺序看？** 先核对版本、mask 和行为概率，再看 $A$ 的非零比例及 critic 校准，然后看 token ratio 尾部、$\bar z$ 与序列内方差，最后看归一化后的系数集中度、实际梯度范数和独立成功率。上述计算只诊断可疑位置，不足以证明某个 loss 更好；需要固定数据和预算，单独更换 gate 或路由机制。`,
+**追问：日志该按什么顺序看？** 先核对版本、mask 和行为概率，再看 $A$ 的非零比例及 critic 校准，然后看 token ratio 尾部、$\bar z$ 与序列内方差，最后看归一化后的系数集中度、实际梯度范数和独立成功率。上述计算只诊断可疑位置，不足以证明某个 loss 更好；需要固定数据和预算，单独更换 gate 或路由机制。
+
+回到异常批次，1.9231 提醒我们四个活跃 token 并未均匀承担更新，0.208 则说明共享误差不会像独立噪声那样被长序列平均掉。先用下面的有限差分实验排除漏 ratio、漏 detach，再对真实 rollout 按上述顺序补日志；优化公式通过核验后，第 21 章继续追查奖励与数据选择是否改变了学习信号。`,
     },
     {
       id: "code",

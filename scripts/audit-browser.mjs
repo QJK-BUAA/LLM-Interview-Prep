@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { CHAPTERS } from "../content/catalog.js";
 import { visibleSections } from "../app/renderer.js";
 
-const session = process.env.ROADMAP_BROWSER_SESSION || "roadmap-interview-layout";
+const session = process.env.ROADMAP_BROWSER_SESSION || "roadmap-narrative-layout";
 const baseUrl = process.env.ROADMAP_URL || "http://127.0.0.1:8010/";
 const run = (args, input) => execFileSync("agent-browser", ["--session", session, ...args], {
   encoding: "utf8", input, timeout: 30000,
@@ -46,6 +46,11 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
       }
       await frame();
       const openDerivations = document.querySelectorAll('.derivation-disclosure[open]').length;
+      const formulaIndexOpen = document.querySelector('.formula-index')?.open;
+      const teachingOrder = [...document.querySelector('.lesson-sections').children]
+        .slice(0, 5).map(el => el.dataset.sectionId || el.className);
+      const opener = document.querySelector('#intuition .section-body > p');
+      const openerHasMath = Boolean(opener?.querySelector('[data-math]'));
       for (const details of document.querySelectorAll('.chapter details')) details.open = true;
       await frame();
       await document.fonts.ready;
@@ -69,10 +74,13 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
       const edges = chapter.querySelectorAll('.flow-edge').length;
       const quizzes = chapter.querySelectorAll('.quiz-answer').length;
       const row = { id:record.id, rendered:chapter.dataset.chapterId, sections, edges, quizzes, openDerivations,
+        formulaIndexOpen, teachingOrder, openerHasMath,
         formulaCount:chapter.querySelectorAll('.math-rendered').length, fallback,
         pageOverflow:page.scrollWidth>page.clientWidth, readerOverflow:reader.scrollWidth>reader.clientWidth+1,
         badBounds, badOverflow, headerOverlap };
-      row.passed = row.rendered===record.id && sections===record.sections && openDerivations===record.derivations && edges===record.edges && quizzes===record.quizzes && !fallback && !row.pageOverflow && !row.readerOverflow && !badBounds.length && !badOverflow.length && !headerOverlap;
+      row.passed = row.rendered===record.id && sections===record.sections && openDerivations===record.derivations && edges===record.edges && quizzes===record.quizzes && !fallback && !row.pageOverflow && !row.readerOverflow && !badBounds.length && !badOverflow.length && !headerOverlap &&
+        formulaIndexOpen===${mode === "interview"} && !openerHasMath &&
+        teachingOrder.join(',')==='intuition,chapter-objectives,example,roadmap,formula-index';
       results.push(row);
     }
     return {viewport:[innerWidth,innerHeight], courseLabel:document.querySelector('#course-count').textContent,
@@ -83,12 +91,11 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
   report.viewports.push(result);
   console.log(`${width}x${height} ${mode}: ${result.results.filter(r => r.passed).length}/30 chapter layouts pass`);
   }
-  const captureChapter = CHAPTERS.find(chapter => chapter.id === (width === 1440 ? "04" : width === 1024 ? "09" : "19"));
-  const captureSection = width === 390 ? "whiteboard" : captureChapter.sections.find(s => s.id.startsWith("math-")).id;
-  run(["open", `${baseUrl}?capture=${width}#${captureChapter.id}/${captureSection}`]);
+  run(["open", `${baseUrl}?capture=${width}#00`]);
   run(["wait", ".chapter"]);
+  run(["click", '[data-mode="learn"]']);
   evaluate("(async()=>{await document.fonts.ready; await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); return {chapter:document.querySelector('.chapter').dataset.chapterId};})()");
-  run(["screenshot", fileURLToPath(new URL(`../artifacts/interview-${width}x${height}.png`, import.meta.url))]);
+  run(["screenshot", fileURLToPath(new URL(`../artifacts/narrative-opening-${width}x${height}.png`, import.meta.url))]);
 }
 const consoleData = JSON.parse(run(["console", "--json"]));
 const networkData = JSON.parse(run(["network", "requests", "--json"]));
@@ -97,7 +104,7 @@ report.network = (networkData.data?.requests ?? []).map(({ url, status, resource
 report.layoutPassed = report.viewports.every(v => v.results.every(r => r.passed) &&
   v.nav.join(",") === CHAPTERS.map(r => r.id).join(",") &&
   v.totalProgress === CHAPTERS.reduce((sum, chapter) => sum + chapter.sections.length, 0));
-writeFileSync(new URL("../artifacts/interview-layout-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
+writeFileSync(new URL("../artifacts/narrative-layout-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
 if (!report.layoutPassed) {
   console.error(JSON.stringify(report.viewports.map(v=>({viewport:v.viewport, failures:v.results.filter(r=>!r.passed)})), null, 2));
   process.exitCode = 1;
