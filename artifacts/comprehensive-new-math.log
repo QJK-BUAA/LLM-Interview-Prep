@@ -1,0 +1,13 @@
+test_central_difference_and_checkpoint (__main__.ComprehensiveMath) ... ok
+test_pca_requires_top_eigenspace (__main__.ComprehensiveMath) ... ok
+test_position_bias_frequency_and_squared_scale (__main__.ComprehensiveMath) ... ok
+test_schedule_endpoints_and_monotonicity (__main__.ComprehensiveMath) ... ok
+test_shared_parameters_require_both_paths (__main__.ComprehensiveMath) ... ok
+test_speculative_conservation_including_support_gaps (__main__.ComprehensiveMath) ... ok
+test_truncated_sampling_boundary_order_and_support (__main__.ComprehensiveMath) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+OK
+YaRN s=4: amplitude=1.138629436112, score factor=1.296476992781, score 2->2.592953985561

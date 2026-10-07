@@ -129,9 +129,10 @@ EMPO² 的关键边是“有 tips 轨迹”通向“无 tips 更新”，表示�
 
 任务为 $x$，同任务轨迹编号为 $i$，环境动作步为 $t$，轨迹长度为 $T_i$。$s_{i,t}$ 是动作前的有效状态，$a_{i,t}$ 是动作，$r_{i,t}$ 是立即奖励，$\gamma\in[0,1]$ 是折扣系数。只给终局奖励是立即奖励的一种特例。定义：
 
-$$G_{i,t}=\sum_{k=t}^{T_i-1}\gamma^{k-t}r_{i,k},\qquad R_i=G_{i,0}$$
+$$G_{i,t}=\sum_{k=t}^{T_i-1}\gamma^{k-t}r_{i,k},\qquad
+R_i=\sum_{k=0}^{T_i-1}r_{i,k}$$
 
-$G_{i,t}$ 是从该步起的折扣回报，$R_i$ 是整条轨迹回报。轨迹级优势的教学简化是 $A_i^{\mathrm{episode}}=R_i-\bar R$，其中 $\bar R$ 为同任务组均值。是否除以标准差是额外选择，不应隐含在“相对优势”四个字里。
+$G_{i,t}$ 是 step 信号使用的折扣回报；与原 GiGPO 一致，$R_i$ 是 episode 的未折扣奖励总和。仅终局得 1、长度分别 1 和 3 时，两条 $R_i$ 都为 1；若改用 $\gamma=0.9$ 的 $G_{i,0}$，就会变成 1 和 0.81，属于另一变体。轨迹级优势的教学简化是 $A_i^{\mathrm{episode}}=R_i-\bar R$，其中 $\bar R$ 为同任务组均值。是否除以标准差是额外选择，不应隐含在“相对优势”四个字里。
 
 **GiGPO：精确锚点。** 令 $\mathcal H(s)$ 为同任务、同初态组中状态键等于 $s$ 的所有访问位置 $(j,u)$，允许跨轨迹、跨时间。使用均值归一化的示意式为：
 
@@ -166,7 +167,7 @@ $$\sum_a\pi_\theta(a|s)b(s)\nabla_\theta\log\pi_\theta(a|s)
 
 $\pi_\theta$ 是参数为 $\theta$ 的策略。包含当前样本回报的有限组均值、按成功筛选的候选、与动作相关的邻居，都不自动满足上述条件。把 baseline 停止梯度只能阻断计算图，不能消除采样依赖；把相关状态当作同一状态，也不能从回报差推出动作的因果效果。
 
-**LUFFY：改变陌生动作的学习权重。** 令 $u>0$ 为其 off-policy 项使用的概率比，$c>0$ 为塑形参数。为避免和折扣系数混淆，这里把论文塑形公式中的 gamma 改记为 $c$：
+**LUFFY：改变陌生动作的学习权重。** 理论 ratio 应以真实行为概率为分母；原论文 §2.2 为接入外部示范，在工程实现中把外部行为分母设为 1，并移除 off-policy clipping。这个代用分母不是归一化的真实行为分布，不能据此宣称任意分布上的无偏 IS。令 $u>0$ 为所用权重，真实分母固定或代用为 1 时，它对当前 log-prob 的导数均为 u。$c>0$ 为塑形参数；为避免和折扣混淆，这里把论文塑形公式中的 gamma 改记为 $c$：
 
 $$f(u)=\frac{u}{u+c},\qquad f'(u)=\frac{c}{(u+c)^2}$$
 
@@ -310,7 +311,7 @@ $p=0.1$ 时最小整数是 29，覆盖概率约 0.952899；28 次还只有 0.947
 
 ~~~python
 from collections import defaultdict
-from math import exp, isclose, log
+from math import exp, isclose, isfinite, log
 
 # task, initial_state, state_key, time, discounted_return
 visits = [
@@ -332,11 +333,13 @@ assert isclose(sum(anchor_advantages), 0.0, abs_tol=1e-12)
 def soft_baseline(returns, similarities, temperature):
     if len(returns) != len(similarities) or not returns:
         raise ValueError("candidate lengths must agree and be non-empty")
-    if temperature <= 0:
-        raise ValueError("temperature must be positive")
-    scores = [value / temperature for value in similarities]
-    offset = max(scores)
-    numerators = [exp(value - offset) for value in scores]
+    if not isfinite(temperature) or temperature <= 0:
+        raise ValueError("temperature must be finite and positive")
+    if not all(isfinite(value) for value in (*returns, *similarities)):
+        raise ValueError("returns and similarities must be finite")
+    offset = max(similarities)
+    # 先平移再除温度，避免极小温度产生 inf - inf。
+    numerators = [exp((value - offset) / temperature) for value in similarities]
     normalizer = sum(numerators)
     weights = [value / normalizer for value in numerators]
     baseline = sum(w * ret for w, ret in zip(weights, returns))
@@ -389,7 +392,7 @@ print("four failed probes:", round(miss_probability, 4))
       body: String.raw`| 方法 | 主要干预 | 新增信号或成本 |
 |---|---|---|
 | EMPO² | 检索经验 tips，混合有提示学习与去提示内化 | 记忆总结和检索，条件分布校正 |
-| LUFFY | 学生与外部引导轨迹混组，policy shaping | 高质量外部路线和奖励可比性 |
+| LUFFY | 学生与外部引导轨迹混组，policy shaping | 外部路线与奖励可比性；工程代用分母不是精确 IS |
 | GiGPO | 重复状态形成锚点组 | 复用已有 rollout，依赖可靠状态键 |
 | ProxMO | 成功率调节与相似度加权基线 | 文本相似度计算，邻居偏差 |
 | ELPO | 固定前缀恢复探测，定位关键错误 | 多次后缀 rollout 与恢复噪声 |

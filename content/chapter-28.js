@@ -271,13 +271,22 @@ $$N_{\mathrm{naive}}=B(P+S),\quad N_{\mathrm{shared}}=P+BS,\quad
 
 $B=4,P=100,S=20$ 时，朴素计数 480，共享计数 180，少 300，即 62.5%。这不是 FLOPs、GPU 显存或墙钟同比下降的结论；attention 访问、分支缓存、调度和梯度通信仍有成本。$P=0$ 或 $B=1$ 时该项节省为零。
 
-**为何反向必须累加？** 设共享前缀表示 $h=f_\theta(x)$，样本损失为 $L=\sum_i\alpha_i\ell_i(h)$，$\alpha_i$ 是原本约定的样本权重。链式法则要求：
+**为何反向必须累加？** 设共享前缀表示 $h=f_\theta(x)$，先假定样本损失仅经 h 依赖参数，即 $L=\sum_i\alpha_i\ell_i(h)$，$\alpha_i$ 是原本约定的样本权重。仅沿前缀路径的链式法则要求：
 
 $$\nabla_\theta L=
 \left(\frac{\partial h}{\partial\theta}\right)^\top
 \sum_i\alpha_i\nabla_h\ell_i.$$
 
 从输出往回走，每个分支先产生对公共表示的梯度，并乘原来的样本权重；这些梯度在共享节点相加，再经过一次前缀网络的 Jacobian 传回参数。共享减少重复算图，不会把“多个样本的贡献相加”改成“任取一个样本”。
+
+真实 Transformer 后缀也使用同一参数，应写成 $\ell_i(h,\theta)$。完整梯度还要加上固定 h 时的后缀直接路径：
+
+$$\nabla_\theta L=
+\left(\frac{\partial h}{\partial\theta}\right)^\top
+\sum_i\alpha_i\nabla_h\ell_i
++\sum_i\alpha_i\left.\nabla_\theta\ell_i\right|_h.$$
+
+例如 $h=2\theta$、两个损失为 $(h+\theta-1)^2/2$ 和 $(h+\theta-2)^2/2$，权重均为 1。在 $\theta=1$ 时，前缀贡献为 $2(2+1)=6$，后缀直接贡献为 $2+1=3$，总梯度为 9；只验前缀会漏掉 3。
 
 共享前向只计算一次 $h$，反向仍收集所有分支的梯度。教学标量例：$h=2\theta$，两个目标分别是 1、2，原损失 $L=\frac12(h-1)^2+\frac12(h-2)^2$。在 $\theta=1$，$h=2,L=0.5$，梯度为 $2[(2-1)+(2-2)]=2$；把分支求和擅自改成平均，loss 变为 0.25、梯度变为 1，就改了原目标。若原目标本来是平均，则应从一开始设置 $\alpha_i=1/2$，而不是由缓存实现决定。
 

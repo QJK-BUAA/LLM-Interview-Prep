@@ -10,12 +10,12 @@ const chapter = {
   tags: ["Policy Gradient", "REINFORCE", "Actor-Critic", "Advantage", "GAE"],
   objectives: [
     "从 log-derivative trick 推出 REINFORCE",
-    "解释 baseline 为何降方差但不改变期望梯度",
+    "解释合适 baseline 的降方差作用与保持期望梯度的条件",
     "计算 TD residual 与 GAE",
     "把轨迹、动作概率和优势映射到 LLM token 生成",
   ],
   summary:
-    "策略梯度用回报加权所采动作的 log 概率梯度，直接提高好轨迹、降低坏轨迹的概率；Actor-Critic 用价值网络构造低方差优势，GAE 再通过参数 λ 调节 bootstrap 偏差与 Monte Carlo 方差。",
+    "策略梯度用回报加权所采动作的 log 概率梯度；Actor-Critic 用价值网络构造优势以帮助降低方差，GAE 再通过参数 λ 调节对 bootstrap 和采样回报的依赖，实际权衡取决于估值误差。",
   sections: [
     {
       id: "intuition",
@@ -269,13 +269,13 @@ Actor 用 advantages，critic 常回归 returns。实际实现会在有效 token
 
 **误区二：critic loss 下降就说明策略更好。** critic 只拟合当前数据上的价值目标，策略质量由真实回报决定；critic 过拟合还会给 Actor 错误优势。
 
-**误区三：GAE 的 λ 越大越准确。** 接近 1 减少 bootstrap 偏差，却增加轨迹采样方差；有限数据下未必更好。
+**误区三：GAE 的 λ 越大越准确。** 接近 1 通常减少对中间 critic 的依赖，却可能增加采样方差；偏差和方差取决于奖励相关性、critic 与末端估计误差，不保证随 λ 单调变化。
 
 **误区四：熵越大探索越好。** 高熵只表示分布更分散，不保证探索到有用状态。任务奖励、采样温度和熵系数需协同。
 
 **误区五：把整句奖励复制给每个 token 就完成信用分配。** 这是可用的序列级 REINFORCE 信号，但无法区分句内关键步骤；长轨迹方差高，也容易奖惩无关 token。
 
-**误区六：梯度 norm clipping、PPO ratio clipping 和 reward clipping 相同。** 三者分别限制参数梯度、策略概率比和奖励数值，作用位置与偏差完全不同。`,
+**误区六：梯度 norm clipping、PPO ratio clipping 和 reward clipping 相同。** 三者分别限制梯度范数、抑制样本 surrogate 的部分更新激励、限制奖励数值。PPO clip 不把实际概率比投影进区间；作用位置与偏差不同。`,
     },
     {
       id: "comparison",
@@ -299,7 +299,7 @@ policy-based 方法直接表示动作概率，适合大离散或连续动作，�
       title: "面试表达：baseline 为什么不引入偏差",
       body: String.raw`**30 秒回答：**“策略梯度中可从回报减去只依赖状态的 baseline，因为对动作取期望时，$b(s)\sum_a\pi(a|s)\nabla\log\pi(a|s)=b(s)\nabla\sum_a\pi(a|s)=0$。因此期望方向不变，合适基线能降方差，但 $V(s)$ 不一定是最小梯度方差的基线。”
 
-若追问 GAE：先计算每步 TD residual $\delta_t=r+\gamma V(s')-V(s)$，再按 $(\gamma\lambda)^l$ 加权未来 residual。小 λ 更依赖 critic、低方差高偏差；大 λ 更接近 Monte Carlo。
+若追问 GAE：先计算每步 TD residual $\delta_t=r+\gamma V(s')-V(s)$，再按 $(\gamma\lambda)^l$ 加权未来 residual。小 λ 更依赖 critic，通常方差较低而估值偏差可能更大；大 λ 更接近 Monte Carlo，但仍需检查 critic 与片段末端误差，不能宣称普遍单调权衡。
 
 若追问 Actor 与 Critic：Actor 输出策略并由优势加权 log 概率更新；Critic 回归价值目标，承担降方差。两者可共享 backbone，也可独立，取决于显存与梯度干扰。
 

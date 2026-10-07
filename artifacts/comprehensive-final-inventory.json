@@ -1,0 +1,343 @@
+{
+  "rows": [
+    {
+      "id": "00",
+      "title": "从一个预测问题开始：学习时长与测验分数",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 7,
+      "duration": 90
+    },
+    {
+      "id": "01",
+      "title": "张量、Shape 与反向求和",
+      "objectives": 4,
+      "sections": 15,
+      "derivations": 5,
+      "whiteboards": 4,
+      "oldSectionsRetained": 15,
+      "oldQuestionsRetained": 7,
+      "duration": 120
+    },
+    {
+      "id": "02",
+      "title": "线性代数、矩阵求导与线性模型",
+      "objectives": 5,
+      "sections": 17,
+      "derivations": 7,
+      "whiteboards": 5,
+      "oldSectionsRetained": 17,
+      "oldQuestionsRetained": 8,
+      "duration": 210
+    },
+    {
+      "id": "03",
+      "title": "概率、统计与信息论",
+      "objectives": 5,
+      "sections": 16,
+      "derivations": 6,
+      "whiteboards": 6,
+      "oldSectionsRetained": 16,
+      "oldQuestionsRetained": 9,
+      "duration": 180
+    },
+    {
+      "id": "04",
+      "title": "经典机器学习：模型推导、训练与评估",
+      "objectives": 5,
+      "sections": 23,
+      "derivations": 13,
+      "whiteboards": 11,
+      "oldSectionsRetained": 23,
+      "oldQuestionsRetained": 14,
+      "duration": 540
+    },
+    {
+      "id": "05",
+      "title": "神经网络、计算图与反向传播",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 3,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 6,
+      "duration": 90
+    },
+    {
+      "id": "06",
+      "title": "优化、初始化、归一化与正则化",
+      "objectives": 5,
+      "sections": 15,
+      "derivations": 5,
+      "whiteboards": 5,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 7,
+      "duration": 130
+    },
+    {
+      "id": "07",
+      "title": "CNN、RNN、LSTM 与序列建模",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 7,
+      "duration": 105
+    },
+    {
+      "id": "08",
+      "title": "Tokenization 与 Embedding",
+      "objectives": 5,
+      "sections": 16,
+      "derivations": 6,
+      "whiteboards": 5,
+      "oldSectionsRetained": 15,
+      "oldQuestionsRetained": 8,
+      "duration": 110
+    },
+    {
+      "id": "09",
+      "title": "Transformer 从零到完整前向过程",
+      "objectives": 4,
+      "sections": 15,
+      "derivations": 5,
+      "whiteboards": 4,
+      "oldSectionsRetained": 15,
+      "oldQuestionsRetained": 8,
+      "duration": 150
+    },
+    {
+      "id": "10",
+      "title": "现代 LLM 组件",
+      "objectives": 4,
+      "sections": 17,
+      "derivations": 7,
+      "whiteboards": 5,
+      "oldSectionsRetained": 16,
+      "oldQuestionsRetained": 8,
+      "duration": 170
+    },
+    {
+      "id": "11",
+      "title": "训练显存、并行与推理系统",
+      "objectives": 5,
+      "sections": 16,
+      "derivations": 6,
+      "whiteboards": 5,
+      "oldSectionsRetained": 15,
+      "oldQuestionsRetained": 8,
+      "duration": 175
+    },
+    {
+      "id": "12",
+      "title": "LoRA、QLoRA 与参数高效微调",
+      "objectives": 4,
+      "sections": 15,
+      "derivations": 5,
+      "whiteboards": 4,
+      "oldSectionsRetained": 15,
+      "oldQuestionsRetained": 8,
+      "duration": 120
+    },
+    {
+      "id": "13",
+      "title": "MDP、回报、价值函数与贝尔曼方程",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 3,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 7,
+      "duration": 120
+    },
+    {
+      "id": "14",
+      "title": "Q-Learning、SARSA 与 DQN",
+      "objectives": 4,
+      "sections": 13,
+      "derivations": 3,
+      "whiteboards": 3,
+      "oldSectionsRetained": 13,
+      "oldQuestionsRetained": 7,
+      "duration": 125
+    },
+    {
+      "id": "15",
+      "title": "REINFORCE、Actor-Critic 与 GAE",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 8,
+      "duration": 140
+    },
+    {
+      "id": "16",
+      "title": "PPO、奖励模型与经典 RLHF",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 8,
+      "duration": 150
+    },
+    {
+      "id": "17",
+      "title": "GRPO、DAPO、Dr.GRPO 与 RLOO",
+      "objectives": 4,
+      "sections": 13,
+      "derivations": 3,
+      "whiteboards": 4,
+      "oldSectionsRetained": 13,
+      "oldQuestionsRetained": 8,
+      "duration": 155
+    },
+    {
+      "id": "18",
+      "title": "DPO 与偏好优化家族",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 8,
+      "duration": 145
+    },
+    {
+      "id": "19",
+      "title": "OPD、OPSD 与跨阶段蒸馏",
+      "objectives": 5,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 10,
+      "duration": 175
+    },
+    {
+      "id": "20",
+      "title": "VAPO、CISPO、GSPO 与 SAPO",
+      "objectives": 4,
+      "sections": 13,
+      "derivations": 3,
+      "whiteboards": 3,
+      "oldSectionsRetained": 13,
+      "oldQuestionsRetained": 9,
+      "duration": 190
+    },
+    {
+      "id": "21",
+      "title": "后训练数据工程：获取、验证、课程与回灌",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 3,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 9,
+      "duration": 195
+    },
+    {
+      "id": "22",
+      "title": "工业案例 I：DeepSeek、Qwen 与 Seed",
+      "objectives": 5,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 3,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 10,
+      "duration": 180
+    },
+    {
+      "id": "23",
+      "title": "工业案例 II：Kimi、MiniMax、GLM 与闭源模型",
+      "objectives": 5,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 3,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 11,
+      "duration": 190
+    },
+    {
+      "id": "24",
+      "title": "跨模型经验、技术演进与方法选择",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 9,
+      "duration": 140
+    },
+    {
+      "id": "25",
+      "title": "Agentic RL：从生成答案到环境交互",
+      "objectives": 5,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 3,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 9,
+      "duration": 145
+    },
+    {
+      "id": "26",
+      "title": "Agentic 奖励设计与训练稳定性",
+      "objectives": 5,
+      "sections": 15,
+      "derivations": 5,
+      "whiteboards": 4,
+      "oldSectionsRetained": 15,
+      "oldQuestionsRetained": 12,
+      "duration": 205
+    },
+    {
+      "id": "27",
+      "title": "探索与信用分配",
+      "objectives": 5,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 10,
+      "duration": 180
+    },
+    {
+      "id": "28",
+      "title": "环境合成与训练系统",
+      "objectives": 5,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 11,
+      "duration": 190
+    },
+    {
+      "id": "29",
+      "title": "Agentic RL 全景、路线判断与综合面试",
+      "objectives": 4,
+      "sections": 14,
+      "derivations": 4,
+      "whiteboards": 4,
+      "oldSectionsRetained": 14,
+      "oldQuestionsRetained": 9,
+      "duration": 120
+    }
+  ],
+  "totals": {
+    "objectives": 133,
+    "sections": 443,
+    "derivations": 143,
+    "whiteboards": 126,
+    "oldSectionsRetained": 439,
+    "oldQuestionsRetained": 260,
+    "duration": 4935
+  }
+}

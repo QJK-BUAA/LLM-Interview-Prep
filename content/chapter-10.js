@@ -5,9 +5,9 @@ const chapter = {
   title: "现代 LLM 组件",
   subtitle: "位置、归一化、注意力、专家与状态空间模型",
   level: "进阶",
-  duration: 145,
+  duration: 170,
   prerequisites: ["06", "09"],
-  tags: ["RoPE", "RMSNorm", "SwiGLU", "GQA", "MLA", "MoE", "Mamba", "NSA"],
+  tags: ["RoPE", "ALiBi", "YaRN", "RMSNorm", "SwiGLU", "GQA", "MLA", "MoE", "Mamba", "NSA"],
   objectives: [
     "解释 RoPE、ALiBi 与 YaRN 如何处理位置和长度外推",
     "比较 MHA、MQA、GQA 与 MLA 的 KV 成本",
@@ -57,6 +57,7 @@ GQA 的计算仍有 32 个 query 头，每组 query 读取同一 K/V。2048 相�
       links: [
         { label: "定位三个局部前向公式", sectionId: "derivation", level: "必会" },
         { label: "RoPE 相对位移", sectionId: "math-rope-relative", level: "推导" },
+        { label: "ALiBi 与 YaRN 扩窗", sectionId: "math-position-extension", level: "推导" },
         { label: "RMSNorm 完整导数", sectionId: "math-rmsnorm-backward", level: "推导" },
         { label: "SwiGLU 等参数比较", sectionId: "math-swiglu-budget", level: "必会" },
         { label: "MHA/GQA/MQA/MLA 缓存", sectionId: "math-kv-mla", level: "进阶" },
@@ -111,7 +112,7 @@ $$R_{\theta_i,m}
 \end{bmatrix}
 \begin{bmatrix}x_{2i}\\x_{2i+1}\end{bmatrix}$$
 
-当 query 在位置 $m$、key 在位置 $n$ 时，旋转后的点积满足 $q^\top R_{n-m}k$ 的形式，因此自然依赖相对位移。长于训练窗口时，旋转频率落入未见区域；YaRN 等方法通过频率插值和尺度修正扩展上下文，但仍需长上下文数据与评估。
+当 query 在位置 $m$、key 在位置 $n$ 时，旋转后的点积满足 $q^\top R_{n-m}k$ 的形式，因此自然依赖相对位移。延长位置不会自动改变固定频率 $\theta_i$，但位置、相位 $m\theta_i$ 及其组合会超出训练覆盖；YaRN 等另行修改频率和尺度来扩展上下文，仍需长上下文数据与评估。
 
 例如将 [1,0] 旋转四分之一圈得到 [0,1]，长度仍是 1，改变的是与另一个旋转向量的相对夹角。位置变换不负责控制整个 token 的幅度，这由归一化处理。RMSNorm 对隐藏向量 $x\in\mathbb{R}^{H}$ 计算：
 
@@ -149,7 +150,39 @@ $$\tilde q_m^\top\tilde k_n
 
 **反向与边界。** 位置和频率固定时，$\nabla_qL=R_m^\top\nabla_{\tilde q}L$，只需逆旋转。未参与旋转的通道照常点积。实现的 interleaved 与 split-half 配对必须与 checkpoint 一致，否则长度保持仍成立但模型语义错误。
 
-例中相邻位置点积为 0，相差两个位置为 -1，再增加完整周期又会回到原值，所以不能把它解释成单调距离惩罚。统一把位置缩成 $m/s$ 会改变频率分辨率和局部相位；YaRN 等采用更细的频段策略。相对位置代数不等于分布外长序列质量保证，需单独测长程召回、位置偏差与 PPL。位置部分查清后，下一节回到 decoder 输入尺度，检查归一化是否把正确的梯度传回来了。`,
+例中相邻位置点积为 0，相差两个位置为 -1，再增加完整周期又会回到原值，所以不能把它解释成单调距离惩罚。统一把位置缩成 $m/s$ 会改变频率分辨率和局部相位；YaRN 等采用更细的频段策略。相对位置代数不等于分布外长序列质量保证，需单独测长程召回、位置偏差与 PPL。下一节具体计算距离偏置与扩窗频率。`,
+    },
+    {
+      id: "math-position-extension",
+      type: "derivation",
+      title: "ALiBi 与 YaRN：距离偏置和分频扩窗",
+      body: String.raw`训练只见过长度 $L$，部署却需要 $L'=4L$。直接延长会遇到未见的位置组合；把所有位置压成四分之一，又会缩小邻近 token 的相位差。怎样表达近邻偏好，怎样尽量保留局部分辨率？ALiBi 和 YaRN 分别修改注意力偏置和 RoPE 频率，作用位置不同。
+
+**ALiBi。** 第 $h$ 个头使用固定、非学习的正斜率 $m_h$。因果位置 $j\le i$ 的分数为
+
+$$s_{ij}^{(h)}=\frac{q_i^\top k_j}{\sqrt D}-m_h(i-j),$$
+
+未来位置仍屏蔽。距离偏置加在已缩放的 QK 分数上，不再除一次 $\sqrt D$；不同头使用不同斜率。本例仅取一个头 $m_h=1/2$，不是规定所有头都用该值。$i=2$、$j=0,1,2$、内容分数相同时，偏置为 $(-1,-1/2,0)$，softmax 约为 $(0.186324,0.307196,0.506480)$。这是偏置带来的近邻倾向；内容分数不同时，最终权重不必随距离单调。
+
+**先看均匀位置插值 PI。** 令扩展倍数 $s=L'/L>1$，原 RoPE 某二维通道频率为 $\theta_d$，相位为 $m\theta_d$。用位置 $m/s$，等价于频率 $\theta_d/s$，将扩展窗口压回原来的相位尺度。代价是原来相邻两位置的相位差也缩小到 $1/s$。
+
+**YaRN 的分频策略。** 波长 $\lambda_d=2\pi/\theta_d$，原窗口内旋转圈数 $r_d=L/\lambda_d$。圈数小的低频通道适合插值；圈数大的高频通道保留频率以维持局部变化，中间频段渐变。给定 $0<\alpha<\beta$：
+
+$$\gamma(r)=\begin{cases}
+0,&r\le\alpha,\\
+(r-\alpha)/(\beta-\alpha),&\alpha<r<\beta,\\
+1,&r\ge\beta,
+\end{cases}\qquad
+\theta'_d=(1-\gamma(r_d))\frac{\theta_d}{s}
++\gamma(r_d)\theta_d.$$
+
+因此它不是所有频率统一除以 $s$。论文在所测 Llama 上使用 $\alpha=1,\beta=32$ 的经验设置，不能直接当作所有模型的最优值。
+
+YaRN 还调节 attention 温度 $t$，使旋转后的分数为 $\tilde q^\top\tilde k/(t\sqrt D)$。同时将 Q、K 各乘幅度 $a=\sqrt{1/t}$，分数会乘 **$a^2$**。论文经验式 $a=1+0.1\ln s$ 同样依赖所测模型与设置，不是长度外推定理。
+
+**扩四倍手算。** $s=4$，三个频段的 ramp 值为 $\gamma=0,1/2,1$ 时，$\theta'_d/\theta_d$ 分别为 $1/4,5/8,1$。中间频段若误用统一 PI，就会写成 1/4。幅度 $a\approx1.138629$，分数倍数 $a^2\approx1.296477$；原分数 2 变成约 2.592954，而非 2.277259。
+
+这组数字说明 YaRN 同时改变相位分辨率和注意力尖锐程度；它不保证无限扩窗，也不能替代长文本数据和任务评估。ALiBi、PI、YaRN 应分别报告短文本退化、长程召回、位置偏差和 PPL。接下来回到 RMSNorm，检查控制隐藏尺度时分母怎样参与反向。`,
     },
     {
       id: "math-rmsnorm-backward",
@@ -352,6 +385,10 @@ ALiBi 把与距离成比例的头特定偏置加到注意力分数，不增加�
           a: String.raw`$(R_mq)^\top R_nk=q^\top R_m^\top R_nk=q^\top R_{n-m}k$。例中旋转向量为 $[0,1]$ 与 $[-1,0]$，内积 0。内容 q/k 仍依赖文本；周期旋转不保证距离单调衰减或无限长度外推。**得分点：**转置变逆旋转；顺序给 n-m；保范数不代表保质量。`,
         },
         {
+          q: "ALiBi 的 i=2、slope=1/2，对 j=0,1,2 的偏置是什么？YaRN 扩四倍、ramp 为 0/0.5/1 时频率怎样变化，Q/K 各乘 a 又使分数乘多少？",
+          a: String.raw`偏置为 $(-1,-1/2,0)$，加在已缩放的 QK 上。YaRN 频率倍数为 $(1-\gamma)/4+\gamma$，得到 $1/4,5/8,1$。Q/K 各乘 a 后点积乘 $a^2$；$a=1+0.1\ln4$ 时约为 1.296477。**得分点：**区分偏置、相位与幅度；PI 不是完整 YaRN；经验设置不保证无限扩窗。`,
+        },
+        {
           q: "RMSNorm x=[1,2]、gamma=[1,1]、epsilon=0，上游 [1,0]，求输入梯度。若把分母 detach 会错在哪里？",
           a: String.raw`$r=\sqrt{5/2}$，$u=[1,0]$，$x^\top u=1$。$\nabla x=u/r-x/(2r^3)=[0.8/r,-0.4/r]\approx[0.505964,-0.252982]$，径向内积为 0。detach 会丢掉第二项并给 $[1/r,0]$，违反本例尺度不变性。**得分点：**对分母求导；gamma 梯度另为 $[1/r,0]$；epsilon 非零时径向梯度不必为零。`,
         },
@@ -408,13 +445,13 @@ ALiBi 把与距离成比例的头特定偏置加到注意力分数，不增加�
     },
     {
       label: "Train Short, Test Long: ALiBi",
-      url: "https://arxiv.org/abs/2108.12409",
-      evidence: "原始论文",
+      url: "https://arxiv.org/html/2108.12409v2#S3",
+      evidence: "§3 的固定每头 slope，偏置加在已缩放分数上",
     },
     {
       label: "YaRN",
-      url: "https://arxiv.org/abs/2309.00071",
-      evidence: "原始论文",
+      url: "https://arxiv.org/html/2309.00071v3#S3",
+      evidence: "§3.2–3.3 分频与 attention 温度；PI 比例据附录 A.1 的 mL/L'，经验设置仅限论文范围",
     },
     {
       label: "Root Mean Square Layer Normalization",

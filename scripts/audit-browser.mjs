@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 import { CHAPTERS } from "../content/catalog.js";
 import { visibleSections } from "../app/renderer.js";
 
-const session = process.env.ROADMAP_BROWSER_SESSION || "roadmap-narrative-layout";
+const prefix = process.env.ROADMAP_AUDIT_PREFIX || "narrative";
+if (!/^[a-z0-9-]+$/.test(prefix)) throw new Error("Invalid audit prefix");
+const session = process.env.ROADMAP_BROWSER_SESSION || `roadmap-${prefix}-layout`;
 const baseUrl = process.env.ROADMAP_URL || "http://127.0.0.1:8010/";
 const run = (args, input) => execFileSync("agent-browser", ["--session", session, ...args], {
   encoding: "utf8", input, timeout: 30000,
@@ -95,7 +97,7 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
   run(["wait", ".chapter"]);
   run(["click", '[data-mode="learn"]']);
   evaluate("(async()=>{await document.fonts.ready; await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); return {chapter:document.querySelector('.chapter').dataset.chapterId};})()");
-  run(["screenshot", fileURLToPath(new URL(`../artifacts/narrative-opening-${width}x${height}.png`, import.meta.url))]);
+  run(["screenshot", fileURLToPath(new URL(`../artifacts/${prefix}-opening-${width}x${height}.png`, import.meta.url))]);
 }
 const consoleData = JSON.parse(run(["console", "--json"]));
 const networkData = JSON.parse(run(["network", "requests", "--json"]));
@@ -104,7 +106,7 @@ report.network = (networkData.data?.requests ?? []).map(({ url, status, resource
 report.layoutPassed = report.viewports.every(v => v.results.every(r => r.passed) &&
   v.nav.join(",") === CHAPTERS.map(r => r.id).join(",") &&
   v.totalProgress === CHAPTERS.reduce((sum, chapter) => sum + chapter.sections.length, 0));
-writeFileSync(new URL("../artifacts/narrative-layout-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
+writeFileSync(new URL(`../artifacts/${prefix}-layout-audit.json`, import.meta.url), JSON.stringify(report, null, 2) + "\n");
 if (!report.layoutPassed) {
   console.error(JSON.stringify(report.viewports.map(v=>({viewport:v.viewport, failures:v.results.filter(r=>!r.passed)})), null, 2));
   process.exitCode = 1;

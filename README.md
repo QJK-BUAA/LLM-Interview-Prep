@@ -12,6 +12,7 @@ npm test
 npm run validate
 node scripts/check-math-rendering.mjs
 python3 scripts/check-interview-math.py
+python3 scripts/check-comprehensive-math.py
 python3 -m http.server 8010
 ```
 
@@ -35,11 +36,13 @@ python3 -m http.server 8010
 
 每章先提出一个具体问题，再用小例子解释输入、选择和结果，随后说明学习路线。推导从待解决的计算问题进入，逐步引入符号、假设和公式，最后解释计算结果；机制图、代码、误区、对比和问答帮助连接不同表达，基础自测与白板题提供完整过程和得分点。
 
-第 19 章讲 OPD、OPSD 与跨阶段蒸馏，第 24、29 章分别汇总后训练和 Agentic RL 的选型与面试。零基础读者按 00–29 学习；已有 Transformer 基础可从 13 章进入后训练；Agent 方向在 13、15、17、21 章基础上进入 25–29。
+第 19 章讲 OPD、OPSD 与跨阶段蒸馏，第 24、29 章分别汇总后训练和 Agentic RL 的选型与面试。零基础读者按 00–29 学习；已具备 01–06、08–12 对应能力者可从 13 章进入后训练，Agent 方向继续走到 29。白板验收可免读已掌握部分，未通过则沿先修链接回补；完整路线和闭合的快捷路线见第 00 章。
+
+本轮补齐 warmup/cosine、top-k/top-p、ALiBi/YaRN、投机解码四个推导专题，以及 Transformer 整网前向与 mask/loss 接口。当前共 443 个小节、143 个推导专题、126 道白板题；逐章阅读与回访估计合计 82.25 小时，练习、编码和错题重做另计。推荐系统召回/CTR/序列推荐、RAG/reranker、完整 scaling-law 实验、视觉/语音/扩散、GNN 与因果推断等属于后续岗位专项。
 
 面试复习时可在学习路线之后的公式索引选择主题，遮住正文写定义、目标和推导，再进入“白板练习”作答。第 00 章初读先完成预测和误差例子；总体风险、似然和奖励专题注明后续回访章节，学过求导、概率和策略梯度后再串联这些目标。
 
-本轮正文连贯性与页面验收见 [叙事修订验收记录](docs/research/narrative-acceptance.md)，上一轮数学补充见 [面试数学验收记录](docs/research/interview-acceptance.md)。
+最新逐章审查、修订与验收见 [全内容检查报告](docs/research/comprehensive-audit-2026-10-07.md)。此前正文连贯性与页面验收见 [叙事修订验收记录](docs/research/narrative-acceptance.md)，早期数学补充见 [面试数学验收记录](docs/research/interview-acceptance.md)。
 
 ## 来源与改编
 
@@ -47,7 +50,7 @@ python3 -m http.server 8010
 
 [逐篇阅读与改编说明](docs/research/source-reading-2026-09-30.md) 记录原文具体小节、实质论点、吸收位置，以及补充、纠正和未采用的内容。[来源映射](content/source-manifest.js) 和 [原文快照索引](docs/research/source-inventory.json) 保存可检查的正文锚点与 SHA-256；它们证明版本和覆盖，阅读说明进一步交代改编取舍。每章末尾“本章扩展阅读”可打开原文。原论文定义、报告结果、教学例子与作者观点分开说明；纠错证据保存在 [research](docs/research/) 中。MIT 许可说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-来源固定于上述提交，原始论文核验截至 2026-09-27；个别后续官方报告用于纠正源文档已经过时的披露状态。这些记录不是模型实验复现，也不以不同报告的分数构造跨模型优劣排名。
+来源固定于上述提交。2026-10-07 再次完整阅读 37 份综述，并按确认问题定向复读原论文方法；具体版本、章节和未读范围见本轮五批审查记录。个别后续官方报告用于纠正源文档已经过时的披露状态。这些记录不是模型实验复现，也不以不同报告的分数构造跨模型优劣排名。
 
 ## 学习功能
 
@@ -102,12 +105,14 @@ ml-roadmap/
 5. 若扩展当前 00-29 的固定课程规模，同步调整 `scripts/validate-content.mjs` 和目录测试中的预期 ID 序列；目录标题与进度总数从 catalog 自动计算。
 6. 运行 `npm test`、`npm run validate`、全部 KaTeX 解析和 Python 数值校验，再运行 `node scripts/audit-browser.mjs` 与 `node scripts/audit-interactions.mjs` 检查浏览器。
 
+实际正文代码的回归为 `python3 scripts/check-lesson-code.py`，需本地安装 PyTorch，使用小型 CPU 张量验证 09 的完整前向、19 的聚合与 27 的数值契约。它不是阅读网页的运行依赖。浏览器验收依赖 `agent-browser` CLI；设置 `ROADMAP_AUDIT_PREFIX=comprehensive` 可使用独立 session 和产物前缀，`ROADMAP_URL` 可指定服务地址。完整命令及结果见最新检查报告。
+
 `npm run validate` 会拒绝缺少教学层、断裂的知识路线、缺少白板题、前置章节失效或后置、重复 ID、占位标记、来源映射缺失和正文锚点失效。KaTeX 校验检查公式能否解析；独立数值程序检查梯度、概率、形状和预算算例；教学与原论文的对应见 `docs/research/interview-audit-*.md`。这些检查各有目的，公式数量本身不是质量证明。
 
 ## 状态与重置
 
 本地状态使用键 `ml-roadmap-state-v2`。首次打开自动从 v1 迁移 00–19 章完成记录、模式与主题；旧第 20 章更换了主题，其完成标记会清除。原综合选型内容移至第 24 章，旧 slug 链接仍能定位该内容。v1 原始数据保留作备份，已有 v2 状态时不会重复迁移。
 
-本轮只调整内容叙述和顺序，保留已有 v2 小节 ID、完成记录与进度分母。上一轮新增的公式主题和白板题按原规则保存完成状态。
+本轮保留全部旧 v2 小节 ID、260 道原有题目及完成记录，新增四个小节使进度分母从 439 变为 443。旧完成项仍完成，新增小节按原规则等待学习与标记；无需清空进度。
 
 需要彻底重置时，在浏览器开发者工具中同时删除 `ml-roadmap-state-v2` 和 `ml-roadmap-state-v1` 后刷新。只删除 v2 会再次从 v1 备份迁移。Storage API 不可用时退化为当前页面会话内的内存状态。

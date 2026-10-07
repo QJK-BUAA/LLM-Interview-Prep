@@ -368,7 +368,7 @@ $$ESS=\frac{(\sum_i w_i)^2}{\sum_i w_i^2}$$
 
 若追问为什么不用 MSE，可以说 MSE 不是绝对错误，但它对应不同噪声假设；与 sigmoid/softmax 组合时还可能在饱和区提供较弱梯度。分类的概率建模下，交叉熵更自然。
 
-若追问 forward 与 reverse KL，先声明命名可能随优化变量不同而混乱，再写出公式。$D_{\mathrm{KL}}(p\|q)$ 要求 $q$ 覆盖 $p$ 的质量，常称 mass-covering；$D_{\mathrm{KL}}(q\|p)$ 更偏向选择 $p$ 的高密度模式，常称 mode-seeking。
+若追问 forward 与 reverse KL，先声明命名可能随优化变量不同而混乱，再写出公式。固定目标 $p$、在受限分布族中优化 $q$ 时，$D_{\mathrm{KL}}(p\|q)$ 常表现为 mass-covering，$D_{\mathrm{KL}}(q\|p)$ 常表现为 mode-seeking。这是受限近似下常见的趋势；若 $q$ 能充分表达 $p$，两者都可在 $q=p$ 处达到零，不能把“择模”当作任意分布族的定理。
 
 若追问降方差为什么重要，可以指出样本均值误差只按 $1/\sqrt N$ 降低，四倍样本才约减半；合适的 baseline、控制变量或分层设计可能以更低成本减少方差。`,
     },

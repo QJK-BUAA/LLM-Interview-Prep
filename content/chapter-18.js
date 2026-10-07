@@ -217,14 +217,14 @@ $$\frac{\partial L}{\partial\bar\ell_w}
       title: "KTO：单条好坏反馈、参考点与停止梯度",
       body: String.raw`用户有时只给助手的一份说明点了“有帮助”或“无帮助”，没有留下同题另一份回答。把不同题目的回答硬凑成偏好对会破坏前面消去归一化常数的条件。现在直接使用单条好坏反馈，同时明确它与“某回答比另一条更好”不是同一种标签。
 
-KTO 可使用单条 $(x,y,d)$ 数据，$d\in\{D,U\}$ 是 desirable/undesirable 标签，不要求同 prompt 的偏好对。x 为题目、y 为回答，$\pi_{\rm ref}$ 冻结。沿用原文的未缩放 log-ratio：
+KTO 可使用单条 $(x,y,d)\sim\mathcal D$ 数据，$\mathcal D$ 为数据分布，$d\in\{D,U\}$ 是 desirable/undesirable 标签，不要求同 prompt 的偏好对。x 为题目、y 为回答，$\pi_{\rm ref}$ 冻结。沿用原文的未缩放 log-ratio：
 
 $$r_\theta(x,y)=\log\frac{\pi_\theta(y|x)}{\pi_{\rm ref}(y|x)},\qquad
 z_0(x)=D_{\rm KL}(\pi_\theta(\cdot|x)\|\pi_{\rm ref}(\cdot|x))$$
 
 这里 $z_0$ 是策略相对 reference 的 KL 参考点，不是某条回答的偏好标签。以相对参考点的增幅构造有界效用：把参考点在反向时冻结，令 $s=\beta(r_\theta-\operatorname{sg}(z_0))$，正权重 $\lambda_D,\lambda_U$ 表达两类反馈的重要性。最小化效用缺口，不是二元交叉熵：
 
-$$L_{\rm KTO}=\mathbb E_D\left[
+$$L_{\rm KTO}=\mathbb E_{(x,y,d)\sim\mathcal D}\left[
 \begin{cases}
 \lambda_D[1-\sigma(s)],&d=D\\
 \lambda_U[1-\sigma(-s)],&d=U
@@ -306,7 +306,7 @@ print(chosen_ratio, rejected_ratio, logit, loss)
 | SimPO | 成对偏好 | 不需要 | 长度归一化平均 log-prob + 目标 margin |
 | Online/Iterative DPO | 当前策略候选与新偏好 | 视方法而定 | 周期刷新数据、降低静态分布错配 |
 
-IPO 的动机之一是避免 logistic 目标在可分数据上持续扩大 margin；KTO 面向只有好/坏单样本而无严格配对的数据；ORPO 把 chosen 的监督学习和偏好 odds 结合；SimPO 让隐式 reward 与生成时常用的平均 log probability 对齐并加入 margin。它们的假设不同，不应统称为“换个 loss 就一样”。
+IPO 的动机之一是避免 logistic 目标在可分数据上持续扩大 margin；KTO 面向只有好/坏单样本而无严格配对的数据；ORPO 把 chosen 的监督学习和偏好 odds 结合；SimPO 用长度归一化平均 log-prob 作为评分代理并加入 margin。greedy、随机采样和不同长度惩罚的 beam search 并不共享一个精确的平均 log-prob 优化目标。它们的假设不同，不应统称为“换个 loss 就一样”。
 
 偏好优化适合难以写标量 verifier、但能稳定比较两个答案的任务。数学最终答案可直接验证时，RLVR 能在线探索；若已有大量高质量静态偏好对、在线生成昂贵，DPO 家族更直接。
 

@@ -1,0 +1,236 @@
+
+> ml-roadmap@1.0.0 test
+> node --test
+
+TAP version 13
+# Subtest: branching and feedback diagrams show actual edges, not an invented linear chain
+ok 1 - branching and feedback diagrams show actual edges, not an invented linear chain
+  ---
+  duration_ms: 0.937333
+  type: 'test'
+  ...
+# Subtest: disconnected nodes remain visible without fabricating an edge
+ok 2 - disconnected nodes remain visible without fabricating an edge
+  ---
+  duration_ms: 0.149667
+  type: 'test'
+  ...
+# Subtest: every chapter has a connected learning path and worked whiteboard exercises
+ok 3 - every chapter has a connected learning path and worked whiteboard exercises
+  ---
+  duration_ms: 2.49625
+  type: 'test'
+  ...
+# Subtest: all formulas and examples remain reachable in interview mode and by deep link
+ok 4 - all formulas and examples remain reachable in interview mode and by deep link
+  ---
+  duration_ms: 1.127333
+  type: 'test'
+  ...
+# Subtest: search finds concrete mathematical topics instead of only the chapter heading
+ok 5 - search finds concrete mathematical topics instead of only the chapter heading
+  ---
+  duration_ms: 4.183583
+  type: 'test'
+  ...
+# Subtest: existing completion records survive while new whiteboard content remains uncompleted
+ok 6 - existing completion records survive while new whiteboard content remains uncompleted
+  ---
+  duration_ms: 1.093459
+  type: 'test'
+  ...
+# Subtest: escapes untrusted HTML characters
+ok 7 - escapes untrusted HTML characters
+  ---
+  duration_ms: 0.855167
+  type: 'test'
+  ...
+# Subtest: preserves fenced code as escaped code markup
+ok 8 - preserves fenced code as escaped code markup
+  ---
+  duration_ms: 0.611166
+  type: 'test'
+  ...
+# Subtest: renders markdown tables with accessible structure
+ok 9 - renders markdown tables with accessible structure
+  ---
+  duration_ms: 0.497167
+  type: 'test'
+  ...
+# Subtest: emits safe inline and display math placeholders
+ok 10 - emits safe inline and display math placeholders
+  ---
+  duration_ms: 0.368583
+  type: 'test'
+  ...
+# Subtest: renders flow, matrix and comparison diagram variants
+ok 11 - renders flow, matrix and comparison diagram variants
+  ---
+  duration_ms: 0.153917
+  type: 'test'
+  ...
+# Subtest: annotates only the first glossary occurrence
+ok 12 - annotates only the first glossary occurrence
+  ---
+  duration_ms: 1.094542
+  type: 'test'
+  ...
+# Subtest: filters sections for interview mode
+ok 13 - filters sections for interview mode
+  ---
+  duration_ms: 0.836291
+  type: 'test'
+  ...
+# Subtest: renders completion controls and folded quiz answers
+ok 14 - renders completion controls and folded quiz answers
+  ---
+  duration_ms: 0.404667
+  type: 'test'
+  ...
+# Subtest: interview formulas are open, indexed and linked to folded whiteboard answers
+ok 15 - interview formulas are open, indexed and linked to folded whiteboard answers
+  ---
+  duration_ms: 0.650583
+  type: 'test'
+  ...
+# Subtest: both reading modes introduce the problem and example before the formula index
+ok 16 - both reading modes introduce the problem and example before the formula index
+  ---
+  duration_ms: 0.604708
+  type: 'test'
+  ...
+# Subtest: accepts a complete chapter
+ok 17 - accepts a complete chapter
+  ---
+  duration_ms: 1.282708
+  type: 'test'
+  ...
+# Subtest: rejects missing teaching layers and short quizzes
+ok 18 - rejects missing teaching layers and short quizzes
+  ---
+  duration_ms: 0.308416
+  type: 'test'
+  ...
+# Subtest: rejects duplicate section ids and malformed diagrams
+ok 19 - rejects duplicate section ids and malformed diagrams
+  ---
+  duration_ms: 0.085083
+  type: 'test'
+  ...
+# Subtest: rejects incomplete metadata and non-http sources
+ok 20 - rejects incomplete metadata and non-http sources
+  ---
+  duration_ms: 0.071375
+  type: 'test'
+  ...
+# Subtest: rejects broken learning paths but allows multiple independent derivations
+ok 21 - rejects broken learning paths but allows multiple independent derivations
+  ---
+  duration_ms: 0.1475
+  type: 'test'
+  ...
+# Subtest: rejects missing whiteboard exercises and answers without scoring points
+ok 22 - rejects missing whiteboard exercises and answers without scoring points
+  ---
+  duration_ms: 0.254333
+  type: 'test'
+  ...
+# Subtest: all 37 approved source documents are frozen and covered by actual lesson bodies
+ok 23 - all 37 approved source documents are frozen and covered by actual lesson bodies
+  ---
+  duration_ms: 3.573208
+  type: 'test'
+  ...
+# Subtest: the course has 30 dependency-ordered lessons with the full teaching contract
+ok 24 - the course has 30 dependency-ordered lessons with the full teaching contract
+  ---
+  duration_ms: 0.326375
+  type: 'test'
+  ...
+# Subtest: manifest validation rejects missing lesson content even when source citations remain
+ok 25 - manifest validation rejects missing lesson content even when source citations remain
+  ---
+  duration_ms: 1.509709
+  type: 'test'
+  ...
+# Subtest: migrates old progress once, retaining settings and removing repurposed chapter 20
+ok 26 - migrates old progress once, retaining settings and removing repurposed chapter 20
+  ---
+  duration_ms: 1.452875
+  type: 'test'
+  ...
+# Subtest: v2 data wins over legacy and preserves new chapter 20 completion
+ok 27 - v2 data wins over legacy and preserves new chapter 20 completion
+  ---
+  duration_ms: 0.193166
+  type: 'test'
+  ...
+# Subtest: bad current JSON does not resurrect stale legacy progress
+ok 28 - bad current JSON does not resurrect stale legacy progress
+  ---
+  duration_ms: 0.059208
+  type: 'test'
+  ...
+# Subtest: new chapter 29 progress survives save and reload
+ok 29 - new chapter 29 progress survives save and reload
+  ---
+  duration_ms: 0.053041
+  type: 'test'
+  ...
+# Subtest: migration survives read-only storage without discarding in-memory progress
+ok 30 - migration survives read-only storage without discarding in-memory progress
+  ---
+  duration_ms: 0.114708
+  type: 'test'
+  ...
+# Subtest: returns independent defaults when no stored state exists
+ok 31 - returns independent defaults when no stored state exists
+  ---
+  duration_ms: 1.416958
+  type: 'test'
+  ...
+# Subtest: falls back when stored JSON is invalid
+ok 32 - falls back when stored JSON is invalid
+  ---
+  duration_ms: 0.25475
+  type: 'test'
+  ...
+# Subtest: normalizes modes and removes unknown chapters and sections
+ok 33 - normalizes modes and removes unknown chapters and sections
+  ---
+  duration_ms: 0.143542
+  type: 'test'
+  ...
+# Subtest: toggles valid sections without mutating the previous state
+ok 34 - toggles valid sections without mutating the previous state
+  ---
+  duration_ms: 0.149583
+  type: 'test'
+  ...
+# Subtest: normalizes mode and theme updates
+ok 35 - normalizes mode and theme updates
+  ---
+  duration_ms: 0.0515
+  type: 'test'
+  ...
+# Subtest: calculates chapter and catalog progress from valid sections
+ok 36 - calculates chapter and catalog progress from valid sections
+  ---
+  duration_ms: 0.143083
+  type: 'test'
+  ...
+# Subtest: keeps an in-memory fallback when storage reads and writes throw
+ok 37 - keeps an in-memory fallback when storage reads and writes throw
+  ---
+  duration_ms: 0.089959
+  type: 'test'
+  ...
+1..37
+# tests 37
+# suites 0
+# pass 37
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 131.166458

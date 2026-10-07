@@ -143,13 +143,13 @@ $$\frac{1}{1-\lambda_i}=\alpha T_i,\qquad
 
 $\alpha>0$ 控制跨度占序列长度的比例；这个跨度解释在 $\gamma=1$ 时最直接。以 $\alpha=0.05$ 为教学例，$T=100$ 得 $\lambda=0.8$，$T=1000$ 得 0.98。它不是任意短序列都有效：必须满足 $\alpha T\ge1$ 才使 $\lambda\in[0,1)$，工程应显式校验或记录所采用的边界策略。较长序列更大的 $\lambda$ 使终局信号能传播更远，同时也会保留更多方差；不能只说“长度越长优势越准”。
 
-设 $D_+$ 为验证通过的正轨迹集合，正样本 NLL 的核心为：
+设 $D_+$ 为本批验证通过的正轨迹集合，$N_+=\sum_{(x,y)\in D_+}T_y$ 为其有效 token 总数。与 VAPO 原式及后文代码一致，正样本 NLL 按全部正例 token 平均：
 
-$$L_{\mathrm{NLL}}=-\mathbb E_{(x,y)\sim D_+}
-\left[\sum_{t=1}^{T_y}\log\pi_\theta(y_t|x,y_{<t})\right],
+$$L_{\mathrm{NLL}}=-\frac1{N_+}\sum_{(x,y)\in D_+}
+\sum_{t=1}^{T_y}\log\pi_\theta(y_t|x,y_{<t}),
 \qquad L_{\mathrm{actor}}=-J_{\mathrm{PPO}}+\mu L_{\mathrm{NLL}}$$
 
-$\mu$ 是混合系数；token/sequence 归一化会改变它的实际尺度，复现实验须一并对齐。NLL 给正确轨迹额外的监督梯度，即使其相对优势较小也能巩固已有能力；但不能把所有“当前相对较好”的负奖励样本当作已验证正确。没有正样本时，该 batch 的 NLL 应为零，不能除以空集合大小。VAPO 的正样本项、Clip-Higher、token 聚合等是组合设计，需分别消融。
+$\mu$ 是混合系数；token/sequence 归一化会改变它的实际尺度，复现实验须一并对齐。两条正例长度 2、8，每 token NLL 分别为 1、3，此式为 $26/10=2.6$；若改成逐句 NLL 总和的均值则为 $(2+24)/2=13$，相对 PPO 主项的强度改变。NLL 给正确轨迹额外的监督梯度，但不能把所有“当前相对较好”的负奖励样本当作已验证正确。没有正样本时定义本 batch 辅助项为零，不使用上式除以零。VAPO 的正样本项、Clip-Higher、token 聚合等是组合设计，需分别消融。
 
 **二、PPO 与 CISPO：裁目标还是裁权重。** 现在把上一步得到的优势固定，排除 critic 变化的干扰，只问给定动作的新旧概率怎样控制更新。定义 token ratio 与冻结权重：
 

@@ -526,6 +526,9 @@ function initialize() {
 
   function updateTocHighlight() {
     scrollFrame = null;
+    for (const term of elements.chapterRoot.querySelectorAll(".glossary-term:is(:hover, :focus)")) {
+      positionGlossary(term);
+    }
     const sections = [
       ...elements.chapterRoot.querySelectorAll(".lesson-section"),
     ];
@@ -552,6 +555,37 @@ function initialize() {
   function scheduleTocHighlight() {
     if (scrollFrame !== null) return;
     scrollFrame = requestAnimationFrame(updateTocHighlight);
+  }
+
+  function positionGlossary(term) {
+    if (!term?.isConnected) return;
+    const style = getComputedStyle(term, "::after");
+    if (style.display === "none") return;
+    const width = parseFloat(style.width);
+    const height = parseFloat(style.height);
+    if (!Number.isFinite(width) || !Number.isFinite(height)) return;
+    const anchor = term.getBoundingClientRect();
+    const pane = elements.readingPane.getBoundingClientRect();
+    const margin = 8;
+    const leftEdge = Math.max(margin, pane.left + margin);
+    const rightEdge = Math.min(innerWidth - margin, pane.right - margin);
+    const left = Math.max(leftEdge, Math.min(
+      anchor.left + anchor.width / 2 - width / 2, rightEdge - width,
+    ));
+    const topEdge = document.querySelector(".app-header").getBoundingClientRect().bottom + margin;
+    const above = anchor.top - height - margin;
+    const preferredTop = above >= topEdge ? above : anchor.bottom + margin;
+    const top = Math.max(topEdge, Math.min(preferredTop, innerHeight - height - margin));
+    term.style.setProperty("--glossary-left", `${left}px`);
+    term.style.setProperty("--glossary-top", `${top}px`);
+  }
+
+  // Fixed coordinates keep definitions inside the reader even at line/screen edges.
+  for (const eventName of ["pointerover", "focusin"]) {
+    elements.chapterRoot.addEventListener(eventName, (event) => {
+      const term = event.target.closest(".glossary-term");
+      if (term) requestAnimationFrame(() => positionGlossary(term));
+    });
   }
 
   function restoreInitialRoutePosition() {

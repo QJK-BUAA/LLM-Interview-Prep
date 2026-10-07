@@ -5,14 +5,15 @@ const chapter = {
   title: "Tokenization 与 Embedding",
   subtitle: "把原始文本变成模型能够计算的向量",
   level: "基础",
-  duration: 90,
+  duration: 110,
   prerequisites: ["01", "03", "05"],
-  tags: ["Tokenization", "BPE", "BBPE", "WordPiece", "Embedding"],
+  tags: ["Tokenization", "BPE", "BBPE", "WordPiece", "Embedding", "top-k", "top-p"],
   objectives: [
     "追踪文本、字节、token id 与 embedding 的完整 shape",
     "手算一次 BPE 合并并解释词表大小的权衡",
     "区分输入 embedding、位置表示和输出分类头",
     "正确处理 padding、attention mask 与 tied embedding",
+    "手算 top-k/top-p 的候选集合、重归一化和真实行为概率",
   ],
   summary:
     "Tokenizer 决定模型看到的离散符号，embedding 把符号映射为可学习向量；词表、切分、padding 与权重共享会共同影响长度、算力、跨语言公平性和输出概率。",
@@ -56,12 +57,13 @@ const chapter = {
       title: "知识路线：离散切分如何影响连续梯度和评估",
       body: String.raw`现在已有切分片段，怎样把它们接到可训练的语言模型，并判断预测是否变好了？先用 BPE 与 Unigram 区分两种 tokenizer 训练目标，再把离散编号送入 embedding、从隐藏状态输出下一 token 概率，最后讨论采样和评价。
 
-查表前向必须先于共享梯度：重复编号要累加，输入输出共用一张表还要合并两条路径。概率定义好以后，温度节只改变采样分布，似然节则固定有效标签集合计算损失和困惑度；两者不能混为一种模型能力变化。索引与广播回看第 01 章，似然回看第 03 章，softmax 反向回看第 05 章。带着正确的 label shift 和 mask 进入下一章，注意力才有明确的输入与目标。`,
+查表前向必须先于共享梯度：重复编号要累加，输入输出共用一张表还要合并两条路径。概率定义好以后，温度节改变概率差距，截断节确定 top-k/top-p 候选与真实行为分布，似然节则固定有效标签集合计算损失和困惑度；采样规则变化不等于模型能力变化。索引与广播回看第 01 章，似然回看第 03 章，softmax 反向回看第 05 章。带着正确的 label shift 和 mask 进入下一章，注意力才有明确的输入与目标。`,
       links: [
         { label: "BPE 与 Unigram 的训练目标", sectionId: "math-tokenizer-objectives", level: "必会" },
         { label: "查表、分类头与标签错位", sectionId: "derivation", level: "必会" },
         { label: "查表与 tied embedding 梯度", sectionId: "math-embedding-gradients", level: "推导" },
         { label: "温度采样与极限", sectionId: "math-temperature", level: "推导" },
+        { label: "Top-k/Top-p 截断与支持集", sectionId: "math-truncated-sampling", level: "必会" },
         { label: "序列似然、mask 与 PPL", sectionId: "math-likelihood-perplexity", level: "必会" },
         { label: "白板验收", sectionId: "whiteboard", level: "必会" },
       ],
@@ -198,7 +200,33 @@ $$\frac{\partial p_i}{\partial z_j}=\frac1T p_i(\delta_{ij}-p_j),\quad
 
 **手算。** $z=[\log4,0]$，$T=1$ 给 $[4/5,1/5]$，$T=2$ 给 $[2/3,1/3]$。若第二类为目标，$T=2$ 时 CE 梯度为 $[1/3,-1/3]$。top-k/top-p 在截断后还要重归一化，所得行为分布不同于原模型 softmax；记录采样概率时必须说明记录哪一种。
 
-例中第二类从 20% 增加到约 33.3%，并不是模型新学到了它，而是同一分数差被缩小；CE 梯度还多除了一次温度。温度不改变未截断 logits 的排序，但会改变 top-p 累计质量达到阈值时的候选集合。高温不创造模型没有学过的信息，也不保证准确率提高。比较下一节的困惑度时，应固定评价分布，不能把采样规则变化误报成模型预测能力变化。`,
+例中第二类从 20% 增加到约 33.3%，并不是模型新学到了它，而是同一分数差被缩小；CE 梯度还多除了一次温度。温度不改变未截断 logits 的排序，但会改变 top-p 累计质量达到阈值时的候选集合。高温不创造模型没有学过的信息，也不保证准确率提高。下一节实际构造这个候选集合，再固定评价分布计算困惑度。`,
+    },
+    {
+      id: "math-truncated-sampling",
+      type: "derivation",
+      title: "Top-k 与 Top-p：究竟从哪些 token 中采样",
+      body: String.raw`温度调好后，长尾中的低概率 token 仍可能被采到。若只想保留最可能的一小部分，是固定候选数，还是保留足够大的概率质量？先明确集合，再归一化，才能知道一次 rollout 的真实采样概率。
+
+设温度 softmax 后的分布为 $p$，按概率降序排列为 $p_{(1)}\ge\cdots\ge p_{(V)}$，并列时本节固定按 token ID 排序。top-k 保留前 $k$ 项，$1\le k\le V$。top-p 用阈值 $\rho\in(0,1]$，保留累计质量首次达到阈值的最短前缀：
+
+$$m=\min\left\{j:\sum_{\ell=1}^{j}p_{(\ell)}\ge\rho\right\},\qquad
+\mathcal S_\rho=\{(1),\ldots,(m)\}.$$
+
+**跨过阈值的那一项也保留。** 对任一保留集合 $\mathcal S$，行为分布为
+
+$$q(v)=\frac{p(v)\mathbf1[v\in\mathcal S]}{Z_{\mathcal S}},
+\qquad Z_{\mathcal S}=\sum_{u\in\mathcal S}p(u).$$
+
+分子只是截断，除以 $Z_{\mathcal S}$ 才恢复总概率 1；保留 token 的 log-prob 变为 $\log p(v)-\log Z_{\mathcal S}$。top-k 固定数量，top-p 的数量随分布尖锐程度变化；$\rho=1$ 保留全部非零质量。
+
+**手算。** $p=(0.4,0.3,0.2,0.1)$。top-k=2 保留质量 0.7，得到 $(4/7,3/7,0,0)$。top-p=0.8 的累计质量依次为 0.4、0.7、0.9，必须保留前三项，得到 $(4/9,1/3,2/9,0)$。如果只保留“累计不超过 0.8”的前两项，就没有实现这个定义。
+
+操作顺序也影响结果。本节组合约定为温度→top-k→归一化→top-p→再归一化。先 top-k=2 后在其分布上用 top-p=0.8，会保留两个 token；直接对原分布做 top-p=0.8 则有三个。不同库的边界、并列和组合实现应核对，记录原始 logits 不能代替记录实际采样规则。
+
+原分布给第四项 0.1，截断后 $q_4=0$；仅靠来自 $q$ 的样本及单 token 重要性比率，无法恢复该项的期望贡献。第 16、28 章的行为分母必须反映温度和截断，且仍需满足目标的支持集条件。第 11 章投机解码能通过额外的残差分布采样补回缺失质量，是不同机制。
+
+三个结果的候选数和概率都不同，但模型权重没变。因此下一节计算 PPL 时要固定模型评价分布和有效标签，不能把删除低概率 token 当作预测能力提升。`,
     },
     {
       id: "math-likelihood-perplexity",
@@ -326,6 +354,10 @@ print(len(hidden), len(hidden[0]), len(hidden[0][0]))  # 2, 5, H=2
           q: "logits=[log 4,0]，温度从 1 改为 2，概率和第二类 CE 对原 logits 的梯度如何变化？零温是否总选唯一 token？",
           a: String.raw`概率由 $[4/5,1/5]$ 变成 $[2/3,1/3]$；CE 梯度由 $[4/5,-4/5]$ 变为 $(p-y)/2=[1/3,-1/3]$。$T\to0^+$ 若最大 logits 并列，则极限在并列集合上均匀；greedy 的平局规则需单独约定。**得分点：**softmax 输入缩放的链式法则；区分极限与除以零。`,
         },
+        {
+          q: "分布为 (0.4,0.3,0.2,0.1)，分别计算 top-k=2、top-p=0.8。为什么必须保留越过 0.8 的一项？截断后能否仅用 IS 恢复第四项？",
+          a: String.raw`top-k 得 $(4/7,3/7,0,0)$；top-p 的最短前缀累计到 0.9，得 $(4/9,1/3,2/9,0)$。只保留前两项质量 0.7 尚未达到阈值。第四项行为概率为零，单靠该分布的样本无法估计原目标在此项的非零贡献。**得分点：**集合、重归一化、操作顺序和支持条件。`,
+        },
       ],
     },
     {
@@ -354,6 +386,11 @@ print(len(hidden), len(hidden[0]), len(hidden[0][0]))  # 2, 5, H=2
     },
   ],
   sources: [
+    {
+      label: "The Curious Case of Neural Text Degeneration",
+      url: "https://arxiv.org/html/1904.09751v2#S3.SS1",
+      evidence: "Nucleus sampling 的最小累计概率集合与重归一化；组合顺序为本章明确约定",
+    },
     {
       label: "Neural Machine Translation of Rare Words with Subword Units",
       url: "https://arxiv.org/abs/1508.07909",

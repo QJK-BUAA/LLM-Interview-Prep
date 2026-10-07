@@ -1,0 +1,4996 @@
+{
+  "baseline": "635fb27",
+  "chapters": [
+    {
+      "id": "00",
+      "title": "从一个预测问题开始：学习时长与测验分数",
+      "prerequisites": [],
+      "objectives": [
+        "从学习时长预测分数的例子中指出输入、输出和两个参数",
+        "手算三个预测及其误差，理解训练是在调整参数",
+        "区分用已知答案训练与用未见数据评估，不把拟合当作因果规律",
+        "找到从数学基础到大语言模型的路线，并知道何时回访高阶专题"
+      ],
+      "duration": 90,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "三条记录，能不能预测下一位同学的分数？",
+          "bodyLength": 384,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：用学习时长预测分数",
+          "bodyLength": 673,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "先完成预测任务，再按需要回访公式",
+          "bodyLength": 510,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "一张图看完学习主线",
+          "bodyLength": 775,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：看见一次参数更新",
+          "bodyLength": 714,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "岗位路线怎样选择：从共同地基到不同任务",
+          "bodyLength": 888,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "02 后回访：总体风险、经验风险与一次更新",
+          "bodyLength": 1647,
+          "questions": 0
+        },
+        {
+          "id": "math-likelihood",
+          "type": "derivation",
+          "title": "03 后回访：平方误差与交叉熵从哪里来",
+          "bodyLength": 1358,
+          "questions": 0
+        },
+        {
+          "id": "math-generalization",
+          "type": "derivation",
+          "title": "03 后回访：旧班级更准，换班级为何更差",
+          "bodyLength": 1013,
+          "questions": 0
+        },
+        {
+          "id": "math-reward",
+          "type": "derivation",
+          "title": "15 后回访：奖励怎样改变下一次选择",
+          "bodyLength": 1342,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：不要把术语熟悉当作真正理解",
+          "bodyLength": 385,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：用统一框架回答陌生算法",
+          "bodyLength": 621,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：能否看懂整张地图",
+          "bodyLength": 73,
+          "questions": 3
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "回访白板：学完对应先修后再推导",
+          "bodyLength": 82,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "LLM Post-Training 与 Agentic RL 研究",
+          "url": "https://github.com/XavierZhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329",
+          "evidence": "37 份文档的固定版本；本章采用两份报告的组织与训练阶段，基础数学和教学数字另行补充"
+        },
+        {
+          "label": "GLM-5 — Mid-Training 与顺序后训练",
+          "url": "https://arxiv.org/html/2602.15763v1#S2.SS3",
+          "evidence": "官方技术报告中的三阶段实例，并非统一行业配方"
+        },
+        {
+          "label": "Deep Learning",
+          "url": "https://www.deeplearningbook.org/",
+          "evidence": "教材"
+        },
+        {
+          "label": "Dive into Deep Learning",
+          "url": "https://d2l.ai/",
+          "evidence": "开源教材"
+        }
+      ]
+    },
+    {
+      "id": "01",
+      "title": "张量、Shape 与反向求和",
+      "prerequisites": [
+        "00"
+      ],
+      "objectives": [
+        "给每个轴标注语义并判断矩阵乘法、广播和变形是否合法",
+        "从下标求和推导线性层输入、权重和偏置的梯度",
+        "推导 masked mean，区分 token、序列和微批次权重",
+        "用 einsum 与编号算例证明 reshape 不等于 transpose"
+      ],
+      "duration": 120,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "两句话一起计算，怎样不把词和特征混在一起？",
+          "bodyLength": 704,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：两句话如何变成三维张量",
+          "bodyLength": 732,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "从位置归属走到共享参数的反馈",
+          "bodyLength": 478,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "Shape 跟踪流水线",
+          "bodyLength": 298,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "三个运算规则：逐元素、矩阵乘法与广播",
+          "bodyLength": 954,
+          "questions": 0
+        },
+        {
+          "id": "math-matmul-backward",
+          "type": "derivation",
+          "title": "线性层反向：从下标推导三个梯度",
+          "bodyLength": 1292,
+          "questions": 0
+        },
+        {
+          "id": "math-broadcast-backward",
+          "type": "derivation",
+          "title": "广播的伴随操作：前向复用，反向累加",
+          "bodyLength": 1143,
+          "questions": 0
+        },
+        {
+          "id": "math-masked-mean",
+          "type": "derivation",
+          "title": "Masked mean：分母决定谁获得多少权重",
+          "bodyLength": 1433,
+          "questions": 0
+        },
+        {
+          "id": "math-einsum-layout",
+          "type": "derivation",
+          "title": "einsum 与 reshape：计算下标和存储布局是两件事",
+          "bodyLength": 1073,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：不用框架练习 shape",
+          "bodyLength": 615,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：元素个数相同不等于语义相同",
+          "bodyLength": 432,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "常见张量操作对比",
+          "bodyLength": 506,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：三句话讲清注意力 Shape",
+          "bodyLength": 426,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：先写 Shape 再算",
+          "bodyLength": 27,
+          "questions": 3
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：反向求和与布局排错",
+          "bodyLength": 45,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "NumPy Broadcasting",
+          "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html",
+          "evidence": "官方文档"
+        },
+        {
+          "label": "PyTorch Tensor Views",
+          "url": "https://pytorch.org/docs/stable/tensor_view.html",
+          "evidence": "官方文档"
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "title": "线性代数、矩阵求导与线性模型",
+      "prerequisites": [
+        "01"
+      ],
+      "objectives": [
+        "用下标和微分两种方法推导矩阵梯度并检查维度",
+        "从二次型 Hessian 判断凸性、唯一解和梯度下降步长",
+        "解释特征分解与 SVD 的适用对象、秩和投影意义",
+        "从最大投影方差推导 PCA，并手算重建误差",
+        "推导最小二乘、岭回归与 Lasso，解释可逆条件、收缩和稀疏性"
+      ],
+      "duration": 210,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "预测偏高了，应该改哪个参数、改多少？",
+          "bodyLength": 530,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：两层计算怎样传回梯度",
+          "bodyLength": 786,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "从局部变化走向曲率、压缩与正则化",
+          "bodyLength": 473,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "前向算数值，反向算影响",
+          "bodyLength": 237,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "从点积、链式法则到矩阵微分",
+          "bodyLength": 1728,
+          "questions": 0
+        },
+        {
+          "id": "math-quadratic",
+          "type": "derivation",
+          "title": "二次型与 Hessian：凸性和步长的可计算条件",
+          "bodyLength": 1326,
+          "questions": 0
+        },
+        {
+          "id": "math-eigen",
+          "type": "derivation",
+          "title": "特征分解：不改变方向的变换与 Rayleigh 商",
+          "bodyLength": 1024,
+          "questions": 0
+        },
+        {
+          "id": "math-svd",
+          "type": "derivation",
+          "title": "SVD：从任意矩阵到秩、伪逆与低秩近似",
+          "bodyLength": 1243,
+          "questions": 0
+        },
+        {
+          "id": "math-pca",
+          "type": "derivation",
+          "title": "PCA：最大方差等价于最小正交重建误差",
+          "bodyLength": 1169,
+          "questions": 0
+        },
+        {
+          "id": "math-ridge",
+          "type": "derivation",
+          "title": "最小二乘与岭回归：正规方程、奇异性和收缩",
+          "bodyLength": 1581,
+          "questions": 0
+        },
+        {
+          "id": "math-lasso",
+          "type": "derivation",
+          "title": "L1/L2 几何与 Lasso：从次梯度到软阈值",
+          "bodyLength": 1599,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：手写计算图",
+          "bodyLength": 510,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：导数小不一定训练良好",
+          "bodyLength": 407,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "几个容易混淆的数学对象",
+          "bodyLength": 404,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：反向传播不是求导公式",
+          "bodyLength": 366,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：把局部变化连起来",
+          "bodyLength": 24,
+          "questions": 3
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：梯度、谱分解与可逆条件",
+          "bodyLength": 33,
+          "questions": 5
+        }
+      ],
+      "sources": [
+        {
+          "label": "Mathematics for Machine Learning",
+          "url": "https://mml-book.github.io/",
+          "evidence": "开放教材"
+        },
+        {
+          "label": "Dive into Deep Learning: Calculus",
+          "url": "https://d2l.ai/chapter_preliminaries/calculus.html",
+          "evidence": "开源教材"
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "title": "概率、统计与信息论",
+      "prerequisites": [
+        "02"
+      ],
+      "objectives": [
+        "用全概率与 Bayes 公式计算后验，并区分似然与参数概率",
+        "推导期望、方差、全方差和矩估计",
+        "从似然推导 Bernoulli、Gaussian 的 MLE 及 Beta 先验下的 MAP",
+        "证明熵、交叉熵、KL 与 Jensen 不等式的关系",
+        "构造带假设的置信区间，判断重要性采样的支撑、方差和 ESS"
+      ],
+      "duration": 180,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "只看到三次抛硬币，能相信估计到什么程度？",
+          "bodyLength": 512,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：一枚硬币连接 MLE 与交叉熵",
+          "bodyLength": 659,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "从一次估计追问它的依据和不确定性",
+          "bodyLength": 455,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从真实世界到估计结果",
+          "bodyLength": 267,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "熵、交叉熵、KL 与 Jensen 的非负性证明",
+          "bodyLength": 1472,
+          "questions": 0
+        },
+        {
+          "id": "math-bayes",
+          "type": "derivation",
+          "title": "Bayes：从联合概率到基率与后验赔率",
+          "bodyLength": 925,
+          "questions": 0
+        },
+        {
+          "id": "math-moments",
+          "type": "derivation",
+          "title": "矩、协方差与全方差：均值外还要知道什么",
+          "bodyLength": 1588,
+          "questions": 0
+        },
+        {
+          "id": "math-mle-map",
+          "type": "derivation",
+          "title": "MLE 与 MAP：数据拟合、先验和边界解",
+          "bodyLength": 1595,
+          "questions": 0
+        },
+        {
+          "id": "math-confidence",
+          "type": "derivation",
+          "title": "置信区间：从抽样分布到正确的覆盖解释",
+          "bodyLength": 1212,
+          "questions": 0
+        },
+        {
+          "id": "math-importance-sampling",
+          "type": "derivation",
+          "title": "重要性采样：换分布、无偏性、方差与 ESS",
+          "bodyLength": 1275,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：计算熵与 KL",
+          "bodyLength": 575,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：概率高不等于校准好",
+          "bodyLength": 395,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "偏差、方差与采样方法",
+          "bodyLength": 406,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：为什么分类常用交叉熵",
+          "bodyLength": 473,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：从概率到训练目标",
+          "bodyLength": 24,
+          "questions": 3
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：后验、估计、区间与重加权",
+          "bodyLength": 37,
+          "questions": 6
+        }
+      ],
+      "sources": [
+        {
+          "label": "Elements of Information Theory",
+          "url": "https://onlinelibrary.wiley.com/doi/book/10.1002/047174882X",
+          "evidence": "教材"
+        },
+        {
+          "label": "A Mathematical Theory of Communication",
+          "url": "https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Dive into Deep Learning: Probability",
+          "url": "https://d2l.ai/chapter_preliminaries/probability.html",
+          "evidence": "开源教材"
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "title": "经典机器学习：模型推导、训练与评估",
+      "prerequisites": [
+        "03"
+      ],
+      "objectives": [
+        "推导逻辑回归梯度、朴素 Bayes 后验与 SVM 对偶，解释 kNN 距离和维数灾难",
+        "手算树的信息增益、随机森林方差、AdaBoost 权重、GBDT 残差和 XGBoost 叶值",
+        "从目标函数推导 K-means 交替更新与 Gaussian mixture 的 EM",
+        "按决策成本选择分类和排序指标，推导阈值及偏差方差分解",
+        "在无数据泄漏的训练、验证、测试与线上协议下比较模型"
+      ],
+      "duration": 540,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "交易模型准确率 99%，为什么仍漏掉所有欺诈？",
+          "bodyLength": 531,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：准确率 99% 的模型为什么没用",
+          "bodyLength": 693,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "先确定怎样算好，再比较模型怎样学",
+          "bodyLength": 558,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从问题定义到线上监控",
+          "bodyLength": 269,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "分类评估：从混淆矩阵推到排序、校准和成本阈值",
+          "bodyLength": 1676,
+          "questions": 0
+        },
+        {
+          "id": "math-logistic",
+          "type": "derivation",
+          "title": "逻辑回归：从 Bernoulli 似然到梯度和 Hessian",
+          "bodyLength": 1616,
+          "questions": 0
+        },
+        {
+          "id": "math-naive-bayes",
+          "type": "derivation",
+          "title": "朴素 Bayes：条件独立、log 后验与 Laplace 平滑",
+          "bodyLength": 1605,
+          "questions": 0
+        },
+        {
+          "id": "math-knn",
+          "type": "derivation",
+          "title": "kNN：距离、加权投票、标准化与维数灾难",
+          "bodyLength": 1454,
+          "questions": 0
+        },
+        {
+          "id": "math-svm",
+          "type": "derivation",
+          "title": "SVM：几何间隔、软间隔对偶与核技巧",
+          "bodyLength": 1644,
+          "questions": 0
+        },
+        {
+          "id": "math-tree",
+          "type": "derivation",
+          "title": "决策树：熵、Gini、回归叶值与分裂增益",
+          "bodyLength": 1161,
+          "questions": 0
+        },
+        {
+          "id": "math-rf-gbdt",
+          "type": "derivation",
+          "title": "随机森林与 GBDT：降低相关方差，或逐轮拟合负梯度",
+          "bodyLength": 1484,
+          "questions": 0
+        },
+        {
+          "id": "math-adaboost",
+          "type": "derivation",
+          "title": "AdaBoost：从指数损失推弱学习器权重与样本重加权",
+          "bodyLength": 1564,
+          "questions": 0
+        },
+        {
+          "id": "math-xgboost",
+          "type": "derivation",
+          "title": "XGBoost：二阶近似、最优叶权重与分裂增益",
+          "bodyLength": 1629,
+          "questions": 0
+        },
+        {
+          "id": "math-kmeans",
+          "type": "derivation",
+          "title": "K-means：固定分配求中心，固定中心求分配",
+          "bodyLength": 958,
+          "questions": 0
+        },
+        {
+          "id": "math-em",
+          "type": "derivation",
+          "title": "Gaussian mixture 与 EM：从 Jensen 下界到软聚类",
+          "bodyLength": 1794,
+          "questions": 0
+        },
+        {
+          "id": "math-ranking",
+          "type": "derivation",
+          "title": "排序：pairwise 目标、NDCG、MRR 与 Recall@k",
+          "bodyLength": 1419,
+          "questions": 0
+        },
+        {
+          "id": "math-bias-variance",
+          "type": "derivation",
+          "title": "偏差方差分解：为什么训练误差不是模型选择目标",
+          "bodyLength": 1193,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：从预测列表计算指标",
+          "bodyLength": 811,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：最危险的问题不会报错",
+          "bodyLength": 375,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "指标选择速查",
+          "bodyLength": 485,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：如何设计一个可靠实验",
+          "bodyLength": 361,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：指标必须对应代价",
+          "bodyLength": 30,
+          "questions": 3
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：经典模型全链路验收",
+          "bodyLength": 55,
+          "questions": 11
+        }
+      ],
+      "sources": [
+        {
+          "label": "Scikit-learn Model Evaluation",
+          "url": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+          "evidence": "官方文档"
+        },
+        {
+          "label": "Google Rules of ML",
+          "url": "https://developers.google.com/machine-learning/guides/rules-of-ml",
+          "evidence": "工程指南"
+        },
+        {
+          "label": "The Elements of Statistical Learning",
+          "url": "https://hastie.su.domains/ElemStatLearn/",
+          "evidence": "教材"
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "title": "神经网络、计算图与反向传播",
+      "prerequisites": [
+        "02",
+        "03"
+      ],
+      "objectives": [
+        "手算一个神经元和两层网络的前向过程",
+        "解释非线性激活为何不可缺少",
+        "沿计算图计算参数梯度",
+        "区分参数、激活值和梯度在训练中的角色"
+      ],
+      "duration": 90,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：每层都在重画坐标系",
+          "bodyLength": 583,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：一个两输入神经元",
+          "bodyLength": 708,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从局部导数到整网梯度",
+          "bodyLength": 267,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "训练一步的计算图",
+          "bodyLength": 256,
+          "questions": 0
+        },
+        {
+          "id": "math-activations",
+          "type": "derivation",
+          "title": "激活导数：饱和、死亡与链式法则",
+          "bodyLength": 1048,
+          "questions": 0
+        },
+        {
+          "id": "math-softmax-ce",
+          "type": "derivation",
+          "title": "Softmax Jacobian 到交叉熵梯度",
+          "bodyLength": 1266,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "两层 MLP 的 Shape 与梯度",
+          "bodyLength": 1734,
+          "questions": 0
+        },
+        {
+          "id": "math-gradient-check",
+          "type": "derivation",
+          "title": "梯度检查：中心差分检查的是哪个函数",
+          "bodyLength": 1076,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：手写一个 ReLU 网络",
+          "bodyLength": 729,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：网络更深不自动更聪明",
+          "bodyLength": 433,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "常见激活函数对比",
+          "bodyLength": 481,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：为什么反向传播高效",
+          "bodyLength": 555,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：从 Jacobian 写到数值检查",
+          "bodyLength": 23,
+          "questions": 3
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：从神经元到计算图",
+          "bodyLength": 23,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Deep Learning: Deep Feedforward Networks",
+          "url": "https://www.deeplearningbook.org/contents/mlp.html",
+          "evidence": "教材"
+        },
+        {
+          "label": "Automatic Differentiation in Machine Learning",
+          "url": "https://www.jmlr.org/papers/v18/17-468.html",
+          "evidence": "综述论文"
+        }
+      ]
+    },
+    {
+      "id": "06",
+      "title": "优化、初始化、归一化与正则化",
+      "prerequisites": [
+        "05"
+      ],
+      "objectives": [
+        "解释 SGD、Momentum、Adam 与 AdamW 的更新差异",
+        "理解 Xavier、Kaiming 和残差缩放的目标",
+        "区分 BatchNorm、LayerNorm 与 RMSNorm",
+        "按现象排查学习率、梯度和过拟合问题"
+      ],
+      "duration": 110,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：训练是一场有噪声的下山",
+          "bodyLength": 515,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：为什么 Momentum 能穿过之字形山谷",
+          "bodyLength": 604,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：先定位尺度，再选择稳定性工具",
+          "bodyLength": 257,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "稳定训练的四道关",
+          "bodyLength": 261,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "Adam、偏差修正与 AdamW",
+          "bodyLength": 1531,
+          "questions": 0
+        },
+        {
+          "id": "math-initialization",
+          "type": "derivation",
+          "title": "Xavier 与 He：为什么方差里出现 fan-in 和 2",
+          "bodyLength": 1097,
+          "questions": 0
+        },
+        {
+          "id": "math-normalization",
+          "type": "derivation",
+          "title": "BN 与 LN：统计轴、运行状态和完整反向",
+          "bodyLength": 1777,
+          "questions": 0
+        },
+        {
+          "id": "math-dropout-clipping",
+          "type": "derivation",
+          "title": "Dropout 的期望与梯度裁剪的几何含义",
+          "bodyLength": 1150,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：观察 Adam 的第一步",
+          "bodyLength": 551,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：名字相近的操作作用位置不同",
+          "bodyLength": 444,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "优化器与归一化怎么选",
+          "bodyLength": 499,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：AdamW 为什么不是 Adam 加 L2",
+          "bodyLength": 714,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：更新、方差与归一化",
+          "bodyLength": 43,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：训练稳定性工具箱",
+          "bodyLength": 21,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Adam",
+          "url": "https://arxiv.org/abs/1412.6980",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Decoupled Weight Decay Regularization",
+          "url": "https://arxiv.org/abs/1711.05101",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Delving Deep into Rectifiers",
+          "url": "https://arxiv.org/abs/1502.01852",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Understanding the difficulty of training deep feedforward neural networks",
+          "url": "https://proceedings.mlr.press/v9/glorot10a.html",
+          "evidence": "Xavier 初始化原始论文；正文数字为教学算例"
+        },
+        {
+          "label": "Batch Normalization",
+          "url": "https://arxiv.org/abs/1502.03167",
+          "evidence": "原始论文；运行方差约定需另核具体框架"
+        },
+        {
+          "label": "Layer Normalization",
+          "url": "https://arxiv.org/abs/1607.06450",
+          "evidence": "原始论文；正文反向为链式法则推导"
+        }
+      ]
+    },
+    {
+      "id": "07",
+      "title": "CNN、RNN、LSTM 与序列建模",
+      "prerequisites": [
+        "05",
+        "06"
+      ],
+      "objectives": [
+        "计算卷积输出尺寸与感受野",
+        "解释参数共享为何适合局部模式",
+        "沿时间展开 RNN 并说明 BPTT",
+        "解释 LSTM 门控和 Transformer 的并行动机"
+      ],
+      "duration": 105,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：看局部、带记忆、直接互相查找",
+          "bodyLength": 491,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：卷积核怎样发现边缘",
+          "bodyLength": 620,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：空间共享、时间共享与因果边界",
+          "bodyLength": 236,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "序列模型的通信路径",
+          "bodyLength": 291,
+          "questions": 0
+        },
+        {
+          "id": "math-convolution",
+          "type": "derivation",
+          "title": "CNN：输出尺寸、参数量、感受野与重叠反传",
+          "bodyLength": 1612,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "RNN 梯度为何会消失或爆炸",
+          "bodyLength": 1549,
+          "questions": 0
+        },
+        {
+          "id": "math-lstm",
+          "type": "derivation",
+          "title": "完整 LSTM：四门、两个状态与反向累积",
+          "bodyLength": 1752,
+          "questions": 0
+        },
+        {
+          "id": "math-gru-causality",
+          "type": "derivation",
+          "title": "完整 GRU：重置门约定、更新 Jacobian 与双向泄漏",
+          "bodyLength": 1563,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：手算一个 RNN 状态",
+          "bodyLength": 559,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：结构先验不是绝对能力边界",
+          "bodyLength": 429,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "CNN、RNN、LSTM 与 Attention 对比",
+          "bodyLength": 450,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：Transformer 为什么替代 RNN",
+          "bodyLength": 705,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：卷积、共享梯度与门控边界",
+          "bodyLength": 21,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：从局部模式到全局依赖",
+          "bodyLength": 17,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Deep Learning: Convolutional Networks",
+          "url": "https://www.deeplearningbook.org/contents/convnets.html",
+          "evidence": "教材；卷积梯度与数字例为本章教学推导"
+        },
+        {
+          "label": "Learning Phrase Representations using RNN Encoder-Decoder",
+          "url": "https://arxiv.org/abs/1406.1078",
+          "evidence": "GRU 早期论文；本章明确更新门的保留比例约定"
+        },
+        {
+          "label": "Deep Residual Learning",
+          "url": "https://arxiv.org/abs/1512.03385",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Long Short-Term Memory",
+          "url": "https://www.bioinf.jku.at/publications/older/2604.pdf",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Learning to Forget: Continual Prediction with LSTM",
+          "url": "https://doi.org/10.1162/089976600300015015",
+          "evidence": "遗忘门扩展论文；现代四门形式不全部归于 1997 年版本"
+        },
+        {
+          "label": "Attention Is All You Need",
+          "url": "https://arxiv.org/abs/1706.03762",
+          "evidence": "原始论文"
+        }
+      ]
+    },
+    {
+      "id": "08",
+      "title": "Tokenization 与 Embedding",
+      "prerequisites": [
+        "01",
+        "03",
+        "05"
+      ],
+      "objectives": [
+        "追踪文本、字节、token id 与 embedding 的完整 shape",
+        "手算一次 BPE 合并并解释词表大小的权衡",
+        "区分输入 embedding、位置表示和输出分类头",
+        "正确处理 padding、attention mask 与 tied embedding"
+      ],
+      "duration": 90,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：模型看到的不是字，而是编号",
+          "bodyLength": 562,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：手算两轮 BPE",
+          "bodyLength": 852,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：离散切分如何影响连续梯度和评估",
+          "bodyLength": 306,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "文本进入 Transformer 前的流水线",
+          "bodyLength": 415,
+          "questions": 0
+        },
+        {
+          "id": "math-tokenizer-objectives",
+          "type": "derivation",
+          "title": "BPE 的贪心计数与 Unigram 的隐切分似然",
+          "bodyLength": 1332,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "Embedding 查表、输出 logits 与权重共享",
+          "bodyLength": 1110,
+          "questions": 0
+        },
+        {
+          "id": "math-embedding-gradients",
+          "type": "derivation",
+          "title": "Embedding 梯度：重复 ID 累加与输入输出共享",
+          "bodyLength": 1220,
+          "questions": 0
+        },
+        {
+          "id": "math-temperature",
+          "type": "derivation",
+          "title": "温度采样：概率比、导数与零温边界",
+          "bodyLength": 1032,
+          "questions": 0
+        },
+        {
+          "id": "math-likelihood-perplexity",
+          "type": "derivation",
+          "title": "序列似然、有效 token 归一化与困惑度",
+          "bodyLength": 1333,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：从 token id 到上下文窗口",
+          "bodyLength": 966,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：切分细节会进入模型行为",
+          "bodyLength": 544,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "BPE、WordPiece、Unigram 与字节级方案",
+          "bodyLength": 505,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：为什么现代 LLM 常用子词或字节 BPE",
+          "bodyLength": 639,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：切分、共享梯度与评估口径",
+          "bodyLength": 35,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：从字符串到向量",
+          "bodyLength": 21,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Neural Machine Translation of Rare Words with Subword Units",
+          "url": "https://arxiv.org/abs/1508.07909",
+          "evidence": "BPE 原始论文"
+        },
+        {
+          "label": "SentencePiece",
+          "url": "https://arxiv.org/abs/1808.06226",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates",
+          "url": "https://arxiv.org/abs/1804.10959",
+          "evidence": "Unigram 子词模型与采样切分原始论文；EM 数字为教学算例"
+        },
+        {
+          "label": "Language Models are Unsupervised Multitask Learners",
+          "url": "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf",
+          "evidence": "GPT-2 技术报告，字节级 BPE"
+        },
+        {
+          "label": "Using the Output Embedding to Improve Language Models",
+          "url": "https://arxiv.org/abs/1608.05859",
+          "evidence": "权重共享原始论文"
+        }
+      ]
+    },
+    {
+      "id": "09",
+      "title": "Transformer 从零到完整前向过程",
+      "prerequisites": [
+        "01",
+        "05",
+        "08"
+      ],
+      "objectives": [
+        "手算缩放点积注意力和因果 mask",
+        "追踪多头注意力从 [B,S,H] 到 [B,N,S,D] 的 shape",
+        "解释残差、归一化和 FFN 的分工",
+        "写出 decoder-only 语言模型的完整前向伪代码"
+      ],
+      "duration": 130,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：查询、索引与内容",
+          "bodyLength": 601,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：两个 token 的注意力",
+          "bodyLength": 779,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从一次上下文读取到完整训练",
+          "bodyLength": 242,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "一个 Pre-LN Transformer 块",
+          "bodyLength": 322,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "多头注意力与因果语言模型目标",
+          "bodyLength": 1370,
+          "questions": 0
+        },
+        {
+          "id": "math-attention-scaling-mask",
+          "type": "derivation",
+          "title": "缩放与 Mask：成立假设和全屏蔽边界",
+          "bodyLength": 1103,
+          "questions": 0
+        },
+        {
+          "id": "math-attention-backward",
+          "type": "derivation",
+          "title": "Attention 反向：从输出到 Q、K、V 和投影权重",
+          "bodyLength": 1735,
+          "questions": 0
+        },
+        {
+          "id": "math-transformer-flops",
+          "type": "derivation",
+          "title": "MHA 参数与 FLOPs：头数、长度和隐藏维分别影响什么",
+          "bodyLength": 974,
+          "questions": 0
+        },
+        {
+          "id": "math-residual-jacobian",
+          "type": "derivation",
+          "title": "Pre-LN 与 Post-LN：把“梯度直通”写成 Jacobian",
+          "bodyLength": 1134,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：紧凑的 decoder block 伪代码",
+          "bodyLength": 986,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：注意力图不是完整解释",
+          "bodyLength": 498,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "编码器、解码器与交叉注意力",
+          "bodyLength": 534,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：完整说清一次 Attention",
+          "bodyLength": 681,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：Attention 反向与复杂度",
+          "bodyLength": 27,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：沿 shape 复述 Transformer",
+          "bodyLength": 24,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "On Layer Normalization in the Transformer Architecture",
+          "url": "https://arxiv.org/abs/2002.04745",
+          "evidence": "Pre-LN/Post-LN 分析论文；本章方向例为教学推导"
+        },
+        {
+          "label": "Attention Is All You Need",
+          "url": "https://arxiv.org/abs/1706.03762",
+          "evidence": "Transformer 原始论文"
+        },
+        {
+          "label": "The Annotated Transformer",
+          "url": "https://nlp.seas.harvard.edu/annotated-transformer/",
+          "evidence": "教学实现"
+        },
+        {
+          "label": "Language Models are Few-Shot Learners",
+          "url": "https://arxiv.org/abs/2005.14165",
+          "evidence": "decoder-only 语言模型技术论文"
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "title": "现代 LLM 组件",
+      "prerequisites": [
+        "06",
+        "09"
+      ],
+      "objectives": [
+        "解释 RoPE、ALiBi 与 YaRN 如何处理位置和长度外推",
+        "比较 MHA、MQA、GQA 与 MLA 的 KV 成本",
+        "说明 RMSNorm、SwiGLU 和 MoE 的作用位置",
+        "区分成熟默认组件与仍需按模型验证的研究方案"
+      ],
+      "duration": 145,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：组件是在替不同瓶颈付账",
+          "bodyLength": 558,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：GQA 怎样缩小 KV Cache",
+          "bodyLength": 673,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：把组件收益落实到代数和资源量",
+          "bodyLength": 271,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "现代 decoder block 的组件位置",
+          "bodyLength": 324,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "RoPE、RMSNorm 与 SwiGLU 的核心公式",
+          "bodyLength": 1282,
+          "questions": 0
+        },
+        {
+          "id": "math-rope-relative",
+          "type": "derivation",
+          "title": "RoPE：从旋转矩阵证明相对位置",
+          "bodyLength": 1068,
+          "questions": 0
+        },
+        {
+          "id": "math-rmsnorm-backward",
+          "type": "derivation",
+          "title": "RMSNorm：归一化分母也必须反传",
+          "bodyLength": 1140,
+          "questions": 0
+        },
+        {
+          "id": "math-swiglu-budget",
+          "type": "derivation",
+          "title": "SwiGLU：三矩阵预算与门控梯度",
+          "bodyLength": 1174,
+          "questions": 0
+        },
+        {
+          "id": "math-kv-mla",
+          "type": "derivation",
+          "title": "KV 布局：GQA 共享头与 MLA 潜变量吸收",
+          "bodyLength": 1332,
+          "questions": 0
+        },
+        {
+          "id": "math-moe-routing",
+          "type": "derivation",
+          "title": "MoE：Top-k 路由、辅助损失与容量",
+          "bodyLength": 1498,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：模拟 top-2 MoE 路由",
+          "bodyLength": 800,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：理论复杂度不等于端到端速度",
+          "bodyLength": 477,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "成熟实践与活跃研究分层",
+          "bodyLength": 619,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：GQA、MLA、MoE 分别省什么",
+          "bodyLength": 656,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：位置、归一化、缓存与路由",
+          "bodyLength": 22,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：先定位瓶颈，再选组件",
+          "bodyLength": 12,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "GLU Variants Improve Transformer",
+          "url": "https://arxiv.org/abs/2002.05202",
+          "evidence": "SwiGLU 组件论文；参数匹配为本章代数计算"
+        },
+        {
+          "label": "Switch Transformers",
+          "url": "https://arxiv.org/abs/2101.03961",
+          "evidence": "top-1 辅助负载均衡定义；非所有 MoE 的统一配方"
+        },
+        {
+          "label": "RoFormer",
+          "url": "https://arxiv.org/abs/2104.09864",
+          "evidence": "RoPE 原始论文"
+        },
+        {
+          "label": "Train Short, Test Long: ALiBi",
+          "url": "https://arxiv.org/abs/2108.12409",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "YaRN",
+          "url": "https://arxiv.org/abs/2309.00071",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Root Mean Square Layer Normalization",
+          "url": "https://arxiv.org/abs/1910.07467",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "GQA: Training Generalized Multi-Query Transformer Models",
+          "url": "https://arxiv.org/abs/2305.13245",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "DeepSeek-V2",
+          "url": "https://arxiv.org/abs/2405.04434",
+          "evidence": "MLA 与 MoE 技术报告"
+        },
+        {
+          "label": "Mamba",
+          "url": "https://arxiv.org/abs/2312.00752",
+          "evidence": "选择性状态空间模型原始论文"
+        },
+        {
+          "label": "Native Sparse Attention",
+          "url": "https://arxiv.org/abs/2502.11089",
+          "evidence": "研究论文"
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "title": "训练显存、并行与推理系统",
+      "prerequisites": [
+        "06",
+        "09",
+        "10"
+      ],
+      "objectives": [
+        "按字节估算训练参数状态与推理 KV Cache",
+        "解释混合精度、梯度检查点和 ZeRO/FSDP 的节省来源",
+        "区分数据、张量、流水线与序列并行",
+        "分析 prefill、decode、吞吐、TTFT 与 TPOT"
+      ],
+      "duration": 150,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：参数只是显存账单的一部分",
+          "bodyLength": 740,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：7B 训练状态与一条 KV Cache",
+          "bodyLength": 761,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：先算账，再讨论 kernel 和并行",
+          "bodyLength": 256,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "训练与生成的两条资源路径",
+          "bodyLength": 331,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "显存公式、并行通信与注意力复杂度",
+          "bodyLength": 939,
+          "questions": 0
+        },
+        {
+          "id": "math-memory-zero",
+          "type": "derivation",
+          "title": "训练显存账单：ZeRO 各阶段究竟除哪一项",
+          "bodyLength": 1056,
+          "questions": 0
+        },
+        {
+          "id": "math-flashattention-online",
+          "type": "derivation",
+          "title": "FlashAttention：在线 Softmax 的精确递推与内存",
+          "bodyLength": 1438,
+          "questions": 0
+        },
+        {
+          "id": "math-prefill-decode",
+          "type": "derivation",
+          "title": "Prefill 与 Decode：计算量、缓存读取和延迟下界",
+          "bodyLength": 1199,
+          "questions": 0
+        },
+        {
+          "id": "math-parallel-communication",
+          "type": "derivation",
+          "title": "并行：Ring 通信量、张量切分与流水线气泡",
+          "bodyLength": 1296,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：做一张显存预算表",
+          "bodyLength": 956,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：省显存、提吞吐和降延迟不是同一目标",
+          "bodyLength": 712,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "并行与省显存技术如何选择",
+          "bodyLength": 638,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：训练显存怎么估算",
+          "bodyLength": 656,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：在线归一化、显存与通信",
+          "bodyLength": 25,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：把系统问题变成数字",
+          "bodyLength": 25,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Mixed Precision Training",
+          "url": "https://arxiv.org/abs/1710.03740",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "ZeRO",
+          "url": "https://arxiv.org/abs/1910.02054",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "PyTorch Fully Sharded Data Parallel",
+          "url": "https://pytorch.org/docs/stable/fsdp.html",
+          "evidence": "官方文档"
+        },
+        {
+          "label": "FlashAttention",
+          "url": "https://arxiv.org/abs/2205.14135",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention",
+          "url": "https://arxiv.org/abs/2309.06180",
+          "evidence": "系统论文"
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "title": "LoRA、QLoRA 与参数高效微调",
+      "prerequisites": [
+        "02",
+        "06",
+        "11"
+      ],
+      "objectives": [
+        "从矩阵秩解释 LoRA 的参数节省",
+        "计算 rank、alpha 与目标模块对应的参数量",
+        "说明 QLoRA 的 NF4、双重量化与分页优化器",
+        "根据显存、部署和任务差异选择 PEFT 方案"
+      ],
+      "duration": 120,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：不重写整本书，只贴一组可训练批注",
+          "bodyLength": 697,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：一个 4×4 权重只训练 8 个数",
+          "bodyLength": 677,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：低秩梯度、量化误差与实际账单",
+          "bodyLength": 238,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "冻结基座与可训练旁路",
+          "bodyLength": 357,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "参数量、缩放与合并",
+          "bodyLength": 855,
+          "questions": 0
+        },
+        {
+          "id": "math-lora-gradients",
+          "type": "derivation",
+          "title": "LoRA 反向：A/B 梯度、输入梯度与零初始化",
+          "bodyLength": 1375,
+          "questions": 0
+        },
+        {
+          "id": "math-rank-scale-merge",
+          "type": "derivation",
+          "title": "Rank 与缩放：可表达空间和合并的成立条件",
+          "bodyLength": 1088,
+          "questions": 0
+        },
+        {
+          "id": "math-quantization",
+          "type": "derivation",
+          "title": "QLoRA 的量化链：存储代码、尺度与计算权重",
+          "bodyLength": 1167,
+          "questions": 0
+        },
+        {
+          "id": "math-peft-memory",
+          "type": "derivation",
+          "title": "PEFT 显存：低秩状态、量化元数据与激活",
+          "bodyLength": 1282,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：手写 LoRA 线性层",
+          "bodyLength": 905,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：PEFT 不会自动修复数据和目标",
+          "bodyLength": 496,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "LoRA 家族与训练方案选择",
+          "bodyLength": 611,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：LoRA 为什么能省参数",
+          "bodyLength": 516,
+          "questions": 0
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：低秩反向、量化与预算",
+          "bodyLength": 26,
+          "questions": 4
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：低秩不是低要求",
+          "bodyLength": 22,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "LoRA",
+          "url": "https://arxiv.org/abs/2106.09685",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "QLoRA",
+          "url": "https://arxiv.org/abs/2305.14314",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "AdaLoRA",
+          "url": "https://arxiv.org/abs/2303.10512",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "DoRA",
+          "url": "https://arxiv.org/abs/2402.09353",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Hugging Face PEFT LoRA documentation",
+          "url": "https://huggingface.co/docs/peft/main/en/package_reference/lora",
+          "evidence": "官方实现文档"
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "title": "MDP、回报、价值函数与贝尔曼方程",
+      "prerequisites": [
+        "03",
+        "04"
+      ],
+      "objectives": [
+        "用状态、动作、奖励和转移描述一个 MDP",
+        "手算折扣回报、V、Q 与 Advantage",
+        "解释贝尔曼期望方程与最优方程的差别",
+        "区分 MC/TD 以及 on-policy/off-policy"
+      ],
+      "duration": 120,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：当前动作会改变下一道题",
+          "bodyLength": 792,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：两步学习计划的回报",
+          "bodyLength": 606,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从回报定义到收敛与控制",
+          "bodyLength": 209,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "Agent 与 Environment 的闭环",
+          "bodyLength": 371,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "从回报递推到贝尔曼方程",
+          "bodyLength": 1464,
+          "questions": 0
+        },
+        {
+          "id": "math-bellman-matrix",
+          "type": "derivation",
+          "title": "Bellman 矩阵解：逆矩阵为什么存在",
+          "bodyLength": 1308,
+          "questions": 0
+        },
+        {
+          "id": "math-contraction-control",
+          "type": "derivation",
+          "title": "收缩证明、误差界与两种动态规划",
+          "bodyLength": 1416,
+          "questions": 0
+        },
+        {
+          "id": "math-terminal-discount",
+          "type": "derivation",
+          "title": "终止、时间截断与 gamma 等于 1 的边界",
+          "bodyLength": 915,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：迭代求一个固定策略的价值",
+          "bodyLength": 814,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：相似术语描述的是不同坐标轴",
+          "bodyLength": 478,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "MC、TD 与策略关系",
+          "bodyLength": 617,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：V、Q、A 有什么关系",
+          "bodyLength": 446,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：先定义随机变量再计算",
+          "bodyLength": 21,
+          "questions": 4
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：Bellman 解、收缩与边界",
+          "bodyLength": 26,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Reinforcement Learning: An Introduction, Second Edition",
+          "url": "http://incompleteideas.net/book/RLbook2020.pdf",
+          "evidence": "经典教材"
+        },
+        {
+          "label": "Dynamic Programming",
+          "url": "https://press.princeton.edu/books/paperback/9780691146683/dynamic-programming",
+          "evidence": "Bellman 经典著作"
+        },
+        {
+          "label": "OpenAI Spinning Up: Introduction to RL",
+          "url": "https://spinningup.openai.com/en/latest/spinningup/rl_intro.html",
+          "evidence": "教学资料"
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "title": "Q-Learning、SARSA 与 DQN",
+      "prerequisites": [
+        "05",
+        "13"
+      ],
+      "objectives": [
+        "手算 Q-Learning 与 SARSA 的一步更新",
+        "解释 epsilon-greedy 探索和行为策略",
+        "推导 DQN 目标、replay buffer 与 target network",
+        "说明 deadly triad 及价值法为何不适合直接扩展到 LLM token 空间"
+      ],
+      "duration": 125,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：给每个状态动作组合记长期分数",
+          "bodyLength": 661,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：同一转移下 Q-Learning 与 SARSA",
+          "bodyLength": 631,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从 TD 目标到稳定价值学习",
+          "bodyLength": 209,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "DQN 的采样与学习回路",
+          "bodyLength": 339,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "从表格更新到 DQN 损失",
+          "bodyLength": 1691,
+          "questions": 0
+        },
+        {
+          "id": "math-double-bias",
+          "type": "derivation",
+          "title": "max 高估的精确反例与 Double DQN",
+          "bodyLength": 1013,
+          "questions": 0
+        },
+        {
+          "id": "math-dueling-huber",
+          "type": "derivation",
+          "title": "Dueling 的可辨识性、Huber 梯度与目标更新",
+          "bodyLength": 1534,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：表格 Q-Learning 一步",
+          "bodyLength": 829,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：三个看似合理的部件会一起失稳",
+          "bodyLength": 530,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "价值方法及其改进",
+          "bodyLength": 581,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：DQN 为什么需要两个网络和回放池",
+          "bodyLength": 394,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：看清 TD 目标来自哪一个策略",
+          "bodyLength": 16,
+          "questions": 4
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：目标、偏差与梯度",
+          "bodyLength": 20,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Learning from Delayed Rewards",
+          "url": "http://www.cs.rhul.ac.uk/~chrisw/new_thesis.pdf",
+          "evidence": "Q-Learning 原始博士论文"
+        },
+        {
+          "label": "Human-level control through deep reinforcement learning",
+          "url": "https://www.nature.com/articles/nature14236",
+          "evidence": "DQN 原始论文"
+        },
+        {
+          "label": "Deep Reinforcement Learning with Double Q-learning",
+          "url": "https://arxiv.org/abs/1509.06461",
+          "evidence": "Double DQN 原始论文"
+        },
+        {
+          "label": "Dueling Network Architectures for Deep Reinforcement Learning",
+          "url": "https://arxiv.org/abs/1511.06581",
+          "evidence": "Dueling DQN 原始论文"
+        }
+      ]
+    },
+    {
+      "id": "15",
+      "title": "REINFORCE、Actor-Critic 与 GAE",
+      "prerequisites": [
+        "02",
+        "03",
+        "13",
+        "14"
+      ],
+      "objectives": [
+        "从 log-derivative trick 推出 REINFORCE",
+        "解释 baseline 为何降方差但不改变期望梯度",
+        "计算 TD residual 与 GAE",
+        "把轨迹、动作概率和优势映射到 LLM token 生成"
+      ],
+      "duration": 140,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：奖励为每个采样动作调音量",
+          "bodyLength": 691,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：同样奖励在不同基准下含义不同",
+          "bodyLength": 801,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从概率求导到可实现的优势估计",
+          "bodyLength": 224,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "Actor-Critic 的采样与双目标",
+          "bodyLength": 353,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "从期望回报到策略梯度与 GAE",
+          "bodyLength": 1968,
+          "questions": 0
+        },
+        {
+          "id": "math-baseline",
+          "type": "derivation",
+          "title": "Baseline 无偏性与为什么 V 不一定方差最优",
+          "bodyLength": 1217,
+          "questions": 0
+        },
+        {
+          "id": "math-gae-telescoping",
+          "type": "derivation",
+          "title": "GAE 的望远镜求和与有限轨迹端点",
+          "bodyLength": 1534,
+          "questions": 0
+        },
+        {
+          "id": "math-actor-critic-detach",
+          "type": "derivation",
+          "title": "Actor 与 Critic 的损失、停梯度和双 mask",
+          "bodyLength": 1445,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：从后向前计算 GAE",
+          "bodyLength": 1142,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：低方差估计也可能方向错误",
+          "bodyLength": 527,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "从 REINFORCE 到 Actor-Critic",
+          "bodyLength": 566,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：baseline 为什么不引入偏差",
+          "bodyLength": 510,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：策略梯度的每一项从哪里来",
+          "bodyLength": 23,
+          "questions": 4
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：因果性、GAE 与无偏反例",
+          "bodyLength": 19,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning",
+          "url": "https://link.springer.com/article/10.1007/BF00992696",
+          "evidence": "REINFORCE 原始论文"
+        },
+        {
+          "label": "Policy Gradient Methods for Reinforcement Learning with Function Approximation",
+          "url": "https://proceedings.neurips.cc/paper/1999/hash/464d828b85b0bed98e80ade0a5c43b0f-Abstract.html",
+          "evidence": "策略梯度定理论文"
+        },
+        {
+          "label": "High-Dimensional Continuous Control Using Generalized Advantage Estimation",
+          "url": "https://arxiv.org/abs/1506.02438",
+          "evidence": "GAE 原始论文"
+        },
+        {
+          "label": "OpenAI Spinning Up: Vanilla Policy Gradient",
+          "url": "https://spinningup.openai.com/en/latest/algorithms/vpg.html",
+          "evidence": "教学实现"
+        }
+      ]
+    },
+    {
+      "id": "16",
+      "title": "PPO、奖励模型与经典 RLHF",
+      "prerequisites": [
+        "11",
+        "15"
+      ],
+      "objectives": [
+        "解释经典 RLHF 的 SFT、奖励建模与 PPO 三阶段",
+        "写出 Bradley-Terry 奖励模型损失",
+        "手算 PPO 概率比与 clip 目标",
+        "区分 reference KL、PPO clipping 和梯度裁剪"
+      ],
+      "duration": 150,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：先学会评分，再谨慎提高高分回答概率",
+          "bodyLength": 895,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：一个 token 的 PPO clip",
+          "bodyLength": 715,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：偏好评分、信任域与 PPO 更新",
+          "bodyLength": 199,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "经典 RLHF 的三阶段与四模型循环",
+          "bodyLength": 404,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "奖励模型、KL 正则与 PPO 目标",
+          "bodyLength": 2128,
+          "questions": 0
+        },
+        {
+          "id": "math-kl-estimators",
+          "type": "derivation",
+          "title": "KL reward、k1/k2/k3 与无偏性的条件",
+          "bodyLength": 1561,
+          "questions": 0
+        },
+        {
+          "id": "math-trpo-fisher",
+          "type": "derivation",
+          "title": "TRPO：从 KL 二阶约束到自然梯度方向",
+          "bodyLength": 1557,
+          "questions": 0
+        },
+        {
+          "id": "math-ppo-update",
+          "type": "derivation",
+          "title": "PPO 四种边界、log-prob 梯度与完整训练 loss",
+          "bodyLength": 1927,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：PPO-RLHF 训练循环伪代码",
+          "bodyLength": 1216,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：代理奖励会主动寻找漏洞",
+          "bodyLength": 706,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "三种约束不要混用名称",
+          "bodyLength": 608,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：PPO 在 RLHF 中解决什么",
+          "bodyLength": 433,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：把 PPO 的每个模型和约束放回正确位置",
+          "bodyLength": 19,
+          "questions": 4
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：RM、Fisher、裁剪和 KL",
+          "bodyLength": 26,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Trust Region Policy Optimization",
+          "url": "https://arxiv.org/abs/1502.05477",
+          "evidence": "TRPO 原始论文；KL 二阶近似与 Fisher"
+        },
+        {
+          "label": "Approximating KL Divergence",
+          "url": "https://joschu.net/blog/kl-approx.html",
+          "evidence": "k1/k2/k3 估计器说明；课程另推导采样与梯度条件"
+        },
+        {
+          "label": "Constitutional AI: Harmlessness from AI Feedback",
+          "url": "https://arxiv.org/abs/2212.08073",
+          "evidence": "规则驱动批评、修订与 AI 偏好反馈的原始工作"
+        },
+        {
+          "label": "Proximal Policy Optimization Algorithms",
+          "url": "https://arxiv.org/abs/1707.06347",
+          "evidence": "PPO 原始论文"
+        },
+        {
+          "label": "Learning to Summarize from Human Feedback",
+          "url": "https://arxiv.org/abs/2009.01325",
+          "evidence": "奖励建模与 RLHF 论文"
+        },
+        {
+          "label": "Training Language Models to Follow Instructions with Human Feedback",
+          "url": "https://arxiv.org/abs/2203.02155",
+          "evidence": "InstructGPT 原始论文"
+        },
+        {
+          "label": "High-Dimensional Continuous Control Using GAE",
+          "url": "https://arxiv.org/abs/1506.02438",
+          "evidence": "GAE 原始论文"
+        }
+      ]
+    },
+    {
+      "id": "17",
+      "title": "GRPO、DAPO、Dr.GRPO 与 RLOO",
+      "prerequisites": [
+        "15",
+        "16"
+      ],
+      "objectives": [
+        "手算组内 reward baseline 和标准化 advantage",
+        "解释 GRPO 为何可去掉 critic 以及零方差组问题",
+        "比较 DAPO、Dr.GRPO、GSPO、RLOO 与 REINFORCE++",
+        "识别 token/sequence 聚合、clipping 与长度偏差"
+      ],
+      "duration": 155,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：同一道题内做相对排名",
+          "bodyLength": 898,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：四条 rollout 的组内优势",
+          "bodyLength": 763,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：组估计、归一化与 DAPO 配方",
+          "bodyLength": 217,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从一组回答到策略更新",
+          "bodyLength": 326,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "GRPO 目标与 token、sequence 两种概率比",
+          "bodyLength": 3076,
+          "questions": 0
+        },
+        {
+          "id": "math-normalization-rloo",
+          "type": "derivation",
+          "title": "从含自身的组均值到 RLOO：无偏条件与标准差效应",
+          "bodyLength": 1531,
+          "questions": 0
+        },
+        {
+          "id": "math-dapo",
+          "type": "derivation",
+          "title": "DAPO 四项的公式、长度分母和筛选分布",
+          "bodyLength": 2142,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：组优势与零方差过滤",
+          "bodyLength": 642,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：去掉 Critic 不等于算法自然无偏",
+          "bodyLength": 531,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "Critic-Free 家族解决的不是同一个问题",
+          "bodyLength": 720,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：GRPO 为什么不需要 Critic",
+          "bodyLength": 442,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：组内相对信号从哪里消失",
+          "bodyLength": 31,
+          "questions": 4
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：组统计、偏差与长度反例",
+          "bodyLength": 19,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "DeepSeekMath",
+          "url": "https://arxiv.org/abs/2402.03300",
+          "evidence": "GRPO 原始来源"
+        },
+        {
+          "label": "DAPO",
+          "url": "https://arxiv.org/abs/2503.14476",
+          "evidence": "原始论文"
+        },
+        {
+          "label": "Understanding R1-Zero-Like Training",
+          "url": "https://arxiv.org/abs/2503.20783",
+          "evidence": "Dr.GRPO 原始论文"
+        },
+        {
+          "label": "Group Sequence Policy Optimization",
+          "url": "https://arxiv.org/abs/2507.18071",
+          "evidence": "GSPO 原始论文"
+        },
+        {
+          "label": "Back to Basics: REINFORCE Style Optimization",
+          "url": "https://arxiv.org/abs/2402.14740",
+          "evidence": "RLOO 实证论文"
+        },
+        {
+          "label": "REINFORCE++",
+          "url": "https://arxiv.org/abs/2501.03262",
+          "evidence": "原始论文"
+        }
+      ]
+    },
+    {
+      "id": "18",
+      "title": "DPO 与偏好优化家族",
+      "prerequisites": [
+        "03",
+        "08",
+        "16"
+      ],
+      "objectives": [
+        "从 KL 正则策略目标推导 DPO 隐式奖励",
+        "手算 chosen/rejected 的 DPO logit",
+        "比较 IPO、KTO、ORPO 与 SimPO 的数据和目标",
+        "解释离线、在线、迭代与 step-level 偏好优化"
+      ],
+      "duration": 145,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：学习相对偏好，不预测绝对分数",
+          "bodyLength": 725,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：四个 log 概率决定一对偏好",
+          "bodyLength": 858,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从约束最优策略到偏好损失与梯度",
+          "bodyLength": 277,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从偏好对到 DPO 更新",
+          "bodyLength": 385,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "从 KL 正则最优策略到 DPO",
+          "bodyLength": 2175,
+          "questions": 0
+        },
+        {
+          "id": "math-dpo-gradient-length",
+          "type": "derivation",
+          "title": "DPO 从 margin 到 token 梯度：beta、长度与概率下降",
+          "bodyLength": 1787,
+          "questions": 0
+        },
+        {
+          "id": "math-preference-pairs",
+          "type": "derivation",
+          "title": "IPO、SimPO、ORPO：精确目标与不同梯度",
+          "bodyLength": 2317,
+          "questions": 0
+        },
+        {
+          "id": "math-kto",
+          "type": "derivation",
+          "title": "KTO：单条好坏反馈、参考点与停止梯度",
+          "bodyLength": 1602,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：从 token log-prob 算 DPO loss",
+          "bodyLength": 803,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：目标简单不表示数据问题消失",
+          "bodyLength": 541,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "DPO 变体按数据需求与目标区分",
+          "bodyLength": 911,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：DPO 为什么不需要显式奖励模型",
+          "bodyLength": 473,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：偏好目标究竟比较什么",
+          "bodyLength": 37,
+          "questions": 4
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：拉格朗日、梯度与偏好家族",
+          "bodyLength": 21,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Qwen2.5 Technical Report",
+          "url": "https://arxiv.org/abs/2412.15115",
+          "evidence": "离线与在线偏好阶段的工业实例"
+        },
+        {
+          "label": "MiniMax-01: Scaling Foundation Models with Lightning Attention",
+          "url": "https://arxiv.org/abs/2501.08313",
+          "evidence": "短长上下文后训练配方；不是普适顺序"
+        },
+        {
+          "label": "Direct Preference Optimization",
+          "url": "https://arxiv.org/abs/2305.18290",
+          "evidence": "DPO 原始论文"
+        },
+        {
+          "label": "A General Theoretical Paradigm to Understand Learning from Human Preferences",
+          "url": "https://arxiv.org/abs/2310.12036",
+          "evidence": "IPO 原始论文"
+        },
+        {
+          "label": "KTO: Model Alignment as Prospect Theoretic Optimization",
+          "url": "https://arxiv.org/abs/2402.01306",
+          "evidence": "KTO 原始论文"
+        },
+        {
+          "label": "ORPO: Monolithic Preference Optimization without Reference Model",
+          "url": "https://arxiv.org/abs/2403.07691",
+          "evidence": "ORPO 原始论文"
+        },
+        {
+          "label": "SimPO",
+          "url": "https://arxiv.org/abs/2405.14734",
+          "evidence": "SimPO 原始论文"
+        }
+      ]
+    },
+    {
+      "id": "19",
+      "title": "OPD、OPSD 与跨阶段蒸馏",
+      "prerequisites": [
+        "03",
+        "15",
+        "17",
+        "18"
+      ],
+      "objectives": [
+        "从 exposure bias 与稀疏奖励解释 OPD 的动机",
+        "推导 student rollout 上的逐 token KL 目标",
+        "区分外部教师 OPD 与 privileged-context OPSD",
+        "诊断信息泄漏、长 CoT 失稳与教师错配",
+        "比较 Purified OPSD、RLSD、H2SD 与 Lightning OPD"
+      ],
+      "duration": 175,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：在学生真正迷路的位置教它",
+          "bodyLength": 922,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：同一错误前缀上的密集纠正",
+          "bodyLength": 776,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：KL 梯度、轨迹分布与特权信息",
+          "bodyLength": 249,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "四种数据与监督闭环",
+          "bodyLength": 531,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "逐 token KL、方向差异与 OPSD 条件",
+          "bodyLength": 2118,
+          "questions": 0
+        },
+        {
+          "id": "math-kl-logit-temperature",
+          "type": "derivation",
+          "title": "Forward/Reverse KL 对学生 logits 的完整梯度",
+          "bodyLength": 1789,
+          "questions": 0
+        },
+        {
+          "id": "math-trajectory-gradient",
+          "type": "derivation",
+          "title": "固定前缀局部 KL 不等于整条轨迹 KL 的梯度",
+          "bodyLength": 2071,
+          "questions": 0
+        },
+        {
+          "id": "math-privileged-opsd",
+          "type": "derivation",
+          "title": "OPSD：条件信息、教师停梯度与不可迁移下界",
+          "bodyLength": 1701,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：OPSD 训练循环与防泄漏检查",
+          "bodyLength": 956,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：有答案的教师不一定教会无答案的学生",
+          "bodyLength": 579,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "2026 方向定位与方法选择树",
+          "bodyLength": 972,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：OPD 与 OPSD 的核心差别",
+          "bodyLength": 625,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：四种训练范式不要混淆",
+          "bodyLength": 20,
+          "questions": 6
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：两向 KL、轨迹梯度与信息边界",
+          "bodyLength": 20,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "GLM-5: On-Policy Cross-Stage Distillation, §3.5",
+          "url": "https://arxiv.org/html/2602.15763v1#S3.SS5",
+          "evidence": "原始技术报告：前序 checkpoint 教师、逐 token log-ratio 优势、group size=1"
+        },
+        {
+          "label": "On-Policy Distillation of Language Models",
+          "url": "https://arxiv.org/abs/2306.13649",
+          "evidence": "GKD/OPD 原始论文"
+        },
+        {
+          "label": "Self-Distilled Reasoner",
+          "url": "https://arxiv.org/abs/2601.18734",
+          "evidence": "OPSD 2026 原始预印本"
+        },
+        {
+          "label": "Self-Distilled RLVR",
+          "url": "https://arxiv.org/abs/2604.03128",
+          "evidence": "RLSD 2026 原始预印本"
+        },
+        {
+          "label": "Lightning OPD",
+          "url": "https://arxiv.org/abs/2604.13010",
+          "evidence": "2026 原始预印本"
+        },
+        {
+          "label": "Purified OPSD",
+          "url": "https://arxiv.org/abs/2607.02234",
+          "evidence": "2026 原始预印本"
+        },
+        {
+          "label": "H²SD: Hybrid Hindsight Self-Distillation",
+          "url": "https://arxiv.org/abs/2607.18955",
+          "evidence": "2026 原始预印本"
+        },
+        {
+          "label": "Rethinking OPSD for Thinking Models",
+          "url": "https://arxiv.org/abs/2607.05184",
+          "evidence": "2026 独立失效分析预印本"
+        }
+      ]
+    },
+    {
+      "id": "20",
+      "title": "VAPO、CISPO、GSPO 与 SAPO",
+      "prerequisites": [
+        "15",
+        "16",
+        "17"
+      ],
+      "objectives": [
+        "解释 VAPO 的价值预训练、解耦 GAE、长度自适应和正样本 NLL",
+        "手算正负优势下的 PPO clipping 与 CISPO detached token 权重",
+        "推导 GSPO 的归一化序列比率和 SAPO 的完整 log-policy 梯度",
+        "区分优化器与 MoE 路由一致性问题，并设计可归因的对照实验"
+      ],
+      "duration": 190,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：同一批正确解答，为什么没有带来稳定更新？",
+          "bodyLength": 1234,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：四个越界格子与两个 token",
+          "bodyLength": 1385,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：先信用估计，再比较完整梯度",
+          "bodyLength": 292,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从同一批轨迹分出信用、优化与一致性三条支路",
+          "bodyLength": 420,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "完整推导：GAE、冻结权重、序列比率与软门控",
+          "bodyLength": 4842,
+          "questions": 0
+        },
+        {
+          "id": "math-gradient-units",
+          "type": "derivation",
+          "title": "统一梯度：单 token 系数怎样变成整批更新",
+          "bodyLength": 2407,
+          "questions": 0
+        },
+        {
+          "id": "math-update-diagnostics",
+          "type": "derivation",
+          "title": "从公式到诊断：平均 ratio 正常为什么仍会失稳",
+          "bodyLength": 1685,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：用有限差分抓出漏 ratio 与漏 detach",
+          "bodyLength": 3877,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：MoE 的比率异常不能全靠换 loss",
+          "bodyLength": 1126,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "比较：不要把七种优化方法排成淘汰链",
+          "bodyLength": 1186,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试回答：先写一个 token 的系数",
+          "bodyLength": 863,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：公式、边界与工程责任",
+          "bodyLength": 36,
+          "questions": 6
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：系数、归一化与稳定性",
+          "bodyLength": 27,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Proximal Policy Optimization Algorithms",
+          "url": "https://arxiv.org/abs/1707.06347",
+          "evidence": "PPO 原始 clipped surrogate；正负优势下的梯度由原式直接推导。"
+        },
+        {
+          "label": "Generalized Advantage Estimation",
+          "url": "https://arxiv.org/abs/1506.02438",
+          "evidence": "GAE 原始论文：TD residual 的指数加权与偏差方差折中。"
+        },
+        {
+          "label": "DeepSeekMath / GRPO",
+          "url": "https://arxiv.org/html/2402.03300",
+          "evidence": "原始组相对优势和 outcome/process reward；critic-free 不等于无 RM。"
+        },
+        {
+          "label": "DAPO",
+          "url": "https://arxiv.org/abs/2503.14476",
+          "evidence": "Clip-Higher、动态采样、token-level loss 和超长奖励处理。"
+        },
+        {
+          "label": "VC-PPO",
+          "url": "https://arxiv.org/abs/2503.01491",
+          "evidence": "价值预训练与 actor/critic 解耦 GAE 的前置工作。"
+        },
+        {
+          "label": "VAPO: Efficient and Reliable Reinforcement Learning for Advanced Reasoning Tasks",
+          "url": "https://arxiv.org/html/2504.05118v1#S4",
+          "evidence": "第 4 节：critic 初始化、解耦/长度自适应 GAE、正样本 NLL。"
+        },
+        {
+          "label": "MiniMax-M1 / CISPO",
+          "url": "https://arxiv.org/html/2506.13585v1#S3.SS1",
+          "evidence": "式 4-5：detached token IS 权重；实验无有效下界。"
+        },
+        {
+          "label": "Group Sequence Policy Optimization",
+          "url": "https://arxiv.org/html/2507.18071v2#S4",
+          "evidence": "式 7、10：长度归一化 sequence ratio 与 sA/T 梯度。"
+        },
+        {
+          "label": "Soft Adaptive Policy Optimization",
+          "url": "https://arxiv.org/html/2511.20347v1#S3",
+          "evidence": "式 5-6 的 sigmoid 目标；链式法则给出 A*r*4p(1-p)，近似需小步与低离散度条件。"
+        },
+        {
+          "label": "R3: Rollout Routing Replay",
+          "url": "https://arxiv.org/html/2510.11370v1#S4",
+          "evidence": "重放专家选择而保留训练 gate 梯度；与 GRPO、GSPO、DAPO 互补。"
+        },
+        {
+          "label": "verl Router Replay 官方实现说明",
+          "url": "https://raw.githubusercontent.com/volcengine/verl/main/examples/router_replay/README.md",
+          "evidence": "2026-09-27 核验的可变文档：R2 训练侧重放，R3 要求 rollout 返回路由结果。"
+        },
+        {
+          "label": "Dr.GRPO",
+          "url": "https://arxiv.org/abs/2503.20783",
+          "evidence": "归一化诱导的长度与优化偏差；不据此推断所有估计无偏。"
+        },
+        {
+          "label": "REINFORCE++",
+          "url": "https://arxiv.org/abs/2501.03262",
+          "evidence": "全局优势归一化及其大 batch 条件。"
+        },
+        {
+          "label": "PRIME",
+          "url": "https://arxiv.org/abs/2502.01456",
+          "evidence": "用 policy rollout 和 outcome label 在线更新隐式过程奖励。"
+        }
+      ]
+    },
+    {
+      "id": "21",
+      "title": "后训练数据工程：获取、验证、课程与回灌",
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20"
+      ],
+      "objectives": [
+        "比较六类 SFT 数据获取路线及各自需要的监督与验证",
+        "为 RL 同时设计 query、reward 和 environment 三个数据维度",
+        "正确计算采样成功率与 pass@k，并据此诊断课程难度",
+        "设计可追溯的去污染、质量过滤、混合与 SFT-RL 回灌流程"
+      ],
+      "duration": 195,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：六种获取路线，不是六个互斥算法",
+          "bodyLength": 2192,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：八次尝试、两次成功，到底是什么指标？",
+          "bodyLength": 1020,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从数据来源到选中概率与有效信号",
+          "bodyLength": 257,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "数据闭环：先隔离评估，再合成和回灌",
+          "bodyLength": 333,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "把成功率、课程信号和混合目标写清楚",
+          "bodyLength": 2876,
+          "questions": 0
+        },
+        {
+          "id": "math-pass-k-proof",
+          "type": "derivation",
+          "title": "pass@k：从子集计数证明到有限样本反例",
+          "bodyLength": 1374,
+          "questions": 0
+        },
+        {
+          "id": "math-dynamic-selection",
+          "type": "derivation",
+          "title": "动态采样：有效组的选中概率、分布偏移和补采账本",
+          "bodyLength": 1619,
+          "questions": 0
+        },
+        {
+          "id": "math-weight-verifier",
+          "type": "derivation",
+          "title": "有效数据量：域权重、ESS 与验证器噪声",
+          "bodyLength": 2053,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：验证指标、来源隔离与 token 账单",
+          "bodyLength": 3920,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "质量控制：通过、干净、可学习，是不同要求",
+          "bodyLength": 1227,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "三条 RL 数据轴与可检验的 SFT-RL 飞轮",
+          "bodyLength": 1383,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试回答：从数据链路判断学习信号",
+          "bodyLength": 771,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：为每个数据结论附上协议",
+          "bodyLength": 28,
+          "questions": 6
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：证明指标、计算成本、审计噪声",
+          "bodyLength": 27,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Self-Instruct",
+          "url": "https://arxiv.org/abs/2212.10560",
+          "evidence": "种子指令扩增、instruction/input/output 生成及无效/相似过滤。"
+        },
+        {
+          "label": "WizardLM / Evol-Instruct",
+          "url": "https://arxiv.org/abs/2304.12244",
+          "evidence": "逐步演化指令复杂度；不把技能数与数据规模混写。"
+        },
+        {
+          "label": "Magicoder / OSS-Instruct",
+          "url": "https://arxiv.org/abs/2312.02120",
+          "evidence": "真实开源代码片段锚定合成指令。"
+        },
+        {
+          "label": "SelfCodeAlign",
+          "url": "https://arxiv.org/abs/2410.24198",
+          "evidence": "概念提取、任务/答案/测例生成与沙箱验证闭环。"
+        },
+        {
+          "label": "Instruct-SkillMix",
+          "url": "https://arxiv.org/abs/2408.14774",
+          "evidence": "提取技能并组合生成指令；区别于其他同名 SkillMix 工作。"
+        },
+        {
+          "label": "CodecLM",
+          "url": "https://arxiv.org/html/2404.05875",
+          "evidence": "目标用例元数据、Self-Rubrics 与模型回答质量差异驱动的 Contrastive Filtering。"
+        },
+        {
+          "label": "SWE-smith",
+          "url": "https://arxiv.org/html/2504.21798v1",
+          "evidence": "真实仓库中制造并验证缺陷任务；任务生成不等于成功轨迹采集。"
+        },
+        {
+          "label": "Sol-Ver",
+          "url": "https://arxiv.org/abs/2502.14948",
+          "evidence": "同模型联合改进代码求解和测试生成；不构成独立正确性证明。"
+        },
+        {
+          "label": "GASP",
+          "url": "https://arxiv.org/abs/2603.15957",
+          "evidence": "真实困难 goalpost 约束的渐进非对称自博弈。"
+        },
+        {
+          "label": "STaR: Self-Taught Reasoner",
+          "url": "https://arxiv.org/abs/2203.14465",
+          "evidence": "有答案题集、失败后答案条件化 rationalization 与正确推理回灌。"
+        },
+        {
+          "label": "Language Self-Play / LSP",
+          "url": "https://arxiv.org/html/2509.07414v3",
+          "evidence": "同模型 Challenger/Solver 角色与 reference-model quality self-reward；不泛化收敛保证。"
+        },
+        {
+          "label": "Self-Generative Adversarial LLM / SGALM",
+          "url": "https://arxiv.org/html/2602.01137v1",
+          "evidence": "真实数据锚定、同模型生成与 Real/Fake 判别。"
+        },
+        {
+          "label": "FineWeb",
+          "url": "https://arxiv.org/html/2406.17557",
+          "evidence": "Web 预训练数据清洗、去重、质量筛选；教育分数不是隐私安全认证。"
+        },
+        {
+          "label": "Seed-Coder",
+          "url": "https://arxiv.org/html/2506.03524v2",
+          "evidence": "LLM 质量过滤、SFT 难度与沙箱验证、跨阶段去污染；纠正上游错误论文编号。"
+        },
+        {
+          "label": "DoReMi",
+          "url": "https://arxiv.org/html/2305.10429",
+          "evidence": "预训练 reference/proxy 与 Group DRO excess loss 域混合，不是缩放律拟合。"
+        },
+        {
+          "label": "Evaluating Large Language Models Trained on Code",
+          "url": "https://arxiv.org/html/2107.03374",
+          "evidence": "pass@k 的至少一次成功定义与组合估计器。"
+        },
+        {
+          "label": "DeepSeek-R1",
+          "url": "https://arxiv.org/html/2501.12948v1",
+          "evidence": "cold SFT、reasoning RL、拒绝采样与通用数据混合、全场景 RL。"
+        },
+        {
+          "label": "Qwen3 Technical Report",
+          "url": "https://arxiv.org/html/2505.09388v1",
+          "evidence": "Thinking Mode Fusion：thinking RS 数据与另行整理的 non-thinking 数据混合。"
+        }
+      ]
+    },
+    {
+      "id": "22",
+      "title": "工业案例 I：DeepSeek、Qwen 与 Seed",
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21"
+      ],
+      "objectives": [
+        "用任务、阶段、数据、奖励、系统约束和证据边界阅读工业报告",
+        "解释 DeepSeek 的纯 RL 探索、多阶段训练与专家蒸馏各自解决什么",
+        "手算 Qwen 式查询方差筛选，并区分查询数量与 rollout 计算量",
+        "比较 DAPO、VAPO 与 Seed 系列对长推理训练的不同处理",
+        "识别跨版本、跨评测协议及跨成本分母比较中的错误"
+      ],
+      "duration": 180,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：从模型报告中选出可复用的训练步骤",
+          "bodyLength": 4444,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "手算：三组查询，哪组值得继续采样？",
+          "bodyLength": 1073,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：把工业阶段翻译成可计算的训练合同",
+          "bodyLength": 258,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "图解：主模型与高预算变体是分支，不是流水线末级",
+          "bodyLength": 368,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "数学视角：查询信号、任务混合与成本分母",
+          "bodyLength": 1934,
+          "questions": 0
+        },
+        {
+          "id": "math-domain-normalization",
+          "type": "derivation",
+          "title": "领域配比落到 loss：专家蒸馏与 mixed RL 的分母",
+          "bodyLength": 2115,
+          "questions": 0
+        },
+        {
+          "id": "math-distillation-pipeline",
+          "type": "derivation",
+          "title": "蒸馏的箭头传什么：输出轨迹、模式标签还是教师分布",
+          "bodyLength": 1909,
+          "questions": 0
+        },
+        {
+          "id": "math-pipeline-budget",
+          "type": "derivation",
+          "title": "预算推导：拒绝样本、教师查询和完整成本",
+          "bodyLength": 1608,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：先审计查询与账本，再选择优化器",
+          "bodyLength": 1919,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：把报告读成算法广告",
+          "bodyLength": 798,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "比较表：先选任务与反馈，再借鉴训练阶段",
+          "bodyLength": 1066,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：从模型名称回到可验证的训练选择",
+          "bodyLength": 652,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：数字、阶段和归因各检查一次",
+          "bodyLength": 28,
+          "questions": 7
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：给工业 pipeline 写目标与账本",
+          "bodyLength": 28,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via RL",
+          "url": "https://arxiv.org/html/2501.12948",
+          "evidence": "原始报告：R1-Zero、R1 四阶段、约 800k 蒸馏数据及 AIME 2024 结果"
+        },
+        {
+          "label": "DeepSeek-V3 Technical Report",
+          "url": "https://arxiv.org/html/2412.19437",
+          "evidence": "原始报告：专家数据、SFT/GRPO；Table 1 成本归属，Table 9 为 V2.5 底座消融"
+        },
+        {
+          "label": "DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models",
+          "url": "https://arxiv.org/html/2512.02556",
+          "evidence": "原始报告：专家蒸馏、mixed RL、Speciale 分支、Keep Routing/Keep Sampling Mask 及 Tables 3–4"
+        },
+        {
+          "label": "Qwen2.5 Technical Report",
+          "url": "https://arxiv.org/html/2412.15115",
+          "evidence": "原始报告：SFT、DPO、在线 GRPO 与基于响应分数方差的查询选择"
+        },
+        {
+          "label": "Qwen3 Technical Report",
+          "url": "https://arxiv.org/html/2505.09388",
+          "evidence": "原始报告：四阶段、3,995 query-verifier 对、阶段性 AIME 2024 结果、模式融合与大小模型蒸馏"
+        },
+        {
+          "label": "Qwen3.5: Towards Native Multimodal Agents",
+          "url": "https://www.alibabacloud.com/blog/qwen3-5-towards-native-multimodal-agents_602894",
+          "evidence": "官方博客转载，公开信息有限：首发模型架构、多模态与 Agent RL 方向；不据此推定算法超参数"
+        },
+        {
+          "label": "Group Sequence Policy Optimization",
+          "url": "https://arxiv.org/html/2507.18071",
+          "evidence": "方法原论文：正式名称与长度归一化序列比；不代表全部 Qwen checkpoint 的统一配方"
+        },
+        {
+          "label": "Soft Adaptive Policy Optimization",
+          "url": "https://arxiv.org/html/2511.20347",
+          "evidence": "方法原论文：平滑门控及其经验条件；不把局部近似写成普遍包含关系"
+        },
+        {
+          "label": "DAPO: An Open-Source LLM Reinforcement Learning System at Scale",
+          "url": "https://arxiv.org/html/2503.14476",
+          "evidence": "原始报告：四项技术，Qwen2.5-32B Base，AIME 2024 avg@32 及采样协议"
+        },
+        {
+          "label": "VAPO: Efficient and Reliable Reinforcement Learning for Advanced Reasoning Tasks",
+          "url": "https://arxiv.org/html/2504.05118",
+          "evidence": "原始报告：Value-Pretraining、Decoupled-GAE、长度自适应与正例 NLL，摘要结果 60.4"
+        },
+        {
+          "label": "Seed1.5-Thinking: Advancing Superb Reasoning Models with Reinforcement Learning",
+          "url": "https://arxiv.org/html/2504.13914",
+          "evidence": "原始报告：200B/20B 最终模型、反馈分工、流式 rollout；150B 算法消融与 RFT 条件"
+        },
+        {
+          "label": "Seed-Coder: Let the Code Model Curate Data for Itself",
+          "url": "https://arxiv.org/html/2506.03524",
+          "evidence": "原始报告：8B 三版本、模型辅助筛数、Instruct SFT+DPO、Reasoning GRPO 加 DAPO 类优化"
+        },
+        {
+          "label": "Seed2.0 Official Launch",
+          "url": "https://seed.bytedance.com/en/blog/seed-2-0-official-launch",
+          "evidence": "2026-02 官方发布，公开信息有限：Pro/Lite/Mini/Code、复杂指令与 Agent 产品定位"
+        },
+        {
+          "label": "Seed2.0 Model Card, v1",
+          "url": "https://arxiv.org/abs/2607.00248v1",
+          "evidence": "2026-06-30 已提交模型卡；本次核对摘要与元数据，不声称核验了全文训练细节"
+        },
+        {
+          "label": "agentic-rl-analysis: 工业模型文档，固定提交 66ae4423",
+          "url": "https://github.com/xavierzhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch2",
+          "evidence": "二级学习材料：2.1、2.3、2.6 全文阅读；与原始报告冲突之处以证据账本勘误"
+        }
+      ]
+    },
+    {
+      "id": "23",
+      "title": "工业案例 II：Kimi、MiniMax、GLM 与闭源模型",
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22"
+      ],
+      "objectives": [
+        "解释 Kimi 的 partial rollout、long2short、MuonClip 与 PARL 分别解决什么",
+        "区分 MiniMax 各代的长上下文、CISPO 和 Agent 训练系统",
+        "手算被裁剪 IS 权重的梯度系数、轨迹掩码与并行关键路径",
+        "用 GLM-5 解释 interleaved thinking、TITO 和跨阶段 OPD",
+        "区分闭源公司的已公开对齐方法与未披露的完整产品配方"
+      ],
+      "duration": 190,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：修复仓库时，模型更新了而任务还没结束",
+          "bodyLength": 4427,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "手算：切片、并行和裁剪各自改变什么？",
+          "bodyLength": 1105,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：把动作记录、教师信号与异步预算接起来",
+          "bodyLength": 272,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "图解：GLM-5 的前序教师与当前学生如何闭环",
+          "bodyLength": 371,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "数学视角：权重裁剪、教师差值与安全乘积",
+          "bodyLength": 2374,
+          "questions": 0
+        },
+        {
+          "id": "math-async-ratio",
+          "type": "derivation",
+          "title": "异步 ratio：行为版本、训推引擎与动作支持集",
+          "bodyLength": 2121,
+          "questions": 0
+        },
+        {
+          "id": "math-opd-gradient",
+          "type": "derivation",
+          "title": "跨阶段 OPD：group size=1 的方向从哪里来",
+          "bodyLength": 1981,
+          "questions": 0
+        },
+        {
+          "id": "math-agent-budget",
+          "type": "derivation",
+          "title": "Agent 预算：关键路径、前缀复用与陈旧度",
+          "bodyLength": 1612,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：审计动作掩码、CISPO 系数与教师方向",
+          "bodyLength": 2071,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：系统速度、模型能力与安全保证混为一谈",
+          "bodyLength": 965,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "比较表：开放机制与公开对齐各学到什么",
+          "bodyLength": 1932,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：用一个工程故障串起整章",
+          "bodyLength": 749,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：认清裁剪对象与证据层级",
+          "bodyLength": 26,
+          "questions": 8
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：从真实动作到可归因的系统收益",
+          "bodyLength": 31,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "Gemma 3 Technical Report",
+          "url": "https://arxiv.org/html/2503.19786v1",
+          "evidence": "Post-Training Techniques 与参考文献：BOND/WARM/WARP 的改进版本；不迁移为 Gemini 配方"
+        },
+        {
+          "label": "Kimi k1.5: Scaling Reinforcement Learning with LLMs",
+          "url": "https://arxiv.org/html/2501.12599",
+          "evidence": "原始报告：长上下文 RL、Partial Rollout、long2short；短模型 60.8 与 3,272 token 的协议"
+        },
+        {
+          "label": "Kimi K2: Open Agentic Intelligence",
+          "url": "https://arxiv.org/html/2507.20534",
+          "evidence": "原始报告：MuonClip/QK-Clip 的 attention-logit 信号、工具合成、rubric 和 Self-Critique Reward"
+        },
+        {
+          "label": "Kimi K2.5: Visual Agentic Intelligence",
+          "url": "https://arxiv.org/html/2602.02276",
+          "evidence": "原始报告：视觉数据时机、Zero-Vision SFT、冻结子 Agent 的 PARL；区分 K2 Thinking 的 Toggle 实验"
+        },
+        {
+          "label": "MiniMax-01: Scaling Foundation Models with Lightning Attention",
+          "url": "https://arxiv.org/html/2501.08313",
+          "evidence": "原始报告：Text-01 五阶段、短/长序列长度与奖励维度；Vision-01 配方另列"
+        },
+        {
+          "label": "MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention",
+          "url": "https://arxiv.org/html/2506.13585",
+          "evidence": "原始报告：CISPO Eq. 3–4、M1-80k Table 2、RL 租赁口径、FP32 LM head 与小梯度"
+        },
+        {
+          "label": "The MiniMax-M2 Series, v1",
+          "url": "https://arxiv.org/html/2605.26494v1",
+          "evidence": "2026-05 原始报告：M2/M2.5/M2.7、全注意力、任务工作区、CISPO、Forge；Table 4 含提升与回退"
+        },
+        {
+          "label": "Forge: A Scalable Agent RL Framework and Algorithm",
+          "url": "https://www.minimax.io/news/forge-scalable-agent-rl-framework-and-algorithm",
+          "evidence": "官方工程博客，结合后续报告核对 Windowed FIFO、Prefix Tree Merging 与加速适用范围"
+        },
+        {
+          "label": "MiniMax-M2.7 Official Release",
+          "url": "https://www.minimax.io/news/minimax-m27-en",
+          "evidence": "官方博客，公开信息有限：研究者指导下的工作流自报比例；不视为独立复现或无约束自改证据"
+        },
+        {
+          "label": "GLM-5: from Vibe Coding to Agentic Engineering",
+          "url": "https://arxiv.org/html/2602.15763",
+          "evidence": "原始报告：SFT/RL 阶段、interleaved/preserved thinking、TITO、slime、IcePop 与 Table 7"
+        },
+        {
+          "label": "GLM-5: On-Policy Cross-Stage Distillation, §3.5",
+          "url": "https://arxiv.org/html/2602.15763v1#S3.SS5",
+          "evidence": "原始公式：前序 checkpoint 教师、逐 token log-prob 差与 group size=1；非组内中心化"
+        },
+        {
+          "label": "Deliberative Alignment: Reasoning Enables Safer Language Models",
+          "url": "https://arxiv.org/html/2412.16339",
+          "evidence": "OpenAI 公开方法：规范推理数据 SFT 与带规范 judge 的 RL，不等于产品完整能力配方"
+        },
+        {
+          "label": "From Hard Refusals to Safe-Completions",
+          "url": "https://arxiv.org/html/2508.09224",
+          "evidence": "OpenAI 公开方法：最终回答的帮助性/安全评分与奖励门控；不保证评分器无误"
+        },
+        {
+          "label": "Gemini 2.5 Technical Report",
+          "url": "https://arxiv.org/html/2507.06261",
+          "evidence": "原始报告：SFT/RM/RL、多模态工具与可验证/生成式奖励；未据此核实固定优化器或 critic"
+        },
+        {
+          "label": "Constitutional AI: Harmlessness from AI Feedback",
+          "url": "https://arxiv.org/html/2212.08073",
+          "evidence": "Anthropic 公开历史方法：批评/修订监督学习与 AI 偏好 RL；不冒充 Claude 当前完整配方"
+        },
+        {
+          "label": "Training a Helpful and Harmless Assistant with RLHF",
+          "url": "https://arxiv.org/html/2204.05862",
+          "evidence": "Anthropic 历史公开人类偏好与反馈迭代证据，不推定后续产品沿用全部细节"
+        },
+        {
+          "label": "agentic-rl-analysis: 工业与 Agentic Training，固定提交 66ae4423",
+          "url": "https://github.com/xavierzhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch2",
+          "evidence": "二级材料：2.2、2.4、2.5、2.7、2.10 全文阅读；CISPO、MuonClip、调度和产品披露已按原文勘误"
+        }
+      ]
+    },
+    {
+      "id": "24",
+      "title": "跨模型经验、技术演进与方法选择",
+      "prerequisites": [
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23"
+      ],
+      "objectives": [
+        "按数据、反馈、信用和资源八个维度比较后训练方法",
+        "区分算法演进中的独立设计轴与历史时间顺序",
+        "把跨模型经验和作者观点转化为可检验的实验",
+        "在相同预算下设计有强基线的模型选择方案"
+      ],
+      "duration": 140,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：算法名是一组设计选择",
+          "bodyLength": 842,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：同样成功率背后的不同预算",
+          "bodyLength": 796,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：由梯度选方法，由配对证据选模型",
+          "bodyLength": 267,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "先诊断失败，再挑选干预",
+          "bodyLength": 314,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "统一分析框架与成对实验口径",
+          "bodyLength": 1333,
+          "questions": 0
+        },
+        {
+          "id": "math-objective-gradients",
+          "type": "derivation",
+          "title": "方法选择先写梯度：监督、偏好、奖励与教师分布",
+          "bodyLength": 2691,
+          "questions": 0
+        },
+        {
+          "id": "math-paired-inference",
+          "type": "derivation",
+          "title": "从逐题差值推导 McNemar、配对区间与 Holm",
+          "bodyLength": 2329,
+          "questions": 0
+        },
+        {
+          "id": "math-budget-design",
+          "type": "derivation",
+          "title": "固定预算下如何设计可归因的选型实验",
+          "bodyLength": 1510,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：先核对预算，再算成对差异",
+          "bodyLength": 696,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "五个挑战与九条观点该怎样检验",
+          "bodyLength": 734,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "方法速查与六条有边界的跨模型经验",
+          "bodyLength": 911,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "从 MDP 到蒸馏的二十问",
+          "bodyLength": 1026,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：为选择和归因负责",
+          "bodyLength": 19,
+          "questions": 5
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：推导目标并为实验结论负责",
+          "bodyLength": 25,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Post-Training 演进与观点（固定源版本）",
+          "url": "https://github.com/XavierZhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch3",
+          "evidence": "二级综述；作者观点在本章明确作为待检验假设"
+        },
+        {
+          "label": "PPO",
+          "url": "https://arxiv.org/abs/1707.06347",
+          "evidence": "原始目标和 2017 年时间点"
+        },
+        {
+          "label": "InstructGPT",
+          "url": "https://arxiv.org/abs/2203.02155",
+          "evidence": "经典偏好后训练实例"
+        },
+        {
+          "label": "DPO",
+          "url": "https://arxiv.org/abs/2305.18290",
+          "evidence": "原始偏好目标"
+        },
+        {
+          "label": "DeepSeekMath",
+          "url": "https://arxiv.org/abs/2402.03300",
+          "evidence": "GRPO 来源；奖励来源与优化算法应区分"
+        },
+        {
+          "label": "GLM-5",
+          "url": "https://arxiv.org/html/2602.15763v1#S3",
+          "evidence": "多阶段后训练和跨阶段蒸馏的工业实例"
+        }
+      ]
+    },
+    {
+      "id": "25",
+      "title": "Agentic RL：从生成答案到环境交互",
+      "prerequisites": [
+        "15",
+        "16",
+        "17"
+      ],
+      "objectives": [
+        "区分环境真实状态、工具观测、交互历史与策略输入",
+        "把 token 生成和工具执行对应到不同的动作粒度",
+        "手算多轮轨迹回报，区分终止、截断和三种 mask",
+        "用奖励信号质量、训练稳定性、探索效率和信用分配定位故障",
+        "读懂一条可用于训练的 agent rollout，而不把交互格式当成 RL 算法"
+      ],
+      "duration": 145,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：会查资料的助手与只交答案的考生",
+          "bodyLength": 810,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小完整任务：用两次查询找到蓝色箱子",
+          "bodyLength": 1293,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：从隐状态到可训练的工具轨迹",
+          "bodyLength": 390,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "两层闭环：交互循环与训练更新",
+          "bodyLength": 343,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "数学建模：从 POMDP 到 response-only 目标",
+          "bodyLength": 3125,
+          "questions": 0
+        },
+        {
+          "id": "math-belief",
+          "type": "derivation",
+          "title": "POMDP 手算：先预测下一状态，再用观测校正",
+          "bodyLength": 1566,
+          "questions": 0
+        },
+        {
+          "id": "math-action-masks",
+          "type": "derivation",
+          "title": "动作概率与 mask：三枚生成 token 的完整损失",
+          "bodyLength": 1994,
+          "questions": 0
+        },
+        {
+          "id": "math-smdp",
+          "type": "derivation",
+          "title": "SMDP：工具用时不等长时怎样折扣与 bootstrap",
+          "bodyLength": 1439,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：跑完 episode，再检查回报和掩码",
+          "bodyLength": 2927,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：看起来成功，不代表训练目标正确",
+          "bodyLength": 717,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "四大挑战：用现象与诊断指标组织问题",
+          "bodyLength": 785,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：Agentic RL 到底比回答题多了什么",
+          "bodyLength": 594,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：能否把一条交互轨迹记对",
+          "bodyLength": 42,
+          "questions": 6
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：belief、概率与时间边界",
+          "bodyLength": 36,
+          "questions": 3
+        }
+      ],
+      "sources": [
+        {
+          "label": "[1] Kaelbling et al.：Planning and acting in partially observable stochastic domains",
+          "url": "https://people.csail.mit.edu/lpk/papers/aij98-pomdp.pdf",
+          "evidence": "一手论文，1998；核对摘要与第 1、2 节。支持序贯决策、状态/观测区分与信念更新；不声称 LLM 的自然语言历史自动成为充分状态。"
+        },
+        {
+          "label": "[2] Sutton & Barto：Reinforcement Learning, Second Edition",
+          "url": "https://incompleteideas.net/book/the-book-2nd.html",
+          "evidence": "作者提供教材与修订 PDF；第 3 章及第 13 章为回报、策略梯度与 baseline 的基础来源。本章三步数值例和代码是原创教学演示。"
+        },
+        {
+          "label": "[3] ReAct: Synergizing Reasoning and Acting in Language Models",
+          "url": "https://arxiv.org/abs/2210.03629v3",
+          "evidence": "一手摘要，首次提交 2022-10-06，核验 v3。支持推理与行动交错；不把 ReAct 交互格式当作 RL 优化器或训练经历的证据。"
+        },
+        {
+          "label": "[4] Agentic RL Analysis：1.1 从推理 RL 到 Agentic RL（固定版本）",
+          "url": "https://github.com/xavierzhang2002/agentic-rl-analysis/blob/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/agentic-rl/ch1/1.1-overview.md",
+          "evidence": "二手选题与四挑战框架来源。纠正其 RL 单步假设表述，不复述缺少可复算编码表的论文数量/频率；证据账本见 docs/research/agentic-core-evidence.md。"
+        }
+      ]
+    },
+    {
+      "id": "26",
+      "title": "Agentic 奖励设计与训练稳定性",
+      "prerequisites": [
+        "17",
+        "20",
+        "25"
+      ],
+      "objectives": [
+        "按奖励、信用与稳定性故障定位核心方法和九个相关方向",
+        "解释 IGPO 的答案条件信号与 CM2 的依赖清单",
+        "说明 SeeUPO 的反向更新思路及其理论适用条件",
+        "用 ARLArena 的诊断维度和 VCPO 的 ESS 检查训练",
+        "推导动作无关 baseline 的无偏条件，识别同批估计偏差"
+      ],
+      "duration": 205,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：考试总分、过程清单与更新步长",
+          "bodyLength": 1592,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "三个手算例子：信息变化、清单得分与 ESS",
+          "bodyLength": 1433,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：奖励含义、梯度方向与分布校正",
+          "bodyLength": 363,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "先验收信号，再验收估计器",
+          "bodyLength": 331,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "数学拆解：IG、顺序更新与无偏基线",
+          "bodyLength": 3911,
+          "questions": 0
+        },
+        {
+          "id": "math-potential-shaping",
+          "type": "derivation",
+          "title": "Potential Shaping：展开望远镜，保留终点残差",
+          "bodyLength": 1640,
+          "questions": 0
+        },
+        {
+          "id": "math-entropy",
+          "type": "derivation",
+          "title": "Entropy 与 Information Gain：从定义到 logits 梯度",
+          "bodyLength": 1764,
+          "questions": 0
+        },
+        {
+          "id": "math-reward-noise",
+          "type": "derivation",
+          "title": "奖励噪声：零均值不够，必须条件零均值",
+          "bodyLength": 1652,
+          "questions": 0
+        },
+        {
+          "id": "math-suffix-is",
+          "type": "derivation",
+          "title": "后缀重要性采样：四条路径、支持条件与裁剪偏差",
+          "bodyLength": 1605,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：用未截断权重计算 ESS 与风险指标",
+          "bodyLength": 2387,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见误区：监督、无偏性与收敛不能混说",
+          "bodyLength": 1210,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "方法地图：九个相关方向各补哪一块",
+          "bodyLength": 2756,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：先问信号，再问分布，最后问更新",
+          "bodyLength": 764,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：判断改进到底发生在哪一层",
+          "bodyLength": 36,
+          "questions": 8
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：奖励不变性、噪声与后缀校正",
+          "bodyLength": 41,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "[1] Information Gain-based Policy Optimization: A Simple and Effective Approach for Multi-Turn Search Agents",
+          "url": "https://arxiv.org/abs/2510.14967v2",
+          "evidence": "一手摘要与正文第 3 节。首次 2025-10-16，v2 2026-03-24；核对平均 log probability 差、stop-gradient、独立归一化与 decision-token mask。标准答案和 outcome 仍是监督，不保证所有等终局奖励组均有非零优势。"
+        },
+        {
+          "label": "[2] CM2: Reinforcement Learning with Checklist Rewards for Multi-Turn and Multi-Step Agentic Tool Use",
+          "url": "https://arxiv.org/abs/2602.12268v2",
+          "evidence": "一手摘要与正文第 3 节、表 1。首次 2026-02-12，v2 2026-02-20；七项为清单字段，区分判据粒度与分配粒度，依赖及首次满足控制计分；论文机构不支持上游的字节跳动归属。"
+        },
+        {
+          "label": "[3] SeeUPO: Sequence-Level Agentic-RL with Convergence Guarantees",
+          "url": "https://arxiv.org/abs/2602.06554v1",
+          "evidence": "一手摘要、正文第 4 节及附录 A/B，2026-02-06 v1。反向顺序更新和后缀校正；收敛依赖特定模型、准确优势与理想 HAML 更新，不是任意多轮 POMDP/SGD 保证；不保留无依据的会议标签或错配增益。"
+        },
+        {
+          "label": "[4] ARLArena: A Unified Framework for Stable Agentic Reinforcement Learning",
+          "url": "https://arxiv.org/abs/2602.21534v3",
+          "evidence": "一手摘要及第 4、5 节。首次 2026-02-25，v3 2026-07-04；四维诊断与 SAMPO 组合，特别关注负优势低 ratio 序列。受控平台结果不是跨任务必要充分条件，聚合效果有任务差异。"
+        },
+        {
+          "label": "[5] Stable Asynchrony: Variance-Controlled Off-Policy RL for LLMs",
+          "url": "https://arxiv.org/abs/2602.17616v2",
+          "evidence": "一手摘要与第 3 节。首次 2026-02-19，v2 2026-03-02；VCPO 用未截断权重计算 ESS，相对 on-policy 参考比例的平方根缩放学习率，OPOB 含平方权重和梯度范数。总体基线公式不等于同 batch 有限样本严格无偏。"
+        },
+        {
+          "label": "[6] EDGE-GRPO: Entropy-Driven GRPO with Guided Error Correction for Advantage Diversity",
+          "url": "https://arxiv.org/abs/2507.21848v1",
+          "evidence": "一手摘要，首次 2025-07-29，核验 v1。熵驱动优势与引导纠错共同改善信号；不是普通 entropy bonus 的别名，推理基准证据不直接保证真实工具任务收益。"
+        },
+        {
+          "label": "[7] Learn Hard Problems During RL with Reference Guided Fine-tuning",
+          "url": "https://arxiv.org/abs/2603.01223v2",
+          "evidence": "一手摘要。首次 2026-03-01，v2 2026-03-05；ReGFT 用部分参考解引导生成可模仿正轨迹，在 RL 前进行 SFT。不是新 on-policy 更新器，也不等于无额外监督。"
+        },
+        {
+          "label": "[8] Policy Filtration for RLHF to Mitigate Noise in Reward Models",
+          "url": "https://arxiv.org/abs/2409.06957v5",
+          "evidence": "一手摘要。首次 2024-09-11，v5 2025-06-07；PF-PPO 研究奖励噪声与过滤，用 reward 和实际成绩的 R2 评估过滤策略。摘要不支持逐样本精确 uncertainty 的简化，过滤改变训练分布。"
+        },
+        {
+          "label": "[9] ZeroSearch: Incentivize the Search Capability of LLMs without Searching",
+          "url": "https://arxiv.org/abs/2505.04588v3",
+          "evidence": "一手摘要。首次 2025-05-07，v3 2026-05-19；SFT 检索模拟器生成有用及噪声文档，并逐渐降低质量形成课程。不能解释为无监督、训练零成本或推理无需真实搜索。"
+        },
+        {
+          "label": "[10] Depth-Breadth Synergy in RLVR: Unlocking LLM Reasoning Gains with Adaptive Exploration",
+          "url": "https://arxiv.org/abs/2508.13755v8",
+          "evidence": "一手摘要。首次 2025-08-19，v8 2026-04-12；DARS 和 DARS-Breadth 区分定向深度探索与实例广度。增加采样不等于单次性能必然提高，需记录计算预算和训练分布。"
+        },
+        {
+          "label": "[11] ProRL: Prolonged Reinforcement Learning Expands Reasoning Boundaries in Large Language Models",
+          "url": "https://arxiv.org/abs/2505.24864v1",
+          "evidence": "一手摘要，首次 2025-05-30，核验 v1。长期训练配合 KL 控制、reference 重置和任务多样性；reference 重置不是 behavior policy 刷新，有限样本未解出不证明成功概率为零。"
+        },
+        {
+          "label": "[12] Geometric-Mean Policy Optimization",
+          "url": "https://arxiv.org/abs/2507.20673v3",
+          "evidence": "一手摘要、正文第 3 节式 (3)-(6) 与 Algorithm 1。首次 2025-07-28，v3 2025-10-18；GMPO 的符号处理、log-space 几何聚合和 token-level clipping，不能简化成负奖励直接求几何均值或 GSPO。"
+        },
+        {
+          "label": "[13] The Optimal Token Baseline: Variance Reduction for Long-Horizon LLM-RL",
+          "url": "https://arxiv.org/abs/2602.07078v2",
+          "evidence": "一手摘要及第 3 节。首次 2026-02-06，v2 2026-06-21；OTB 关注梯度异质性，用前向概率构造 Logit-Gradient Proxy，不是精确全参数梯度范数，也不是 OPOB 同名方法。"
+        },
+        {
+          "label": "[14] Dr. MAS: Stable Reinforcement Learning for Multi-Agent LLM Systems",
+          "url": "https://arxiv.org/abs/2602.08847v1",
+          "evidence": "一手摘要，首次 2026-02-09，核验 v1。按 agent 自身 reward 统计归一化优势，处理全局统计失配；不保证解决所有多智能体非平稳性或全局最优。"
+        },
+        {
+          "label": "[15] Agentic RL Analysis：1.2 奖励信号与训练稳定性（固定版本）",
+          "url": "https://github.com/xavierzhang2002/agentic-rl-analysis/blob/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/agentic-rl/ch1/1.2-reward-stability.md",
+          "evidence": "二手覆盖来源，不承担论文机制与数值的独立证据。已读完整原文并逐项核验 14 个论文名称；题名、机构、版本、收敛和监督边界的纠错见 docs/research/agentic-core-evidence.md。"
+        }
+      ]
+    },
+    {
+      "id": "27",
+      "title": "探索与信用分配",
+      "prerequisites": [
+        "15",
+        "17",
+        "25",
+        "26"
+      ],
+      "objectives": [
+        "区分探索不足与信用分配失真，并选择对应的干预",
+        "手算 GiGPO 锚点优势和 ProxMO 相似度加权基线",
+        "解释 EMPO² 记忆内化与 LUFFY 外部轨迹引导",
+        "说明 ELPO 有限预算定位、树采样与 Monte Carlo 信号的代价",
+        "按状态可比性、奖励可靠性和环境重放成本选择方法"
+      ],
+      "duration": 180,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先分清：没有找到好路线，还是奖错了步骤",
+          "bodyLength": 1084,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小手算：同一个状态，三条后续路线",
+          "bodyLength": 1238,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：先找到信号，再比较可比的动作",
+          "bodyLength": 359,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从探索入口到局部优势的闭环",
+          "bodyLength": 446,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "推导：状态基线、塑形权重与错误定位",
+          "bodyLength": 3622,
+          "questions": 0
+        },
+        {
+          "id": "math-credit-baselines",
+          "type": "derivation",
+          "title": "两级信用与 baseline：从手算到梯度方差",
+          "bodyLength": 1960,
+          "questions": 0
+        },
+        {
+          "id": "math-neighbor-boundaries",
+          "type": "derivation",
+          "title": "锚点碰撞与软邻居：覆盖率换来了什么偏差",
+          "bodyLength": 1671,
+          "questions": 0
+        },
+        {
+          "id": "math-exploration-sparsity",
+          "type": "derivation",
+          "title": "探索与梯度稀疏：成功覆盖不等于可用相对优势",
+          "bodyLength": 1460,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：算出硬分组与软基线",
+          "bodyLength": 2565,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "实现检查：可比较不等于因果等价",
+          "bodyLength": 836,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "十二种方法：信号从哪里增加",
+          "bodyLength": 1383,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：把方法落到数据、信号与成本",
+          "bodyLength": 705,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：候选集合、概率与证据",
+          "bodyLength": 26,
+          "questions": 6
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：两级优势、邻居与探索预算",
+          "bodyLength": 31,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "EMPO²: Exploratory Memory-Augmented LLM Agent",
+          "url": "https://arxiv.org/html/2602.23008v1#S4",
+          "evidence": "原论文：tips 检索、混合 on/off-policy 内化与探索；不搬运相对提升数字"
+        },
+        {
+          "label": "LUFFY: Learning to Reason under Off-Policy Guidance",
+          "url": "https://arxiv.org/html/2504.14945v1#S2",
+          "evidence": "原论文：混合轨迹组、regularized importance sampling 与 policy shaping"
+        },
+        {
+          "label": "GiGPO: Group-in-Group Policy Optimization",
+          "url": "https://arxiv.org/html/2505.10978v1#S4",
+          "evidence": "原论文：hashmap 锚点分组、折扣回报、episode 与 step 优势组合"
+        },
+        {
+          "label": "ELPO: Learning from the Irrecoverable",
+          "url": "https://arxiv.org/html/2602.09598v1#S4",
+          "evidence": "原论文：固定预算 BEL、分支比较和关键步骤及后缀的下侧裁剪放宽"
+        },
+        {
+          "label": "ProxMO: Proximity-Based Multi-Turn Optimization",
+          "url": "https://arxiv.org/html/2602.19225v1#S3",
+          "evidence": "原论文：PSC、TF-IDF cosine PSA；同任务同一步候选可包含自身"
+        },
+        {
+          "label": "TreePO: Tree-Based Policy Optimization",
+          "url": "https://arxiv.org/abs/2508.17445",
+          "evidence": "原论文摘要：动态树采样、固定长度片段与片段级优势，非单纯缓存优化"
+        },
+        {
+          "label": "LADDER: Autonomous Difficulty-Driven Example Recursion",
+          "url": "https://arxiv.org/abs/2503.00735v3",
+          "evidence": "原论文摘要：递归构造简单变体；原始应用是数学积分"
+        },
+        {
+          "label": "SGE: Strategy-Guided Exploration",
+          "url": "https://arxiv.org/abs/2603.02045",
+          "evidence": "原论文摘要：高层策略、混合温度和策略反思"
+        },
+        {
+          "label": "SSRL: Self-Search Reinforcement Learning",
+          "url": "https://arxiv.org/abs/2508.10874",
+          "evidence": "原论文摘要：内部知识模拟搜索、格式与规则奖励及 sim-to-real 评估"
+        },
+        {
+          "label": "R1-VL: Step-wise Group Relative Policy Optimization",
+          "url": "https://arxiv.org/html/2503.12937v2",
+          "evidence": "原论文：StepRAR 与 StepRVR；以正文纠正摘要中的缩写重复"
+        },
+        {
+          "label": "ARPO: Agentic Reinforced Policy Optimization",
+          "url": "https://arxiv.org/abs/2507.19849",
+          "evidence": "原论文摘要：熵引导局部采样、整轨迹与步骤预算平衡、优势归因"
+        },
+        {
+          "label": "VinePPO: Monte Carlo Value Estimation for Reasoning",
+          "url": "https://arxiv.org/html/2410.01679v2#S4",
+          "evidence": "原论文：前缀重放的 Monte Carlo 价值估计替代学习型 critic"
+        }
+      ]
+    },
+    {
+      "id": "28",
+      "title": "环境合成与训练系统",
+      "prerequisites": [
+        "11",
+        "17",
+        "23",
+        "25",
+        "26",
+        "27"
+      ],
+      "objectives": [
+        "把训练样本拆成任务、环境、验证器与轨迹四种产物",
+        "设计 SWE、Terminal 和 Search 的合成与验收流程",
+        "检查异步轨迹的 token、版本、上下文与损失掩码",
+        "区分 IcePop 训推校正、PPO 更新裁剪及离散路由一致性",
+        "计算 partial rollout、前缀共享与多 Agent 并行的收益边界"
+      ],
+      "duration": 190,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：考题、考场、阅卷规则和答题记录",
+          "bodyLength": 1096,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：三类任务怎样变成可训练数据",
+          "bodyLength": 1459,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：概率一致性与系统账单一起验收",
+          "bodyLength": 384,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "从任务工厂到异步更新",
+          "bodyLength": 579,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "推导：版本滞后、IcePop 与并行关键路径",
+          "bodyLength": 3470,
+          "questions": 0
+        },
+        {
+          "id": "math-async-ratios",
+          "type": "derivation",
+          "title": "异步两层比率：支持、detach 与错误梯度反例",
+          "bodyLength": 1897,
+          "questions": 0
+        },
+        {
+          "id": "math-queue-throughput",
+          "type": "derivation",
+          "title": "Little 定律与有效吞吐：先统一系统边界和单位",
+          "bodyLength": 1774,
+          "questions": 0
+        },
+        {
+          "id": "math-prefix-reuse",
+          "type": "derivation",
+          "title": "可复用前缀：省计算，不去重样本权重",
+          "bodyLength": 1694,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：训练入口拒绝错位轨迹",
+          "bodyLength": 4909,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "常见故障：概率对齐前先检查离散路径",
+          "bodyLength": 1089,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "三组取舍：生成什么、复用什么、并行什么",
+          "bodyLength": 1802,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "面试表达：为什么 Agent RL 首先是数据协议问题",
+          "bodyLength": 837,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "自测：发现那些不会直接报错的错位",
+          "bodyLength": 25,
+          "questions": 7
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "白板练习：异步梯度、吞吐与共享前缀",
+          "bodyLength": 32,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "GLM-5: Agentic RL Infrastructure and Environments, §4",
+          "url": "https://arxiv.org/html/2602.15763v1#S4",
+          "evidence": "原始报告：异步、TITO、版本过滤、SWE/Terminal/Search 任务生产与直接比率 masking"
+        },
+        {
+          "label": "GLM-5: Train-Inference Consistency, §3.2",
+          "url": "https://arxiv.org/html/2602.15763v1#S3.SS2",
+          "evidence": "原始报告：IcePop 采用版本、DSA indexer 与离散计算路径；不推广为全平台确定性"
+        },
+        {
+          "label": "IcePop: Official Method Note",
+          "url": "https://ringtech.notion.site/icepop",
+          "evidence": "原始官方博客：双边训推校正；原版上下界不必互为倒数"
+        },
+        {
+          "label": "PyTorch torch.topk API",
+          "url": "https://docs.pytorch.org/docs/stable/generated/torch.topk.html",
+          "evidence": "官方文档：平分元素索引不保证稳定，sorted=True 不提供稳定 tie-break 保证"
+        },
+        {
+          "label": "Stabilizing MoE RL by Aligning Training and Inference Routers",
+          "url": "https://arxiv.org/abs/2510.11370v2",
+          "evidence": "原论文摘要：记录推理路由并在训练中 replay，与损失端校正互补"
+        },
+        {
+          "label": "SWE-bench Evaluation Guide",
+          "url": "https://www.swebench.com/SWE-bench/guides/evaluation/",
+          "evidence": "官方 harness 文档：真实仓库应用补丁、运行测试并区分基础设施错误"
+        },
+        {
+          "label": "Harbor Task Tutorial",
+          "url": "https://harborframework.com/docs/tasks/task-tutorial",
+          "evidence": "官方任务结构：说明、环境、参考解和测试；Oracle 用于检查可解性"
+        },
+        {
+          "label": "Kimi K2 Technical Report",
+          "url": "https://arxiv.org/html/2507.20534v2",
+          "evidence": "原始报告：工具规范、Agent/任务/轨迹合成，RLVR 与 self-critique rubric reward"
+        },
+        {
+          "label": "Kimi K1.5: Partial Rollout",
+          "url": "https://arxiv.org/html/2501.12599v1",
+          "evidence": "原始报告：保存未完成响应、跨迭代续写和选择性片段 loss mask"
+        },
+        {
+          "label": "Forge: Scalable Agent RL Framework and Algorithm",
+          "url": "https://www.minimax.io/news/forge-scalable-agent-rl-framework-and-algorithm",
+          "evidence": "官方博客：解耦系统与前缀共享；系统数值不作为通用加速承诺"
+        },
+        {
+          "label": "The MiniMax-M2 Series: Data and Forge",
+          "url": "https://arxiv.org/html/2605.26494v1",
+          "evidence": "后续官方报告：问题改写与证据规范、Windowed FIFO、prefix tree merging 的逐样本损失"
+        },
+        {
+          "label": "Kimi K2.5: Agent Swarm and PARL",
+          "url": "https://arxiv.org/html/2602.02276v2#S3",
+          "evidence": "原始报告：固定子 Agent、训练编排器、辅助奖励退火和 CriticalSteps"
+        },
+        {
+          "label": "ABE: Automated Build Environments",
+          "url": "https://arxiv.org/abs/2508.08791v3",
+          "evidence": "原论文摘要：场景分解、函数集成、复杂度扩展与本地可执行工具环境"
+        },
+        {
+          "label": "Agent World Model",
+          "url": "https://arxiv.org/abs/2602.10090v3",
+          "evidence": "原论文摘要：代码与数据库支撑的可执行环境，不是纯文本模拟工具输出"
+        },
+        {
+          "label": "ASTRA",
+          "url": "https://arxiv.org/abs/2601.21558v2",
+          "evidence": "原论文摘要：工具调用图、可执行规则环境与 SFT/在线 RL"
+        },
+        {
+          "label": "GEM: Unlocking Implicit Experience",
+          "url": "https://arxiv.org/abs/2601.10355",
+          "evidence": "原论文摘要：从文本经验合成工具轨迹并训练 Trajectory Synthesizer，非同名环境框架"
+        }
+      ]
+    },
+    {
+      "id": "29",
+      "title": "Agentic RL 全景、路线判断与综合面试",
+      "prerequisites": [
+        "24",
+        "25",
+        "26",
+        "27",
+        "28"
+      ],
+      "objectives": [
+        "按挑战和干预位置检索 Agentic RL 方法",
+        "比较算法修复、问题重建模与数据环境三条路线",
+        "用评估协议区分实际能力、系统加速和代理奖励上升",
+        "完成一个多轮 Agent 训练项目的方案答辩"
+      ],
+      "duration": 120,
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "title": "先建立直觉：从论文地图回到真实任务",
+          "bodyLength": 573,
+          "questions": 0
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "title": "最小例子：搜索 Agent 的两种成功",
+          "bodyLength": 722,
+          "questions": 0
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "title": "知识路线：把一个 Agent 项目写成可检验的目标",
+          "bodyLength": 351,
+          "questions": 0
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "title": "三条路线与一个共同验收出口",
+          "bodyLength": 324,
+          "questions": 0
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "title": "联合成功、预算与可靠性的定义",
+          "bodyLength": 1201,
+          "questions": 0
+        },
+        {
+          "id": "math-training-objective",
+          "type": "derivation",
+          "title": "端到端目标：从终局判定到一次可复算更新",
+          "bodyLength": 3327,
+          "questions": 0
+        },
+        {
+          "id": "math-budget-lagrange",
+          "type": "derivation",
+          "title": "约束预算：为什么超支时乘子应上升",
+          "bodyLength": 1941,
+          "questions": 0
+        },
+        {
+          "id": "math-aggregate-evaluation",
+          "type": "derivation",
+          "title": "聚合评估：联合成功、配对不确定性与单位成本",
+          "bodyLength": 2306,
+          "questions": 0
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "title": "代码实验：给一次 Agent 评估定义可复算指标",
+          "bodyLength": 811,
+          "questions": 0
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "title": "六条未来判断如何保留价值而不变成断言",
+          "bodyLength": 661,
+          "questions": 0
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "title": "按失败位置检索方法与工程路线",
+          "bodyLength": 915,
+          "questions": 0
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "title": "综合答辩：设计一个研究助手的训练方案",
+          "bodyLength": 744,
+          "questions": 0
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "title": "最终自测：从懂名词到可验证方案",
+          "bodyLength": 21,
+          "questions": 5
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "title": "毕业白板：训练目标、预算与统计答辩",
+          "bodyLength": 37,
+          "questions": 4
+        }
+      ],
+      "sources": [
+        {
+          "label": "Agentic RL 全景与作者预测（固定源版本）",
+          "url": "https://github.com/XavierZhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/agentic-rl",
+          "evidence": "二级综述与作者观点；统计样本不可完整复算时不外推"
+        },
+        {
+          "label": "GLM-5",
+          "url": "https://arxiv.org/abs/2602.15763",
+          "evidence": "公开 Agent 训练系统实例，受报告任务与版本约束"
+        },
+        {
+          "label": "Kimi K2",
+          "url": "https://arxiv.org/abs/2507.20534",
+          "evidence": "工具数据合成与 Agent 训练技术报告"
+        },
+        {
+          "label": "Evaluating Large Language Models Trained on Code",
+          "url": "https://arxiv.org/abs/2107.03374",
+          "evidence": "pass@k 指标的经典来源；Agent 场景需另外说明相关性和验证机制"
+        },
+        {
+          "label": "verl",
+          "url": "https://github.com/volcengine/verl",
+          "evidence": "开源训练系统入口，不代表已复现任意论文成绩"
+        },
+        {
+          "label": "OpenRLHF",
+          "url": "https://github.com/OpenRLHF/OpenRLHF",
+          "evidence": "开源训练框架入口"
+        },
+        {
+          "label": "slime",
+          "url": "https://github.com/THUDM/slime",
+          "evidence": "rollout 与训练编排系统入口"
+        }
+      ]
+    }
+  ],
+  "uniqueSources": [
+    "https://github.com/XavierZhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329",
+    "https://arxiv.org/html/2602.15763v1#S2.SS3",
+    "https://www.deeplearningbook.org/",
+    "https://d2l.ai/",
+    "https://numpy.org/doc/stable/user/basics.broadcasting.html",
+    "https://pytorch.org/docs/stable/tensor_view.html",
+    "https://mml-book.github.io/",
+    "https://d2l.ai/chapter_preliminaries/calculus.html",
+    "https://onlinelibrary.wiley.com/doi/book/10.1002/047174882X",
+    "https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf",
+    "https://d2l.ai/chapter_preliminaries/probability.html",
+    "https://scikit-learn.org/stable/modules/model_evaluation.html",
+    "https://developers.google.com/machine-learning/guides/rules-of-ml",
+    "https://hastie.su.domains/ElemStatLearn/",
+    "https://www.deeplearningbook.org/contents/mlp.html",
+    "https://www.jmlr.org/papers/v18/17-468.html",
+    "https://arxiv.org/abs/1412.6980",
+    "https://arxiv.org/abs/1711.05101",
+    "https://arxiv.org/abs/1502.01852",
+    "https://proceedings.mlr.press/v9/glorot10a.html",
+    "https://arxiv.org/abs/1502.03167",
+    "https://arxiv.org/abs/1607.06450",
+    "https://www.deeplearningbook.org/contents/convnets.html",
+    "https://arxiv.org/abs/1406.1078",
+    "https://arxiv.org/abs/1512.03385",
+    "https://www.bioinf.jku.at/publications/older/2604.pdf",
+    "https://doi.org/10.1162/089976600300015015",
+    "https://arxiv.org/abs/1706.03762",
+    "https://arxiv.org/abs/1508.07909",
+    "https://arxiv.org/abs/1808.06226",
+    "https://arxiv.org/abs/1804.10959",
+    "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf",
+    "https://arxiv.org/abs/1608.05859",
+    "https://arxiv.org/abs/2002.04745",
+    "https://nlp.seas.harvard.edu/annotated-transformer/",
+    "https://arxiv.org/abs/2005.14165",
+    "https://arxiv.org/abs/2002.05202",
+    "https://arxiv.org/abs/2101.03961",
+    "https://arxiv.org/abs/2104.09864",
+    "https://arxiv.org/abs/2108.12409",
+    "https://arxiv.org/abs/2309.00071",
+    "https://arxiv.org/abs/1910.07467",
+    "https://arxiv.org/abs/2305.13245",
+    "https://arxiv.org/abs/2405.04434",
+    "https://arxiv.org/abs/2312.00752",
+    "https://arxiv.org/abs/2502.11089",
+    "https://arxiv.org/abs/1710.03740",
+    "https://arxiv.org/abs/1910.02054",
+    "https://pytorch.org/docs/stable/fsdp.html",
+    "https://arxiv.org/abs/2205.14135",
+    "https://arxiv.org/abs/2309.06180",
+    "https://arxiv.org/abs/2106.09685",
+    "https://arxiv.org/abs/2305.14314",
+    "https://arxiv.org/abs/2303.10512",
+    "https://arxiv.org/abs/2402.09353",
+    "https://huggingface.co/docs/peft/main/en/package_reference/lora",
+    "http://incompleteideas.net/book/RLbook2020.pdf",
+    "https://press.princeton.edu/books/paperback/9780691146683/dynamic-programming",
+    "https://spinningup.openai.com/en/latest/spinningup/rl_intro.html",
+    "http://www.cs.rhul.ac.uk/~chrisw/new_thesis.pdf",
+    "https://www.nature.com/articles/nature14236",
+    "https://arxiv.org/abs/1509.06461",
+    "https://arxiv.org/abs/1511.06581",
+    "https://link.springer.com/article/10.1007/BF00992696",
+    "https://proceedings.neurips.cc/paper/1999/hash/464d828b85b0bed98e80ade0a5c43b0f-Abstract.html",
+    "https://arxiv.org/abs/1506.02438",
+    "https://spinningup.openai.com/en/latest/algorithms/vpg.html",
+    "https://arxiv.org/abs/1502.05477",
+    "https://joschu.net/blog/kl-approx.html",
+    "https://arxiv.org/abs/2212.08073",
+    "https://arxiv.org/abs/1707.06347",
+    "https://arxiv.org/abs/2009.01325",
+    "https://arxiv.org/abs/2203.02155",
+    "https://arxiv.org/abs/2402.03300",
+    "https://arxiv.org/abs/2503.14476",
+    "https://arxiv.org/abs/2503.20783",
+    "https://arxiv.org/abs/2507.18071",
+    "https://arxiv.org/abs/2402.14740",
+    "https://arxiv.org/abs/2501.03262",
+    "https://arxiv.org/abs/2412.15115",
+    "https://arxiv.org/abs/2501.08313",
+    "https://arxiv.org/abs/2305.18290",
+    "https://arxiv.org/abs/2310.12036",
+    "https://arxiv.org/abs/2402.01306",
+    "https://arxiv.org/abs/2403.07691",
+    "https://arxiv.org/abs/2405.14734",
+    "https://arxiv.org/html/2602.15763v1#S3.SS5",
+    "https://arxiv.org/abs/2306.13649",
+    "https://arxiv.org/abs/2601.18734",
+    "https://arxiv.org/abs/2604.03128",
+    "https://arxiv.org/abs/2604.13010",
+    "https://arxiv.org/abs/2607.02234",
+    "https://arxiv.org/abs/2607.18955",
+    "https://arxiv.org/abs/2607.05184",
+    "https://arxiv.org/html/2402.03300",
+    "https://arxiv.org/abs/2503.01491",
+    "https://arxiv.org/html/2504.05118v1#S4",
+    "https://arxiv.org/html/2506.13585v1#S3.SS1",
+    "https://arxiv.org/html/2507.18071v2#S4",
+    "https://arxiv.org/html/2511.20347v1#S3",
+    "https://arxiv.org/html/2510.11370v1#S4",
+    "https://raw.githubusercontent.com/volcengine/verl/main/examples/router_replay/README.md",
+    "https://arxiv.org/abs/2502.01456",
+    "https://arxiv.org/abs/2212.10560",
+    "https://arxiv.org/abs/2304.12244",
+    "https://arxiv.org/abs/2312.02120",
+    "https://arxiv.org/abs/2410.24198",
+    "https://arxiv.org/abs/2408.14774",
+    "https://arxiv.org/html/2404.05875",
+    "https://arxiv.org/html/2504.21798v1",
+    "https://arxiv.org/abs/2502.14948",
+    "https://arxiv.org/abs/2603.15957",
+    "https://arxiv.org/abs/2203.14465",
+    "https://arxiv.org/html/2509.07414v3",
+    "https://arxiv.org/html/2602.01137v1",
+    "https://arxiv.org/html/2406.17557",
+    "https://arxiv.org/html/2506.03524v2",
+    "https://arxiv.org/html/2305.10429",
+    "https://arxiv.org/html/2107.03374",
+    "https://arxiv.org/html/2501.12948v1",
+    "https://arxiv.org/html/2505.09388v1",
+    "https://arxiv.org/html/2501.12948",
+    "https://arxiv.org/html/2412.19437",
+    "https://arxiv.org/html/2512.02556",
+    "https://arxiv.org/html/2412.15115",
+    "https://arxiv.org/html/2505.09388",
+    "https://www.alibabacloud.com/blog/qwen3-5-towards-native-multimodal-agents_602894",
+    "https://arxiv.org/html/2507.18071",
+    "https://arxiv.org/html/2511.20347",
+    "https://arxiv.org/html/2503.14476",
+    "https://arxiv.org/html/2504.05118",
+    "https://arxiv.org/html/2504.13914",
+    "https://arxiv.org/html/2506.03524",
+    "https://seed.bytedance.com/en/blog/seed-2-0-official-launch",
+    "https://arxiv.org/abs/2607.00248v1",
+    "https://github.com/xavierzhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch2",
+    "https://arxiv.org/html/2503.19786v1",
+    "https://arxiv.org/html/2501.12599",
+    "https://arxiv.org/html/2507.20534",
+    "https://arxiv.org/html/2602.02276",
+    "https://arxiv.org/html/2501.08313",
+    "https://arxiv.org/html/2506.13585",
+    "https://arxiv.org/html/2605.26494v1",
+    "https://www.minimax.io/news/forge-scalable-agent-rl-framework-and-algorithm",
+    "https://www.minimax.io/news/minimax-m27-en",
+    "https://arxiv.org/html/2602.15763",
+    "https://arxiv.org/html/2412.16339",
+    "https://arxiv.org/html/2508.09224",
+    "https://arxiv.org/html/2507.06261",
+    "https://arxiv.org/html/2212.08073",
+    "https://arxiv.org/html/2204.05862",
+    "https://github.com/XavierZhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/post-training/ch3",
+    "https://arxiv.org/html/2602.15763v1#S3",
+    "https://people.csail.mit.edu/lpk/papers/aij98-pomdp.pdf",
+    "https://incompleteideas.net/book/the-book-2nd.html",
+    "https://arxiv.org/abs/2210.03629v3",
+    "https://github.com/xavierzhang2002/agentic-rl-analysis/blob/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/agentic-rl/ch1/1.1-overview.md",
+    "https://arxiv.org/abs/2510.14967v2",
+    "https://arxiv.org/abs/2602.12268v2",
+    "https://arxiv.org/abs/2602.06554v1",
+    "https://arxiv.org/abs/2602.21534v3",
+    "https://arxiv.org/abs/2602.17616v2",
+    "https://arxiv.org/abs/2507.21848v1",
+    "https://arxiv.org/abs/2603.01223v2",
+    "https://arxiv.org/abs/2409.06957v5",
+    "https://arxiv.org/abs/2505.04588v3",
+    "https://arxiv.org/abs/2508.13755v8",
+    "https://arxiv.org/abs/2505.24864v1",
+    "https://arxiv.org/abs/2507.20673v3",
+    "https://arxiv.org/abs/2602.07078v2",
+    "https://arxiv.org/abs/2602.08847v1",
+    "https://github.com/xavierzhang2002/agentic-rl-analysis/blob/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/agentic-rl/ch1/1.2-reward-stability.md",
+    "https://arxiv.org/html/2602.23008v1#S4",
+    "https://arxiv.org/html/2504.14945v1#S2",
+    "https://arxiv.org/html/2505.10978v1#S4",
+    "https://arxiv.org/html/2602.09598v1#S4",
+    "https://arxiv.org/html/2602.19225v1#S3",
+    "https://arxiv.org/abs/2508.17445",
+    "https://arxiv.org/abs/2503.00735v3",
+    "https://arxiv.org/abs/2603.02045",
+    "https://arxiv.org/abs/2508.10874",
+    "https://arxiv.org/html/2503.12937v2",
+    "https://arxiv.org/abs/2507.19849",
+    "https://arxiv.org/html/2410.01679v2#S4",
+    "https://arxiv.org/html/2602.15763v1#S4",
+    "https://arxiv.org/html/2602.15763v1#S3.SS2",
+    "https://ringtech.notion.site/icepop",
+    "https://docs.pytorch.org/docs/stable/generated/torch.topk.html",
+    "https://arxiv.org/abs/2510.11370v2",
+    "https://www.swebench.com/SWE-bench/guides/evaluation/",
+    "https://harborframework.com/docs/tasks/task-tutorial",
+    "https://arxiv.org/html/2507.20534v2",
+    "https://arxiv.org/html/2501.12599v1",
+    "https://arxiv.org/html/2602.02276v2#S3",
+    "https://arxiv.org/abs/2508.08791v3",
+    "https://arxiv.org/abs/2602.10090v3",
+    "https://arxiv.org/abs/2601.21558v2",
+    "https://arxiv.org/abs/2601.10355",
+    "https://github.com/XavierZhang2002/agentic-rl-analysis/tree/66ae4423b36270ef50a288fb1bb2e1b31c46c329/docs/agentic-rl",
+    "https://arxiv.org/abs/2602.15763",
+    "https://arxiv.org/abs/2507.20534",
+    "https://arxiv.org/abs/2107.03374",
+    "https://github.com/volcengine/verl",
+    "https://github.com/OpenRLHF/OpenRLHF",
+    "https://github.com/THUDM/slime"
+  ]
+}

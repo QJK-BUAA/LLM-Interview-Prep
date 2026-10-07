@@ -5,8 +5,8 @@ const chapter = {
   title: "Transformer 从零到完整前向过程",
   subtitle: "沿着 shape 看懂注意力、残差与语言模型损失",
   level: "核心",
-  duration: 130,
-  prerequisites: ["01", "05", "08"],
+  duration: 150,
+  prerequisites: ["01", "05", "06", "08"],
   tags: ["Transformer", "Self-Attention", "Mask", "FFN", "Causal LM"],
   objectives: [
     "手算缩放点积注意力和因果 mask",
@@ -244,37 +244,76 @@ $$J_N=\frac{\operatorname{diag}(\gamma)}r
     {
       id: "code",
       type: "code",
-      title: "代码实验：紧凑的 decoder block 伪代码",
-      body: String.raw`下面省略 bias、dropout 与设备细节，但保留关键 shape。transpose 后必须在合并头前换回序列轴，否则元素数虽正确，语义却错位。
+      title: "代码实验：从二值 mask 到完整 decoder-only 前向",
+      body: String.raw`接第 08 章的 input_ids 和 0/1 attention_mask，两者都是 $[B,S]$。本例使用绝对位置 embedding 与 Pre-LN；第 10 章再讨论 RoPE 和 RMSNorm。下面省略训练循环与缓存，保留整网前向、全屏蔽行约定和一次标签错位。
+
+model 持有 token_embedding、position_embedding、blocks、final_norm、lm_head。每个 block 的 norm1/norm2 是 LayerNorm，qkv 是 $H\to3H$ 线性层，wo 是 $H\to H$，ffn 是 $H\to F\to H$ 的逐位置非线性网络，num_heads 为头数；这些都是通常的 PyTorch 模块。位置表需覆盖本次有效长度。transpose 后先换回序列轴再 reshape，不能只凭元素数合并头。
 
 ~~~python
-def decoder_block(x, attention_mask, parameters):
-    # x: [B, S, H], H = N * D
-    residual = x
-    x_norm = rms_norm(x, parameters.norm1)
+import math
+import torch
+import torch.nn.functional as F
 
-    q = linear(x_norm, parameters.wq)  # [B, S, H]
-    k = linear(x_norm, parameters.wk)
-    v = linear(x_norm, parameters.wv)
+def attention_weights(scores, key_mask):
+    # scores: [B, N, S, S]; key_mask: bool [B, S]
+    S = scores.shape[-1]
+    causal = torch.ones(S, S, dtype=torch.bool,
+                        device=scores.device).tril()
+    allowed = (causal[None, None, :, :]
+               & key_mask[:, None, None, :]
+               & key_mask[:, None, :, None])
+    has_key = allowed.any(dim=-1, keepdim=True)
+    masked = scores.float().masked_fill(~allowed, -torch.inf)
+    # 全屏蔽 query 先设有限分数，softmax 后明确置零。
+    safe = torch.where(has_key, masked, torch.zeros_like(masked))
+    return safe.softmax(dim=-1).masked_fill(~allowed, 0)
 
-    q = split_heads(q)  # [B, N, S, D]
-    k = split_heads(k)
-    v = split_heads(v)
+def decoder_block(x, key_mask, parameters):
+    B, S, H = x.shape
+    N = parameters.num_heads
+    assert H % N == 0
+    D = H // N
+    q, k, v = parameters.qkv(parameters.norm1(x)).chunk(3, dim=-1)
+    q, k, v = [z.reshape(B, S, N, D).transpose(1, 2)
+               for z in (q, k, v)]
+    scores = q.float() @ k.float().transpose(-2, -1) / math.sqrt(D)
+    weights = attention_weights(scores, key_mask)
+    context = (weights @ v.float()).to(x.dtype)
+    context = context.transpose(1, 2).reshape(B, S, H)
+    x = x + parameters.wo(context)
+    x = x + parameters.ffn(parameters.norm2(x))
+    return x.masked_fill(~key_mask[:, :, None], 0)
 
-    scores = matmul(q, transpose_last_two(k)) / sqrt(q.shape[-1])
-    scores = scores + causal_mask(scores) + attention_mask
-    weights = softmax(scores, axis=-1)
-    context = matmul(weights, v)  # [B, N, S, D]
+def decoder_lm(input_ids, attention_mask, model):
+    assert input_ids.shape == attention_mask.shape
+    assert torch.all((attention_mask == 0) | (attention_mask == 1))
+    key_mask = attention_mask.bool()
+    # 左/右 padding 下，有效 token 的位置都从 0 开始。
+    positions = (key_mask.long().cumsum(dim=-1) - 1).clamp_min(0)
+    x = model.token_embedding(input_ids) + model.position_embedding(positions)
+    x = x.masked_fill(~key_mask[:, :, None], 0)
+    for block in model.blocks:
+        x = decoder_block(x, key_mask, block)
+    return model.lm_head(model.final_norm(x))  # [B, S, V]
 
-    context = merge_heads(context)  # [B, S, H]
-    x = residual + linear(context, parameters.wo)
+def next_token_loss(logits, labels, attention_mask):
+    # labels 与 input_ids 原始对齐；不计分标签可预先设为 -100。
+    targets = labels[:, 1:]  # 只在这里 shift 一次
+    valid = (attention_mask[:, :-1].bool()
+             & attention_mask[:, 1:].bool() & (targets != -100))
+    if not valid.any():
+        return None  # 无有效标签，本 batch 跳过更新
+    return F.cross_entropy(logits[:, :-1][valid].float(),
+                           targets[valid], reduction="mean")
 
-    residual = x
-    x = residual + ffn(rms_norm(x, parameters.norm2), parameters.ffn)
-    return x
+# labels = input_ids.clone()；按任务将 prompt/pad 标签设为 -100
+# logits = decoder_lm(input_ids, attention_mask, model)
+# loss = next_token_loss(logits, labels, attention_mask)
 ~~~
 
-完整模型在 token embedding 后循环多个 block，做最终 norm 与 LM head。训练代码还要把 labels 左移、屏蔽 padding，并使用数值稳定的 cross-entropy，而不是先显式算 softmax 再取对数。`,
+二值 mask 通过扩轴和布尔选择，把禁止分数变为负无穷；不能直接把 1/0 加到 scores。两键分数都为 0、mask=[1,0] 时，直接相加仍给 pad 约 0.269 的概率，本例则给 [1,0]。padding query 的整行权重按约定为零，避免依赖 loss mask 去“清除”前向 NaN。
+
+对于 [BOS,A,B,EOS,PAD]，有效配对为 BOS→A、A→B、B→EOS，共三个标签。左 padding 时还排除 PAD→BOS。交叉熵内部使用稳定的 log-softmax，先选择有效位置再求均值。若库模型已内部 shift，就传原始对齐 labels 并使用库的 loss，不能再调用这份 shift。此例不包含 packed 独立序列；拼接样本还需 segment mask，不能只靠因果三角形。`,
     },
     {
       id: "pitfall",

@@ -1032,12 +1032,13 @@ progress::-moz-progress-bar {
 }
 
 .glossary-term::after {
-  position: absolute;
-  z-index: 20;
-  bottom: calc(100% + 8px);
-  left: 50%;
+  position: fixed;
+  z-index: 60;
+  top: var(--glossary-top, 80px);
+  left: var(--glossary-left, 16px);
   display: none;
-  width: min(280px, 74vw);
+  box-sizing: border-box;
+  width: min(304px, calc(100vw - 32px));
   padding: 9px 11px;
   border: 1px solid var(--border-strong);
   border-radius: 5px;
@@ -1049,7 +1050,6 @@ progress::-moz-progress-bar {
   font-weight: 400;
   line-height: 1.55;
   text-align: left;
-  transform: translateX(-50%);
 }
 
 .glossary-term:hover::after,

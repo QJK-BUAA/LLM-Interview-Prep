@@ -276,7 +276,30 @@ $$\mathbb E_{z|s}D_{\rm KL}(q_z\|p)
       id: "code",
       type: "code",
       title: "代码实验：OPSD 训练循环与防泄漏检查",
-      body: String.raw`下面伪代码把 teacher context 与 student context 分开。teacher 必须 stop-gradient；若使用周期性 teacher checkpoint，还要记录更新间隔。
+      body: String.raw`下面把 teacher context 与 student context 分开。teacher 必须 stop-gradient；若使用周期性 teacher checkpoint，还要记录更新间隔。先实现正文的归约：**每句按有效 token 平均，再对 batch 平均**，而非把所有句子的 token 混成一个均值。
+
+两种 logits 均已对齐为 $[B,T,V]$，第 t 个位置预测相同的学生 response token；教师额外前缀不进入此 T 轴。输入为有限 logits，response_mask 为二值 $[B,T]$，每句至少有一个有效动作。空回答应在构造 batch 时拒绝或重新采样，不能悄悄改变平均分母。
+
+~~~python
+import torch
+import torch.nn.functional as F
+
+def opsd_reverse_kl(student_logits, teacher_logits, response_mask):
+    assert student_logits.shape == teacher_logits.shape
+    assert student_logits.shape[:-1] == response_mask.shape
+    assert torch.all((response_mask == 0) | (response_mask == 1))
+    mask = response_mask.bool()
+    lengths = mask.sum(dim=-1)
+    if (lengths == 0).any():
+        raise ValueError("每条回答至少需要一个有效 response token")
+    logp = F.log_softmax(student_logits.float(), dim=-1)
+    logq = F.log_softmax(teacher_logits.detach().float(), dim=-1)
+    token_kl = (logp.exp() * (logp - logq)).sum(dim=-1)
+    sequence_mean = token_kl.masked_fill(~mask, 0).sum(dim=-1) / lengths
+    return sequence_mean.mean()
+~~~
+
+训练循环中的 logits 接口负责 response 位置对齐；这里不重复做 label shift：
 
 ~~~python
 for problems, references in loader:
@@ -290,17 +313,17 @@ for problems, references in loader:
         teacher_inputs = attach_privileged_context(problems, references)
         teacher_logits = teacher.logits(teacher_inputs, rollouts)
 
-    # 3. 对 response token 做全词表 reverse KL
-    loss = masked_mean(
-        reverse_kl(student_logits, stop_gradient(teacher_logits)),
-        response_mask(rollouts),
-    )
+    # 3. 全词表 KL，先每句 token mean，再 batch mean
+    loss = opsd_reverse_kl(student_logits, teacher_logits,
+                          response_mask(rollouts))
     update(student, loss)
 
     # 4. 必须同时监控无 privileged context 的真实推理
     evaluate_base_context(student)
     track_entropy_and_reasoning_markers(student)
 ~~~
+
+若两句长度为 2、8，每个有效 token 的 KL 分别恒为 1、3，本目标为 $(1+3)/2=2$；全 batch token mean 却是 $(2+24)/10=2.6$，会改变样本相对权重。两种都可另行定义，但不能混用公式与实现。reverse KL 是本章教学实例，原 OPSD 还讨论 generalized JSD 等目标。
 
 审计时加入三类对照：把正确 reference 换成无关 reference，检验是否只学风格；只给最终答案与给完整推理对比，检验 privileged density；在未见题型和更长 token budget 下评估，检验是否破坏探索与反思。`,
     },
@@ -328,13 +351,17 @@ for problems, references in loader:
 |---|---|---|---|
 | OPD/GKD | 外部教师 logits | 学生状态上密集模仿 | 原理成熟，成本依教师 |
 | OPSD | 同模型 + reference | 去掉外部教师 | 2026 论文报告有效，也有长 CoT 反例 |
-| Purified OPSD | 问题+reference 与 reference-only 对照 | 用 PMI 残差过滤 reference 捷径 | 2026 预印本报告保留反思行为 |
-| RLSD | verifier 决定方向，教师差异调幅 | 防止教师反向覆盖成功推理 | 2026 预印本，依可靠 verifier |
-| H²SD | 成功/失败轨迹使用不同 teacher context 与更新 | 成功保方向、失败做纠正 | 2026 预印本的混合方案 |
-| Lightning OPD | 预计算 SFT rollout 上的教师 log-prob | 移除在线 teacher server | 依 teacher consistency 与离线近似 |
+| Purified OPSD | question-only、question+reference、reference-only 三种冻结前向 | 用 PMI 残差调节 base 分布，抑制 reference 捷径 | 2026 预印本报告保留反思行为 |
+| RLSD | 验证奖励产生的优势给 token 系数定正负，教师正权重调幅 | 保留各 token 优势符号，总参数梯度仍可变化 | 2026 预印本，依可靠 verifier |
+| H²SD | 成功用已验证回答+改写指令评分原 token，失败用 hint 教师 | 按成功/失败构造不同监督 | 2026 预印本，hint 可能有外部生成成本 |
+| Lightning OPD | 固定 SFT 学生在 OPD prompts 上生成，教师评分后缓存 | 移除在线 teacher server | 两阶段同教师，更新后仍有数据陈旧 |
 | Cross-Stage Distillation | 前序阶段 checkpoint 教师 | 缓解顺序 RL 的能力遗忘 | GLM-5 的阶段组合与评估实例 |
 
-**选择树：** 有可靠大教师且 tokenizer 对齐，优先把标准 OPD 作为密集上界；无大教师但有高质量 reference，可试 OPSD，同时做无 reference、错 reference 与长预算对照；有可靠 verifier 且担心 teacher 改坏成功轨迹，优先比较 RLSD/H²SD 类“奖励定方向、教师做信用”；teacher 在线成本是瓶颈且 SFT 数据确由同一教师生成，可评估 Lightning OPD；长 CoT 出现反思坍缩，再考虑 Purified OPSD 或更稀疏 privileged context。
+Purified 用 question+reference 与 reference-only 的 log-prob 差形成 PMI 型信号，再调节 question-only base 分布，实际还做中心化与 tanh 裁剪；它不等于只减两次前向后直接训练。RLSD 的正权重保持的是 token 优势系数的符号，不保证整个共享参数梯度方向或成功行为不变。例如两 token 梯度 $(1,0),(-2,1)$，正权重从 $(1,1)$ 改为 $(3,1)$，总梯度就从 $(-1,1)$ 变成 $(1,1)$。verifier 的绝对奖励也要先转成相对优势，不能直接拿 0/1 充当其符号。
+
+Lightning 先由教师产生 SFT 示范并训练出学生，再固定这个 SFT 学生生成 OPD 轨迹，由同一教师一次性评分并缓存。teacher consistency 指两阶段教师一致，不表示 OPD 轨迹由教师生成；后续学生更新后，缓存不会自动变成实时 on-policy。
+
+**选择树：** 有可靠大教师且 tokenizer 对齐，可把标准 OPD 作为密集监督基线；无大教师但有高质量 reference，可试 OPSD，同时做无 reference、错 reference 与长预算对照；有可靠 verifier 时，比较 RLSD/H²SD 对成功与失败样本的不同信号；teacher 在线成本是瓶颈且满足上述两阶段来源，可评估 Lightning OPD；长 CoT 出现反思坍缩，再考虑 Purified OPSD 或更稀疏 privileged context。
 
 这里“论文报告”表示作者在特定模型、数据和预算上的结果；“广泛共识”仅限学生轨迹能减少 train-inference 状态错配、全词表教师信号比终局标量更密集等机制；选择树是教学性工程建议，不是论文保证。`,
     },
@@ -376,11 +403,11 @@ for problems, references in loader:
         },
         {
           q: "RLSD 为什么把 verifier 与 self-teacher 分工？",
-          a: "verifier 的正确性奖励决定更新正负方向，避免教师覆盖成功轨迹；teacher-student 差异用于细化 token 更新幅度，提供密集信用。",
+          a: "验证奖励先产生相对优势，确定各 token 系数正负；teacher-student 差异通过正权重调幅。保留系数符号不保证共享参数的总梯度方向或成功行为不变，仍需独立评估。",
         },
         {
           q: "Lightning OPD 的关键适用假设是什么？",
-          a: "SFT rollout 与提供预计算监督的教师具有 teacher consistency；离线缓存降低在线教师成本，但策略更新后状态不再严格实时 on-policy。",
+          a: "教师先生成 SFT 示范；训练后的固定 SFT 学生再在 OPD prompts 上生成轨迹，由同一教师预计算监督。两阶段教师一致是 teacher consistency；缓存降低在线成本，但学生更新后数据不再严格实时 on-policy。",
         },
       ],
     },

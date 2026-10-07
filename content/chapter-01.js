@@ -15,7 +15,7 @@ const chapter = {
     "用 einsum 与编号算例证明 reshape 不等于 transpose",
   ],
   summary:
-    "张量只是带多个轴的数字容器；读模型代码时先给每个轴贴上语义标签，再检查运算规则，绝大多数 shape 问题都会变得具体。",
+    "张量是带有形状的数值表示，从零轴的标量到多轴数组；读模型代码时先给每个轴贴上语义标签，再检查运算规则，shape 问题就会变得具体。",
   sections: [
     {
       id: "intuition",

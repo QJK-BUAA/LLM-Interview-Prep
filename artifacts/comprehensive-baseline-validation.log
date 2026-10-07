@@ -1,0 +1,11 @@
+
+> ml-roadmap@1.0.0 validate
+> node scripts/validate-content.mjs
+
+30 chapters validated
+439 required teaching sections present
+0 duplicate ids
+0 unresolved prerequisites
+OPD coverage: PASS
+OPSD coverage: PASS
+37 frozen source documents mapped to lesson bodies

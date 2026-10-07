@@ -1,0 +1,13 @@
+test_binary_padding_causal_batch_and_empty_queries (__main__.LessonCode) ... ok
+test_complete_model_padding_positions_future_and_gradients (__main__.LessonCode) ... ok
+test_exactly_one_shift_and_effective_label_mean (__main__.LessonCode) ... ok
+test_opsd_equal_sequence_weights_teacher_detach_and_padding (__main__.LessonCode) ... ok
+test_soft_baseline_finite_contract_and_tiny_temperature (__main__.LessonCode) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.377s
+
+OK
+anchor: 0.5333
+soft: 0.78 advantage: 0.22
+four failed probes: 0.4096

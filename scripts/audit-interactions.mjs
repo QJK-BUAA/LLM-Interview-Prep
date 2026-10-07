@@ -1,10 +1,13 @@
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { getChapter } from "../content/catalog.js";
 import { visibleSections } from "../app/renderer.js";
 
-const session = "roadmap-narrative-actions";
+const prefix = process.env.ROADMAP_AUDIT_PREFIX || "narrative";
+if (!/^[a-z0-9-]+$/.test(prefix)) throw new Error("Invalid audit prefix");
+const session = process.env.ROADMAP_BROWSER_SESSION || `roadmap-${prefix}-actions`;
 const base = process.env.ROADMAP_URL || "http://127.0.0.1:8010/";
 const clickTrace = [];
 const run = (args, input) => {
@@ -16,7 +19,7 @@ const run = (args, input) => {
       const { data: box } = JSON.parse(run(["get", "box", args[1], "--json"]));
       const { data } = JSON.parse(run(["eval", "--json", `(() => {
         const box = ${JSON.stringify(box)};
-        const target = [...document.querySelectorAll('a,button,input,summary')].find(el => {
+        const target = [...document.querySelectorAll('a,button,input,summary,dfn')].find(el => {
           const r=el.getBoundingClientRect();
           return Math.abs(r.x-box.x)<0.5 && Math.abs(r.y-box.y)<0.5 &&
             Math.abs(r.width-box.width)<0.5 && Math.abs(r.height-box.height)<0.5;
@@ -161,6 +164,46 @@ try {
     }
     run(["open", `${base}?invalid=${width}#99/missing`]);
     assert.equal(evaluate("location.hash"), "#00");
+    // Exercise every new topic through the actual formula index.
+    for (const [id, section] of [
+      ["06", "math-learning-rate-schedule"], ["08", "math-truncated-sampling"],
+      ["10", "math-position-extension"], ["11", "math-speculative-decoding"],
+    ]) {
+      run(["open", `${base}?new-topic=${width}#${id}`]);
+      run(["click", '[data-mode="interview"]']);
+      run(["click", `.formula-index [data-section-link="${section}"]`]);
+      assert.equal(evaluate("location.hash"), `#${id}/${section}`);
+      assert.equal(evaluate(`document.querySelector('#${section} details').open`), true);
+      assert.ok(evaluate(`document.querySelectorAll('#${section} .math-rendered').length`) > 0);
+      if (id === "10") {
+        run(["screenshot", fileURLToPath(new URL(
+          `../artifacts/${prefix}-position-${width}x${height}.png`, import.meta.url))]);
+      }
+    }
+    run(["open", `${base}?glossary=${width}#03/math-confidence`]);
+    const term = 'dfn[data-definition^="Bootstrap："]';
+    run(["scrollintoview", term]);
+    run(["hover", term]);
+    assert.equal(evaluate(`getComputedStyle(document.querySelector('${term}'),'::after').display`), "block");
+    run(["click", term]);
+    assert.equal(evaluate(`document.activeElement===document.querySelector('${term}')`), true);
+    run(["press", "Shift+Tab"]);
+    run(["press", "Tab"]);
+    assert.equal(evaluate(`document.activeElement===document.querySelector('${term}')`), true);
+    assert.equal(evaluate(`getComputedStyle(document.activeElement,'::after').display`), "block");
+    const tooltip = evaluate(`(() => {
+      const style = getComputedStyle(document.activeElement,'::after');
+      const left = parseFloat(style.left), top = parseFloat(style.top);
+      const width = parseFloat(style.width), height = parseFloat(style.height);
+      const pane = document.querySelector('#reading-pane').getBoundingClientRect();
+      return {left,top,width,height,passed: style.position==='fixed' &&
+        left>=Math.max(0,pane.left) && left+width<=Math.min(innerWidth,pane.right) &&
+        top>=document.querySelector('.app-header').getBoundingClientRect().bottom &&
+        top+height<=innerHeight};
+    })()`);
+    assert.equal(tooltip.passed, true, `Clipped definition: ${JSON.stringify(tooltip)}`);
+    run(["screenshot", fileURLToPath(new URL(
+      `../artifacts/${prefix}-glossary-${width}x${height}.png`, import.meta.url))]);
     report.viewports.push({ width, height, passed: true, tested: [
       "v1 migration", "default chapter/count", "search directly to chapter 27 section", "learn/interview",
       "problem first in both modes", "index folded in learn and open in interview", "native index summary toggle",
@@ -168,6 +211,7 @@ try {
       "whiteboard answer and completion persistence", "hidden deep link switches to learn",
       "TOC jump", "derivation disclosure", "completion preserving disclosure", "refresh persistence",
       "clipboard write success", "quiz answer", "theme persistence", "drawer close", "invalid route",
+      "four new topics via native index", "glossary hover/click/keyboard focus and bounds",
     ] });
     console.log(`${width}x${height}: native interaction acceptance passed`);
   }
@@ -181,6 +225,6 @@ try {
   console.error(error.stack);
   process.exitCode = 1;
 } finally {
-  writeFileSync(new URL("../artifacts/narrative-interaction-audit.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
+  writeFileSync(new URL(`../artifacts/${prefix}-interaction-audit.json`, import.meta.url), JSON.stringify(report, null, 2) + "\n");
   run(["close"]);
 }

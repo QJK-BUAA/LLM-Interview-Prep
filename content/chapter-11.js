@@ -5,14 +5,15 @@ const chapter = {
   title: "训练显存、并行与推理系统",
   subtitle: "算清参数、激活、KV Cache、吞吐和延迟",
   level: "进阶",
-  duration: 150,
+  duration: 175,
   prerequisites: ["06", "09", "10"],
-  tags: ["Mixed Precision", "ZeRO", "FSDP", "FlashAttention", "KV Cache", "推理"],
+  tags: ["Mixed Precision", "ZeRO", "FSDP", "FlashAttention", "KV Cache", "推理", "Speculative Decoding"],
   objectives: [
     "按字节估算训练参数状态与推理 KV Cache",
     "解释混合精度、梯度检查点和 ZeRO/FSDP 的节省来源",
     "区分数据、张量、流水线与序列并行",
     "分析 prefill、decode、吞吐、TTFT 与 TPOT",
+    "推导投机解码的接受校正、分布守恒与理想加速预算",
   ],
   summary:
     "大模型系统优化的第一步是把显存和时间拆成可计算部件：训练主要受参数状态、激活和通信约束，生成主要受 KV Cache、内存带宽、批处理与调度约束。",
@@ -58,12 +59,13 @@ $$=2\times32\times1\times4096\times8\times128\times2
       title: "知识路线：先算账，再讨论 kernel 和并行",
       body: String.raw`已经发现训练状态和并发缓存都可能成为大头，下一步该分片参数、丢弃激活，还是降低读取成本？先建立完整显存分解，再按对象逐项分析，避免把不同阶段的收益混在一起。
 
-ZeRO 节算哪些状态真正除以卡数；FlashAttention 节用两块分数证明不存完整概率矩阵也能得到同一输出；prefill/decode 节沿第 09 章的 FLOPs 和第 10 章的 KV 布局估算时间下界；最后补上跨卡传输和流水气泡。单位、dtype、常驻量与峰值贯穿每一步，数值用于形成 profiler 检查假设，不替代目标硬件实测。`,
+ZeRO 节算哪些状态真正除以卡数；FlashAttention 节用两块分数证明不存完整概率矩阵也能得到同一输出；prefill/decode 节沿第 09 章的 FLOPs 和第 10 章的 KV 布局估算时间下界；投机解码再问能否用草稿减少串行大模型调用，同时保持目标分布；最后补上跨卡传输和流水气泡。单位、dtype、常驻量与峰值贯穿每一步，数值用于形成 profiler 检查假设，不替代目标硬件实测。`,
       links: [
         { label: "建立训练与运行时总账", sectionId: "derivation", level: "必会" },
         { label: "显存与 ZeRO 分片", sectionId: "math-memory-zero", level: "必会" },
         { label: "FlashAttention 在线递推", sectionId: "math-flashattention-online", level: "推导" },
         { label: "Prefill/Decode 与 KV 带宽", sectionId: "math-prefill-decode", level: "推导" },
+        { label: "投机解码的分布与预算", sectionId: "math-speculative-decoding", level: "推导" },
         { label: "通信与流水线气泡", sectionId: "math-parallel-communication", level: "进阶" },
         { label: "白板验收", sectionId: "whiteboard", level: "必会" },
       ],
@@ -184,7 +186,48 @@ $\mathcal C$ 是有效算力、$\mathcal B$ 是有效带宽，实际还含通信
 
 14.5369 ms 这个数指出在所设带宽和每步搬运假设下，单纯加快矩阵算术不能越过这条内存下界；真实结果还可能更慢。应先测实际读了多少数据，而不是将下界写成硬件跑分。
 
-一条请求生成 T 个 token，理想平均总时长近似 $\operatorname{TTFT}+(T-1)\operatorname{TPOT}$，TTFT 还含排队与 prefill。B 增大可能提高 tokens/s，却增加排队及 KV 容量；只有在目标尾延迟 SLO 下比较吞吐才有服务意义。下一节补上刚才没有计入的跨卡通信和等待，检查多卡为何不一定按卡数加速。`,
+一条请求生成 T 个 token，理想平均总时长近似 $\operatorname{TTFT}+(T-1)\operatorname{TPOT}$，TTFT 还含排队与 prefill。B 增大可能提高 tokens/s，却增加排队及 KV 容量；只有在目标尾延迟 SLO 下比较吞吐才有服务意义。下一节先检查能否用草稿减少串行目标模型调用，再补上跨卡通信和等待。`,
+    },
+    {
+      id: "math-speculative-decoding",
+      type: "derivation",
+      title: "投机解码：草稿怎样加速而不改变目标分布",
+      body: String.raw`大模型逐 token 解码常受权重和 KV 读取限制。如果小模型先写几个草稿，大模型一次并行验证，能否减少串行大模型调用？关键不只是“猜对多少”，还要保证接受和拒绝后的输出仍服从原目标分布。
+
+固定同一前缀，目标模型的下一 token 分布为 $p$，草稿模型为 $q$；二者均包含约定的温度和截断。本节基本算法要求相同词表/token 事件。草稿采 $x\sim q$，以
+
+$$A(x)=\min\left(1,\frac{p(x)}{q(x)}\right)$$
+
+接受；被采到的 x 有 $q(x)>0$，无需对未采到的零概率项做除法。总接受概率为
+
+$$a=\sum_xq(x)A(x)=\sum_x\min(p(x),q(x))
+=1-\operatorname{TV}(p,q),\quad
+\operatorname{TV}(p,q)=\tfrac12\sum_x|p(x)-q(x)|.$$
+
+**拒绝后不能直接从 p 重采。** 已接受部分积累了 $\min(p,q)$ 的质量，因此拒绝分支需补足差额：
+
+$$r(x)=\frac{[p(x)-q(x)]_+}{1-a},\qquad
+\min(p(x),q(x))+(1-a)r(x)=p(x).$$
+
+这就是每一步保持目标分布的证明。$a=1$ 时不会拒绝，不计算 0/0；$q(x)=0,p(x)>0$ 的项可由 residual 补回，因此这里无需 q 覆盖 p 的全部支持，与仅用 IS 估计不同。
+
+**三 token 手算。** $p=(0.5,0.3,0.2)$、$q=(0.2,0.5,0.3)$。逐项接受率为 $(1,0.6,2/3)$，接受质量为 $(0.2,0.3,0.2)$，总接受率 $a=0.7$。差额为 $(0.3,0,0)$，故拒绝后从 $r=(1,0,0)$ 采样，恢复 p。若错误从 p 重采，最终却是 $(0.2,0.3,0.2)+0.3p=(0.35,0.39,0.26)$。
+
+**从一步到 K 个草稿。** 小模型自回归生成 K 个 token，大模型一次前向给出各草稿前缀下的 p，并按顺序验收。每个位置只在前面的草稿都被接受时继续；首次拒绝后丢弃其余草稿和相应 KV，从该位置 residual 采一个修正 token。若全接受，再从大模型的下一分布采一个额外 token。这样每次校正都作用在一致的已接受前缀上。提前 EOS 要停止；跨 tokenizer 需要另行算法，不能逐 token 生套比值。
+
+**预算手算。** 在每个位置独立、同接受率 a 的近似下，每轮输出数 M 的期望为
+
+$$\mathbb E[M]=1+a+\cdots+a^K
+=\frac{1-a^{K+1}}{1-a},\quad a\ne1.$$
+
+$a=1$ 时为 $K+1$。轮成本约为 $K t_d+t_{\rm verify}$，相对普通目标模型单 token 时间 $t_{\rm target}$ 的理想加速为
+
+$$\operatorname{speedup}\approx
+\frac{\mathbb E[M]t_{\rm target}}{K t_d+t_{\rm verify}}.$$
+
+$K=3,a=0.7$ 得 $1+0.7+0.49+0.343=2.533$；若 $t_d=0.1t_{\rm target}$、$t_{\rm verify}=t_{\rm target}$，理想加速约为 1.94846。接受率低、验证变贵、batch 大或 EOS 提前都可能抵消收益，应在目标硬件和负载下实测。
+
+MTP 是提供多位置预测或草稿的一种机制，并不等于这套接受校正。现在“分布是否保持”与“时间是否节省”各有验收对象，再结合通信和调度预算判断系统是否真的更快。`,
     },
     {
       id: "math-parallel-communication",
@@ -314,6 +357,10 @@ print("KV cache:", gib(kv_cache_bytes(32, 1, 4096, 8, 128)), "GiB")
           q: "有 FlashAttention 和 KV Cache 后，长上下文 decode 是否已变为与长度无关？",
           a: String.raw`没有。FlashAttention 不物化完整概率矩阵，但仍计算可见 QK/AV；decode 的单个新 query 读取 S 个键值，注意力项为 $O(SH)$，KV 容量为 $2LBSN_{kv}Db$。生成 T 步累积可见长度为 $TS+T(T-1)/2$。**得分点：**区分 prefill 的平方算术量、decode 的单步线性量与训练中间显存；KV 避免重算旧投影而非免读旧信息。`,
         },
+        {
+          q: "p=(0.5,0.3,0.2)、q=(0.2,0.5,0.3)，求投机接受率和拒绝分布。K=3、同率独立近似下每轮期望输出多少 token？",
+          a: String.raw`接受概率逐项为 $(1,0.6,2/3)$，接受质量和为 0.7；正差额 $(0.3,0,0)$ 归一化成 $(1,0,0)$。逐项用 $\min(p,q)+(1-a)r=p$ 验证守恒。期望为 $1+0.7+0.7^2+0.7^3=2.533$。**得分点：**拒绝不能直接采 p；全接受后补一 token；期望输出数不等于无条件硬件加速比。`,
+        },
       ],
     },
     {
@@ -342,6 +389,11 @@ print("KV cache:", gib(kv_cache_bytes(32, 1, 4096, 8, 128)), "GiB")
     },
   ],
   sources: [
+    {
+      label: "Fast Inference from Transformers via Speculative Decoding",
+      url: "https://arxiv.org/html/2211.17192v2#S2",
+      evidence: "§2、§3.1–3.3 与 A.1 的接受算法、分布守恒及近似预算",
+    },
     {
       label: "Mixed Precision Training",
       url: "https://arxiv.org/abs/1710.03740",

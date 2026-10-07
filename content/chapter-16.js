@@ -15,7 +15,7 @@ const chapter = {
     "区分 reference KL、PPO clipping 和梯度裁剪",
   ],
   summary:
-    "经典 RLHF 先把人类偏好拟合为奖励模型，再用 PPO 提高高奖励回答的概率；价值模型降低方差，reference KL 与 clip 分别约束长期偏移和单批更新。",
+    "经典 RLHF 先把人类偏好拟合为奖励模型，再用 PPO 优化回答；合适的价值估计帮助降低方差，reference KL 惩罚累计漂移，clip 抑制单批样本的部分激进更新激励。",
   sections: [
     {
       id: "intuition",
@@ -29,7 +29,7 @@ const chapter = {
 
 经典实现常同时涉及四个模型角色：policy/actor 生成并更新；reference 提供不更新的基准概率；reward model 对完整回答评分；value/critic 预测每个前缀的未来回报。它们可共享部分权重或分时部署，但逻辑职责必须分开。
 
-PPO 的“proximal”不是保证永不退化，而是用旧策略采样后，对新旧动作概率比做截断，限制一次数据复用期间的激进更新。训练稳定还依赖奖励尺度、优势估计、KL 系数、数据分布和实现细节。
+PPO 用旧策略采样后，在 surrogate 中截断新旧动作概率比，抑制部分激进更新的目标收益，不保证实际 ratio 或 KL 的硬界。训练稳定还依赖奖励尺度、优势估计、KL 系数、数据分布和实现细节。
 
 RLHF 与 RLVR 描述奖励来源，PPO 与 GRPO 描述更新算法。PPO 可以使用可验证的奖励而不训练神经奖励模型；GRPO 也能接收学习型 RM 的分数。去掉 critic 和去掉 reward model 是两项独立设计。开放式写作、对话和安全规范难用唯一标准答案评价，可以用人类偏好、Constitutional AI 的规则批评与修订、或 rubric 分维度反馈，但都需要检查评审偏差。下面先看一个已获正优势的 token 应该增加到什么程度，再回头补齐评分、KL 和优化目标的整条计算链。`,
     },
@@ -47,9 +47,9 @@ $$r_t(\theta)=\frac{\pi_\theta(a_t|s_t)}
 
 设优势 $\hat A_t=2$，clip 范围 $\epsilon=0.2$。未截断项为 $1.3\times2=2.6$，截断比率为 1.2，对应 $1.2\times2=2.4$。PPO 最大化两者较小值，因此本样本贡献按 2.4 封顶，继续增加该动作概率不再获得额外目标收益。
 
-若优势是 -2，策略应降低该动作概率。此时 min 的方向会阻止概率比过度降到 0.8 以下：PPO 的写法对正负优势产生不同边界，不能简单理解为“把所有 ratio 数值夹进区间再乘”。
+若优势是 -2，策略应降低该动作概率。ratio 低于 0.8 后，min 使该样本继续降低概率不再获得额外目标收益，并不阻止实际 ratio 越界。PPO 对正负优势产生不同分支，不能简单理解为“把所有 ratio 数值夹进区间再乘”。
 
-2.4 是这一样本的目标贡献，不是把实际概率强制改成 0.24；共享参数上的其他样本仍可能继续改变它。再看 reference KL。即使当前策略与本轮 old policy 很接近，它们都可能已经逐轮远离最初 SFT reference。PPO clip 约束一次更新；reference KL 约束累计行为偏移。两者比较对象与时间尺度都不同。接下来的路线会先说明这个“好于预期”的评分从哪里来，再分别处理两种距离。`,
+2.4 是这一样本的目标贡献，不是把实际概率强制改成 0.24；共享参数上的其他样本仍可能继续改变它。再看 reference KL。即使当前策略与本轮 old policy 很接近，它们都可能已经逐轮远离最初 SFT reference。PPO clip 调整本批的更新激励；reference KL 惩罚累计行为偏移。两者比较对象与时间尺度都不同。接下来的路线会先说明这个“好于预期”的评分从哪里来，再分别处理两种距离。`,
     },
     {
       id: "roadmap",
@@ -70,7 +70,7 @@ $$r_t(\theta)=\frac{\pi_\theta(a_t|s_t)}
       title: "经典 RLHF 的三阶段与四模型循环",
       body: String.raw`第一阶段用人工或专家示范训练 SFT policy。第二阶段让模型生成多个候选，由标注者排序，训练 reward model。第三阶段从 SFT 初始化 actor 与 reference：actor 生成回答，reward model 给终局分数，reference 提供 KL 代价，critic 估计前缀价值，PPO 更新 actor 与 critic。
 
-rollout 与 update 必须区分。回答由冻结的 old policy 采样；一次 rollout batch 可切成多个 mini-batch 训练，但每多做一轮 epoch，当前策略与行为策略偏差都会增大，importance ratio 和 clipping 才有意义。
+rollout 与 update 必须区分。回答由冻结的 old policy 采样；一次 rollout batch 可切成多个 mini-batch 训练，多做 epoch 可能扩大当前与行为策略的偏差，但距离不保证单调增长。应监控 ratio/KL，不能用 epoch 数代替实际分布偏移。
 
 上线模型通常只保留训练后的 actor，不需要 reward、critic 和 reference。但训练时四者的权重、KV、激活与通信会造成显著系统成本。`,
       diagram: {
@@ -297,9 +297,9 @@ for prompts in prompt_loader:
       title: "三种约束不要混用名称",
       body: String.raw`| 机制 | 作用对象 | 比较基准 | 目的 |
 |---|---|---|---|
-| PPO ratio clip | 采样动作概率比 | rollout old policy | 限制一次数据复用的激进更新 |
-| Reference KL penalty | 整体 token 分布/采样 log-ratio | 固定或慢更新 reference | 防止累计漂移与能力损失 |
-| Gradient norm clipping | 反向后的参数梯度向量 | 设定范数阈值 | 防止异常优化步 |
+| PPO ratio clip | 样本 surrogate 中的概率比 | rollout old policy | 抑制部分激进更新激励，无硬概率界 |
+| Reference KL penalty | 整体 token 分布/采样 log-ratio | 固定或慢更新 reference | 惩罚累计漂移，不保证能力不损失 |
+| Gradient norm clipping | 反向后的参数梯度向量 | 设定范数阈值 | 限制梯度范数，非 Adam 参数步的同一界 |
 | Reward clipping | 环境/模型奖励值 | 数值边界 | 限制异常奖励尺度 |
 | Value clipping | critic 预测变化 | old value | 稳定价值网络更新 |
 
@@ -311,7 +311,7 @@ PPO 相对 REINFORCE 的主要新增负担是 critic、old policy 逻辑与多�
       id: "interview",
       type: "interview",
       title: "面试表达：PPO 在 RLHF 中解决什么",
-      body: String.raw`**30 秒回答：**“奖励模型把偏好对转成标量反馈，Actor 在自己生成的回答上最大化奖励。PPO 用新旧策略概率比和 clipped surrogate 限制一次更新过大，critic 与 GAE 降低终局奖励的梯度方差；另用 reference KL 约束模型不要逐轮偏离 SFT 策略。”
+      body: String.raw`**30 秒回答：**“奖励模型把偏好对转成标量反馈，Actor 在自己生成的回答上优化奖励。PPO 用新旧策略概率比和 clipped surrogate 抑制部分激进更新激励，合适的 critic 与 GAE 帮助降低方差；另用 reference KL 惩罚逐轮偏离 SFT 策略。clip 本身不保证概率比或 KL 的硬界。”
 
 若追问四模型：policy 生成并学习，reference 冻结并提供 KL，reward model 给完整回答分数，value model 为每个前缀估计未来回报。
 

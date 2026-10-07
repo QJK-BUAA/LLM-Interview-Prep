@@ -212,12 +212,12 @@ $$\nabla_{W_1}L=\begin{bmatrix}-1/2&1/2\\-1&1\end{bmatrix},\quad
       title: "梯度检查：中心差分检查的是哪个函数",
       body: String.raw`两层网络的梯度 shape 都对，并不代表数值和符号也对。怎样不用另一套反传实现，就检查刚才的权重梯度？把同一个权重轻轻向两边移动，观察真实损失的变化，就能给解析梯度一个独立对照。
 
-给定可微标量损失 $L(\theta)$，解析梯度为 $g\in\mathbb R^P$。对第 $j$ 个坐标做正负扰动，Taylor 展开后相减，偶数项抵消，线性项除以扰动间距：
+给定标量损失 $L(\theta)$，解析梯度为 $g\in\mathbb R^P$。假设检查点附近足够光滑，例如相应三阶导数有界。对第 $j$ 个坐标做正负扰动，Taylor 展开后相减，偶数项抵消，线性项除以扰动间距：
 
 $$g_j^{FD}=\frac{L(\theta+\varepsilon e_j)-L(\theta-\varepsilon e_j)}{2\varepsilon}
 =g_j+O(\varepsilon^2).$$
 
-浮点误差则大致随 $u/\varepsilon$ 增大，因此步长不是越小越好。用双精度、固定数据与随机种子，尝试 $10^{-4},10^{-5},10^{-6}$，比较绝对误差及 $\lvert g_j-g_j^{FD}\rvert/\max(1,\lvert g_j\rvert,\lvert g_j^{FD}\rvert)$。大模型逐参数检查需约 $2P$ 次前向；可选单位方向 $v$，用 $[L(\theta+\varepsilon v)-L(\theta-\varepsilon v)]/(2\varepsilon)$ 检查 $g^\top v$，但单方向不能证明所有坐标正确。
+仅“可微”不足以得到二阶误差：$f(x)=x|x|$ 在 0 的导数为 0，但中心差分为 $\varepsilon$，误差只有一阶。浮点误差则大致随 $u/\varepsilon$ 增大，因此步长不是越小越好。用双精度、固定数据与随机种子，尝试 $10^{-4},10^{-5},10^{-6}$，比较绝对误差及 $\lvert g_j-g_j^{FD}\rvert/\max(1,\lvert g_j\rvert,\lvert g_j^{FD}\rvert)$。大模型逐参数检查需约 $2P$ 次前向；可选单位方向 $v$，用 $[L(\theta+\varepsilon v)-L(\theta-\varepsilon v)]/(2\varepsilon)$ 检查 $g^\top v$，但单方向不能证明所有坐标正确。
 
 **数值例。** 固定 $h=[1,1]$，只扰动上节 $W_{2,11}=1$，logits 是 $[1+\delta,1]$，正确类为第一类：
 
@@ -258,7 +258,7 @@ print("shapes:", z1.shape, y_hat.shape, g_W1.shape, g_W2.shape)
 print("loss:", float(loss))
 ~~~
 
-真实训练还会在 batch 维取平均、处理 dtype、清空旧梯度并由优化器更新。手写一次后再用框架 autograd，可把每个 API 对应到计算图中的明确角色。`,
+本例已按全部输出元素取平均，平均系数也已进入上游梯度，不能在各层再次除以 batch 大小。多输出任务需声明按样本还是按元素平均；真实训练还会处理 dtype、清空旧梯度并由优化器更新。手写一次后再用框架 autograd，可把每个 API 对应到计算图中的明确角色。`,
     },
     {
       id: "pitfall",
