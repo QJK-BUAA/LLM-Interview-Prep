@@ -1,6 +1,6 @@
 # ML Roadmap
 
-一个从零基础机器学习延伸到 LLM 后训练与 Agentic RL 的中文面试学习工作台。项目包含 30 章，按知识点组织公式、逐步推导、手算和白板追问，不依赖前端框架或构建工具，KaTeX 与字体均保存在仓库内。
+一个从零基础机器学习延伸到 LLM 后训练与 Agentic RL 的中文面试学习工作台。项目包含 31 章，按知识点组织公式、逐步推导、手算和白板追问，不依赖前端框架或构建工具，KaTeX 与字体均保存在仓库内。
 
 ## 开始使用
 
@@ -31,6 +31,7 @@ python3 -m http.server 8010
 | 05-07 | 神经网络、反向传播、优化器、CNN、RNN 与 LSTM |
 | 08-12 | Tokenization、Transformer、现代 LLM 组件、训练与推理系统、PEFT |
 | 13-15 | MDP、价值方法、策略梯度、Actor-Critic 与 GAE |
+| 30 | 监督微调（SFT）：token 级 CE、mask、chat template、packing 与完成判据 |
 | 16-24 | RLHF、GRPO/DAPO、DPO、OPD/OPSD、VAPO/CISPO/GSPO/SAPO、数据工程、工业案例与选型 |
 | 25-29 | Agentic RL 基础、奖励稳定性、探索与信用分配、环境/异步系统、全景与综合面试 |
 
@@ -102,7 +103,7 @@ ml-roadmap/
 2. 前三节依次是 `intuition`、`example`、`roadmap`，先讲问题和例子再引入路线；保留 `diagram`、`derivation`、`code`、`pitfall`、`comparison`、`interview`、`quiz`。同一形式可按知识点拆成多个独立 section。开场和推导先用文字说明具体任务，再引入数学符号。
 3. 保证 section ID 在章内唯一，至少一个新增数学主题使用 `math-` 前缀；`roadmap.links` 的 `sectionId` 指向真实小节，`level` 为“必会”“推导”或“进阶”。`whiteboard` 使用 `quiz` 类型，至少三题，答案包含完整过程与“得分点”。来源使用绝对 HTTP(S) URL。
 4. 在 `content/catalog.js` 中按学习顺序导入并加入章节。
-5. 若扩展当前 00-29 的固定课程规模，同步调整 `scripts/validate-content.mjs` 和目录测试中的预期 ID 序列；目录标题与进度总数从 catalog 自动计算。
+5. 若扩展当前 00-30 的固定课程规模，同步调整 `scripts/validate-content.mjs` 的 ID 集合与 `tests/source-manifest.test.mjs` 的章节总数；章节 ID 保留追加时的两位数，显示顺序由 `content/catalog.js` 的数组位置决定，可按依赖关系插入新章而不动旧 ID。目录标题与进度总数从 catalog 自动计算。
 6. 运行 `npm test`、`npm run validate`、全部 KaTeX 解析和 Python 数值校验，再运行 `node scripts/audit-browser.mjs` 与 `node scripts/audit-interactions.mjs` 检查浏览器。
 
 实际正文代码的回归为 `python3 scripts/check-lesson-code.py`，需本地安装 PyTorch，使用小型 CPU 张量验证 09 的完整前向、19 的聚合与 27 的数值契约。它不是阅读网页的运行依赖。浏览器验收依赖 `agent-browser` CLI；设置 `ROADMAP_AUDIT_PREFIX=comprehensive` 可使用独立 session 和产物前缀，`ROADMAP_URL` 可指定服务地址。完整命令及结果见最新检查报告。

@@ -21,8 +21,11 @@ test("all 37 approved source documents are frozen and covered by actual lesson b
   assert.deepEqual(validateSourceManifest(CHAPTERS), []);
 });
 
-test("the course has 30 dependency-ordered lessons with the full teaching contract", () => {
-  assert.deepEqual(CHAPTERS.map(c => c.id), Array.from({ length: 30 }, (_, i) => String(i).padStart(2, "0")));
+test("the course has 31 dependency-ordered lessons with the full teaching contract", () => {
+  const ids = CHAPTERS.map(c => c.id);
+  // IDs form the complete 00..30 cover; display order is dependency-driven.
+  assert.deepEqual([...ids].sort(), Array.from({ length: 31 }, (_, i) => String(i).padStart(2, "0")));
+  assert.equal(new Set(ids).size, ids.length);
   for (const [index, chapter] of CHAPTERS.entries()) {
     for (const type of REQUIRED_SECTION_TYPES) {
       assert.ok(chapter.sections.some(section => section.type === type), `${chapter.id}: ${type}`);

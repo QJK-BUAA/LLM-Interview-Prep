@@ -28,6 +28,7 @@ import chapter26 from "./chapter-26.js";
 import chapter27 from "./chapter-27.js";
 import chapter28 from "./chapter-28.js";
 import chapter29 from "./chapter-29.js";
+import chapter30 from "./chapter-30.js";
 
 export const CHAPTERS = Object.freeze([
   chapter00,
@@ -46,6 +47,7 @@ export const CHAPTERS = Object.freeze([
   chapter13,
   chapter14,
   chapter15,
+  chapter30,
   chapter16,
   chapter17,
   chapter18,

@@ -13,7 +13,7 @@ function parseRange(argv) {
     throw new Error("--range must look like 00-04");
   }
   const [start, end] = value.split("-");
-  if (start > end || Number(end) > 29) throw new Error("--range must be ordered within 00-29");
+  if (start > end || Number(end) > 30) throw new Error("--range must be ordered within 00-30");
   return { start, end };
 }
 
@@ -28,12 +28,14 @@ function validateCatalog(chapters, { partial }) {
   const knownIds = new Set(CHAPTERS.map((chapter) => chapter.id));
 
   if (!partial) {
-    const expected = Array.from({ length: 30 }, (_, index) =>
+    const expected = Array.from({ length: 31 }, (_, index) =>
       String(index).padStart(2, "0"),
     );
-    if (JSON.stringify(ids) !== JSON.stringify(expected)) {
+    // IDs are the two-digit append order; display order (CHAPTERS array) is
+    // the dependency order and may differ from the sorted ID sequence.
+    if (JSON.stringify([...ids].sort()) !== JSON.stringify(expected)) {
       errors.push(
-        `catalog ids must be 00-29 in order; received ${ids.join(", ")}`,
+        `catalog ids must cover 00-30 without gaps; received ${ids.join(", ")}`,
       );
     }
   }
