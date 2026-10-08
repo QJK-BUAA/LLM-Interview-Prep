@@ -71,7 +71,7 @@ try {
     const migrated = evaluate("JSON.parse(localStorage.getItem('ml-roadmap-state-v2'))");
     assert.equal(migrated.version, 2);
     assert.deepEqual(migrated.completed, { "00": ["intuition"], "19": ["quiz"] });
-    assert.equal(evaluate("document.querySelector('#course-count').textContent"), "30 章课程");
+    assert.equal(evaluate("document.querySelector('#course-count').textContent"), "31 章课程");
     assert.equal(evaluate("document.querySelector('.lesson-section').id"), "intuition");
     assert.equal(evaluate("document.querySelector('.formula-index').open"), false);
     run(["click", ".formula-index > summary"]);

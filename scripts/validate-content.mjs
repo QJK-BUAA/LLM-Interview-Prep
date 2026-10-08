@@ -77,13 +77,16 @@ function validateCatalog(chapters, { partial }) {
       );
     }
 
+    const posByIndex = Object.fromEntries(chapters.map((ch, i) => [ch.id, i]));
+    const selfPos = posByIndex[chapter.id];
     for (const prerequisite of chapter.prerequisites) {
       if (!knownIds.has(prerequisite)) {
         errors.push(
           `${chapter.id}: unresolved prerequisite chapter ${prerequisite}`,
         );
-      } else if (Number(prerequisite) >= Number(chapter.id)) {
-        errors.push(`${chapter.id}: prerequisite ${prerequisite} must occur earlier`);
+      } else if (posByIndex[prerequisite] === undefined || posByIndex[prerequisite] >= selfPos) {
+        // IDs are append-order tokens; dependency check uses display order (catalog array position).
+        errors.push(`${chapter.id}: prerequisite ${prerequisite} must appear earlier in the catalog`);
       }
     }
   }

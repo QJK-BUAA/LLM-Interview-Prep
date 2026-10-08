@@ -150,7 +150,7 @@ $$m = [\underbrace{0,\ldots,0}_{\text{sys+u1}},\underbrace{1,\ldots,1}_{\text{a1
 
 attention_mask 则对所有位置为 1：u2 要看到 a1，a2 要看到 u2 和 a1。因果 mask 保证不看未来。有效 token 数等于两段 assistant 的 content+end 长度之和。
 
-**工具调用的变体。** 若对话包含工具调用，格式往往形如 assistant 发出 tool_call、tool 返回 observation、assistant 根据 observation 继续回答。工具 observation 的 loss_mask 必须为 0，否则模型会学会生成虚假的工具返回。这是第 25 章“策略只对 agent 自己的动作负责”在 SFT 阶段的对应约定。
+**工具调用的变体。** 若对话包含工具调用，格式往往形如 assistant 发出 tool_call、tool 返回 observation、assistant 根据 observation 继续回答。工具 observation 的 loss_mask 必须为 0，否则模型会学会生成虚假的工具返回。核心约定是：策略只对 agent 自己产出的 token 负责，环境返回的 token 只作为上下文；Agentic RL 章节会在此基础上再加入多轮奖励与信用分配。
 
 **模板漂移。** chat template 一经选定不能随意改动。若 SFT 用 ChatML，推理却按 Alpaca 格式拼 prompt，模型会把陌生角色标记当成普通 token，输出退化到预训练分布。模板变更应作为一次完整的重新 SFT 处理，并同步更新 RLHF 的 reference policy。`,
     },
@@ -356,7 +356,11 @@ optimizer.zero_grad()
         },
         {
           q: "多轮对话 [sys, u1, a1, u2, a2]，长度分别为 10、15、20、18、30。写出 attention_mask 与 loss_mask，并给出有效 token 数（忽略 end token）。",
-          a: String.raw`attention_mask 全 1（因果 mask 由模型内部添加）；loss_mask 为 $[\underbrace{0\times10}_{\text{sys}},\underbrace{0\times15}_{\text{u1}},\underbrace{1\times20}_{\text{a1}},\underbrace{0\times18}_{\text{u2}},\underbrace{1\times30}_{\text{a2}}]$。有效 token 数 $=20+30=50$。a2 的 query 要看到 a1、u1、u2，因果 mask 自然满足。**得分点：** 两个 mask 作用不同；assistant content 为 1；user/system 为 0；因果性由模型内部处理；有效长度是 assistant 段之和。`,
+          a: String.raw`attention_mask 全 1（因果 mask 由模型内部添加）。loss_mask 由 sys 的 10 个 0、u1 的 15 个 0、a1 的 20 个 1、u2 的 18 个 0、a2 的 30 个 1 依次拼接得到；写成分段形式为
+
+$$m=[\underbrace{0,\ldots,0}_{\text{sys}=10},\underbrace{0,\ldots,0}_{\text{u1}=15},\underbrace{1,\ldots,1}_{\text{a1}=20},\underbrace{0,\ldots,0}_{\text{u2}=18},\underbrace{1,\ldots,1}_{\text{a2}=30}].$$
+
+有效 token 数 $=20+30=50$。a2 的 query 要看到 a1、u1、u2，因果 mask 自然满足。**得分点：** 两个 mask 作用不同；assistant content 为 1；user/system 为 0；因果性由模型内部处理；有效长度是 assistant 段之和。`,
         },
         {
           q: "packing 四条样本到一条长 1024 的序列。朴素做法用全 1 attention_mask 为什么错？正确做法是什么？用 token-mean 时分母是什么？",

@@ -483,7 +483,7 @@ attention_keep 只演示哪些位置不是 padding，真正模型还需因果可
       label: "[2] Sutton & Barto：Reinforcement Learning, Second Edition",
       url: "https://incompleteideas.net/book/the-book-2nd.html",
       evidence:
-        "作者提供教材与修订 PDF；第 3 章及第 13 章为回报、策略梯度与 baseline 的基础来源。本章三步数值例和代码是原创教学演示。",
+        "作者提供教材与修订 PDF；第 03 章及第 13 章为回报、策略梯度与 baseline 的基础来源。本章三步数值例和代码是原创教学演示。",
     },
     {
       label: "[3] ReAct: Synergizing Reasoning and Acting in Language Models",

@@ -6,7 +6,7 @@ const chapter = {
   subtitle: "在学生自己的轨迹上获得逐 token 教师信号",
   level: "前沿",
   duration: 175,
-  prerequisites: ["03", "15", "17", "18"],
+  prerequisites: ["03", "15", "17", "18", "30"],
   tags: ["OPD", "OPSD", "Distillation", "RLSD", "Purified OPSD", "H2SD", "GLM-5", "Cross-Stage Distillation"],
   objectives: [
     "从 exposure bias 与稀疏奖励解释 OPD 的动机",

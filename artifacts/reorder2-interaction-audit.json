@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-10-08T04:09:51.924Z",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "learn/interview",
+        "problem first in both modes",
+        "index folded in learn and open in interview",
+        "native index summary toggle",
+        "formulas open by default",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "hidden deep link switches to learn",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route",
+        "four new topics via native index",
+        "glossary hover/click/keyboard focus and bounds"
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "learn/interview",
+        "problem first in both modes",
+        "index folded in learn and open in interview",
+        "native index summary toggle",
+        "formulas open by default",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "hidden deep link switches to learn",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route",
+        "four new topics via native index",
+        "glossary hover/click/keyboard focus and bounds"
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "learn/interview",
+        "problem first in both modes",
+        "index folded in learn and open in interview",
+        "native index summary toggle",
+        "formulas open by default",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "hidden deep link switches to learn",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route",
+        "four new topics via native index",
+        "glossary hover/click/keyboard focus and bounds"
+      ]
+    }
+  ],
+  "console": {
+    "success": true,
+    "data": {
+      "messages": []
+    },
+    "error": null
+  },
+  "passed": true
+}

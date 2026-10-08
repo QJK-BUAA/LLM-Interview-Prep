@@ -6,7 +6,7 @@ const chapter = {
   subtitle: "从 KL 正则奖励最大化到成对分类损失",
   level: "进阶",
   duration: 145,
-  prerequisites: ["03", "08", "16"],
+  prerequisites: ["03", "08", "16", "30"],
   tags: ["DPO", "IPO", "KTO", "ORPO", "SimPO", "Preference Optimization"],
   objectives: [
     "从 KL 正则策略目标推导 DPO 隐式奖励",

@@ -6,7 +6,7 @@ const chapter = {
   subtitle: "理解四模型管线、概率比和受约束策略更新",
   level: "核心",
   duration: 150,
-  prerequisites: ["11", "15"],
+  prerequisites: ["11", "15", "30"],
   tags: ["RLHF", "Reward Model", "PPO", "KL", "GAE"],
   objectives: [
     "解释经典 RLHF 的 SFT、奖励建模与 PPO 三阶段",
