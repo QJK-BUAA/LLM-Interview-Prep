@@ -11,9 +11,9 @@ const session = process.env.ROADMAP_BROWSER_SESSION || `roadmap-${prefix}-action
 const base = process.env.ROADMAP_URL || "http://127.0.0.1:8010/";
 const clickTrace = [];
 const run = (args, input) => {
-  // CLI clicks use viewport coordinates; explicitly reveal controls in scroll panes.
+  // Reveal only occluded controls. scrollintoview on an already visible sticky
+  // header button can move the mobile document and change the reading position.
   if (args[0] === "click") {
-    run(["scrollintoview", args[1]]);
     run(["wait", "--fn", "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))"]);
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const { data: box } = JSON.parse(run(["get", "box", args[1], "--json"]));
@@ -33,8 +33,11 @@ const run = (args, input) => {
       const observation = JSON.parse(data.result);
       clickTrace.push({ selector: args[1], box, ...observation });
       if (observation.exposed) break;
+      if (attempt === 0) {
+        run(["scrollintoview", args[1]]);
+        run(["wait", "--fn", "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))"]);
       // scrollintoview can leave main-pane controls behind the app header.
-      if (observation.reader && box.y < 80) {
+      } else if (observation.reader && box.y < 80) {
         run(["scroll", "up", "200", ...(observation.desktop ? ["--selector", "#reading-pane"] : [])]);
       } else {
         assert.fail(`Click target is occluded: ${args[1]}`);
@@ -61,7 +64,7 @@ function clickRef(selector, pattern) {
 }
 const report = { timestamp: new Date().toISOString(), viewports: [] };
 try {
-  for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
+  for (const [width, height] of [[390, 844], [1440, 1000], [1024, 900]]) {
     run(["set", "viewport", String(width), String(height)]);
     run(["open", `${base}?interactions=${width}#00`]);
     run(["wait", ".chapter"]);
@@ -74,6 +77,8 @@ try {
     assert.equal(evaluate("document.querySelector('#course-count').textContent"), "31 章课程");
     assert.equal(evaluate("document.querySelector('.lesson-section').id"), "intuition");
     assert.equal(evaluate("document.querySelector('.formula-index').open"), false);
+    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
+    assert.equal(evaluate("document.querySelectorAll('.reading-guide').length"), 1);
     run(["click", ".formula-index > summary"]);
     assert.equal(evaluate("document.querySelector('.formula-index').open"), true);
     run(["click", ".formula-index > summary"]);
@@ -114,12 +119,13 @@ try {
     run(["open", `${base}?whiteboard=${width}#27/whiteboard`]);
     assert.equal(evaluate("document.querySelector('#whiteboard button').getAttribute('aria-pressed')"), "true");
 
-    // A link to code must reveal its destination even when entered from interview mode.
+    // Code is available without changing the selected interview mode.
     run(["open", `${base}?hidden-link=${width}#27/code`]);
-    assert.equal(evaluate("document.querySelector('[data-mode=\"learn\"]').getAttribute('aria-pressed')"), "true");
+    assert.equal(evaluate("document.querySelector('[data-mode=\"interview\"]').getAttribute('aria-pressed')"), "true");
     assert.ok(evaluate("Boolean(document.querySelector('#code'))"));
     clickRef(".app-header", /button "学习"/);
     assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), chapter.sections.length);
+    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
 
     if (width < 1180) clickRef(".app-header", /button "打开本章目录"/);
     run(["scroll", "down", "700", "--selector", "#chapter-sidebar"]);
@@ -204,14 +210,43 @@ try {
     assert.equal(tooltip.passed, true, `Clipped definition: ${JSON.stringify(tooltip)}`);
     run(["screenshot", fileURLToPath(new URL(
       `../artifacts/${prefix}-glossary-${width}x${height}.png`, import.meta.url))]);
+
+    // First-pass guide links, keyboard disclosure and mode anchors on revised lessons.
+    for (const id of ["01", "02", "30", "24"]) {
+      run(["open", `${base}?reading-guide=${width}#${id}`]);
+      run(["click", '[data-mode="learn"]']);
+      const topic = id === "24" ? "math-paired-inference" : "derivation";
+      run(["click", `.reading-guide [data-section-link="${topic}"]`]);
+      assert.equal(evaluate("location.hash"), `#${id}/${topic}`);
+      assert.equal(evaluate(`document.querySelector('#${topic} details').open`), true);
+      run(["click", '[data-mode="interview"]']);
+      run(["click", '[data-mode="learn"]']);
+      assert.equal(evaluate("location.hash"), `#${id}/${topic}`);
+      assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
+      const y = evaluate(`document.querySelector('#${topic}').getBoundingClientRect().top`);
+      assert.ok(y >= 58 && y < 180, `${id}: mode anchor at ${y}`);
+      assert.ok(evaluate(`document.querySelector('#${topic} .topic-takeaway').checkVisibility()`));
+      run(["screenshot", fileURLToPath(new URL(
+        `../artifacts/${prefix}-${id}-folded-${width}x${height}.png`, import.meta.url))]);
+      run(["click", `#${topic} summary`]);
+      assert.equal(evaluate(`document.querySelector('#${topic} details').open`), true);
+      run(["press", "Enter"]);
+      assert.equal(evaluate(`document.querySelector('#${topic} details').open`), false);
+      run(["press", "Enter"]);
+      assert.equal(evaluate(`document.querySelector('#${topic} details').open`), true);
+      run(["screenshot", fileURLToPath(new URL(
+        `../artifacts/${prefix}-${id}-expanded-${width}x${height}.png`, import.meta.url))]);
+    }
     report.viewports.push({ width, height, passed: true, tested: [
       "v1 migration", "default chapter/count", "search directly to chapter 27 section", "learn/interview",
       "problem first in both modes", "index folded in learn and open in interview", "native index summary toggle",
-      "formulas open by default", "collapse/expand all", "formula index reopens destination",
-      "whiteboard answer and completion persistence", "hidden deep link switches to learn",
+      "learn folded / interview open", "collapse/expand all", "formula index reopens destination",
+      "whiteboard answer and completion persistence", "code deep link retains interview mode",
       "TOC jump", "derivation disclosure", "completion preserving disclosure", "refresh persistence",
       "clipboard write success", "quiz answer", "theme persistence", "drawer close", "invalid route",
       "four new topics via native index", "glossary hover/click/keyboard focus and bounds",
+      "01/02/30/24 guide links", "mode switch retains visible section", "takeaway remains visible",
+      "keyboard opens and closes derivations", "folded and expanded lesson screenshots",
     ] });
     console.log(`${width}x${height}: native interaction acceptance passed`);
   }

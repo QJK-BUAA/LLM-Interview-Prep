@@ -1,5 +1,6 @@
 import { CHAPTERS, getChapter, getParts } from "../content/catalog.js";
 import { SECTION_LABELS } from "../content/schema.js";
+import { READING_GUIDES } from "../content/reading-guides.js";
 import {
   escapeHtml,
   hydrateMath,
@@ -17,6 +18,7 @@ import {
 } from "./store.js";
 
 const searchDocuments = CHAPTERS.map((chapter) => {
+  const guide = READING_GUIDES[chapter.id];
   const questionText = chapter.sections
     .flatMap((section) => section.questions ?? [])
     .flatMap((question) => [question.q, question.a]);
@@ -29,6 +31,7 @@ const searchDocuments = CHAPTERS.map((chapter) => {
     chapter.summary,
     ...chapter.tags,
     ...chapter.objectives,
+    ...(guide ? [guide.goal, guide.checkpoint, guide.later, ...Object.values(guide.topics)] : []),
     ...chapter.sections.flatMap((section) => [section.title, section.body]),
     ...questionText,
     ...chapter.sources.flatMap((source) => [
@@ -53,6 +56,7 @@ const sectionDocuments = CHAPTERS.flatMap(chapter =>
     text: normalizeSearchText([
       section.title,
       section.body,
+      READING_GUIDES[chapter.id]?.topics[section.id] ?? "",
       ...(section.questions ?? []).flatMap(question => [question.q, question.a]),
     ].join(" ")),
   })),
@@ -160,6 +164,16 @@ function initialize() {
     return isReadingPaneScrollable()
       ? elements.readingPane.scrollTop
       : window.scrollY;
+  }
+
+  function visibleReadingSection() {
+    const anchorLine = isReadingPaneScrollable() ? 130 : 110;
+    return [...elements.chapterRoot.querySelectorAll(".lesson-section")].find(section => {
+      const rect = section.getBoundingClientRect();
+      // Include the small gap before a heading; exclude a preceding section
+      // whose bottom has already scrolled above the reading line.
+      return rect.bottom > anchorLine && rect.top <= anchorLine + 48;
+    });
   }
 
   function writeScrollPosition(value) {
@@ -341,7 +355,7 @@ function initialize() {
       `</section>`;
   }
 
-  function scrollToSection(sectionId, fallbackPosition = 0) {
+  function scrollToSection(sectionId, fallbackPosition = 0, expandSection = true) {
     requestAnimationFrame(() => {
       if (sectionId) {
         const target = elements.chapterRoot.querySelector(
@@ -349,7 +363,7 @@ function initialize() {
         );
         if (target) {
           const derivation = target.querySelector(".derivation-disclosure");
-          if (derivation) derivation.open = true;
+          if (derivation && expandSection) derivation.open = true;
           target.scrollIntoView({ behavior: "auto", block: "start" });
           return;
         }
@@ -362,6 +376,7 @@ function initialize() {
     sectionId = null,
     restorePosition = 0,
     focusReader = false,
+    expandSection = true,
   } = {}) {
     const chapter = getChapter(state.currentChapter) ?? CHAPTERS[0];
     currentSectionId = sectionId;
@@ -380,7 +395,7 @@ function initialize() {
     renderCourseNavigation();
     renderOverallProgress();
     applyModeControls();
-    scrollToSection(sectionId, restorePosition);
+    scrollToSection(sectionId, restorePosition, expandSection);
 
     if (focusReader) {
       requestAnimationFrame(() => elements.readingPane.focus());
@@ -543,6 +558,7 @@ function initialize() {
         break;
       }
     }
+    nearest = visibleReadingSection() ?? nearest;
 
     for (const link of elements.chapterContext.querySelectorAll(".toc-link")) {
       link.classList.toggle(
@@ -641,18 +657,16 @@ function initialize() {
       if (nextMode === state.mode) return;
 
       const position = readScrollPosition();
+      const anchor = visibleReadingSection();
       persist(setMode(state, nextMode));
       const chapter = getChapter(state.currentChapter);
-      const sectionVisible = visibleSections(chapter, state.mode).some(
-        (section) => section.id === currentSectionId,
-      );
-      if (currentSectionId && !sectionVisible) {
-        currentSectionId = null;
-        replaceRoute(chapter.id);
-      }
+      // Folding changes page height: restore the section being read, not old pixels.
+      currentSectionId = anchor?.id ?? null;
+      replaceRoute(chapter.id, currentSectionId);
       renderCurrentChapter({
         sectionId: currentSectionId,
         restorePosition: position,
+        expandSection: false,
       });
     } else if (action === "toggle-theme") {
       persist(setTheme(state, state.theme === "dark" ? "light" : "dark"));

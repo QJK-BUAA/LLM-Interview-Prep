@@ -8,6 +8,9 @@ import {
   renderMarkdown,
   visibleSections,
 } from "../app/renderer.js";
+import { CHAPTERS } from "../content/catalog.js";
+import { READING_GUIDES } from "../content/reading-guides.js";
+import { searchChapters, searchSections } from "../app/app.js";
 
 test("escapes untrusted HTML characters", () => {
   assert.equal(
@@ -75,7 +78,7 @@ test("annotates only the first glossary occurrence", () => {
   assert.match(html, /data-definition=/);
 });
 
-test("filters sections for interview mode", () => {
+test("both modes retain diagrams and code alongside all teaching sections", () => {
   const chapter = {
     sections: [
       { type: "roadmap" },
@@ -86,13 +89,15 @@ test("filters sections for interview mode", () => {
       { type: "comparison" },
       { type: "interview" },
       { type: "quiz" },
+      { type: "diagram" },
+      { type: "code" },
     ],
   };
 
-  assert.equal(visibleSections(chapter, "learn").length, 8);
+  assert.equal(visibleSections(chapter, "learn").length, 10);
   assert.deepEqual(
     visibleSections(chapter, "interview").map((section) => section.type),
-    ["roadmap", "intuition", "example", "derivation", "pitfall", "comparison", "interview", "quiz"],
+    ["roadmap", "intuition", "example", "derivation", "pitfall", "comparison", "interview", "quiz", "diagram", "code"],
   );
 });
 
@@ -174,6 +179,47 @@ test("both reading modes introduce the problem and example before the formula in
     assert.equal((html.match(/class="chapter-objectives"/g) ?? []).length, 1);
     assert.equal((html.match(/class="formula-index"/g) ?? []).length, 1);
     assert.equal(html.includes('<details class="formula-index" open>'), mode === "interview");
-    assert.match(html, /<details class="derivation-disclosure" open>/);
+    assert.equal(html.includes('<details class="derivation-disclosure" open>'), mode === "interview");
+    assert.match(html, /L=e\^2/); // Folded math remains intact in the document.
   }
+});
+
+test("all real lessons expose individually written takeaways outside folded derivations", () => {
+  for (const chapter of CHAPTERS) {
+    const guide = READING_GUIDES[chapter.id];
+    const html = renderChapter(chapter, { mode: "learn" });
+    const count = chapter.sections.filter(section => section.type === "derivation").length;
+    assert.ok(guide.goal && guide.checkpoint && guide.later, chapter.id);
+    assert.equal((html.match(/class="topic-takeaway"/g) ?? []).length, count, chapter.id);
+    assert.equal((html.match(/class="derivation-disclosure" open/g) ?? []).length, 0, chapter.id);
+    assert.match(html, /class="reading-guide"/);
+    assert.equal((html.match(/class="lesson-section /g) ?? []).length, chapter.sections.length);
+    for (const id of guide.focus) {
+      assert.match(html, new RegExp(`href="#${chapter.id}/${id}"`));
+    }
+    const interview = renderChapter(chapter, { mode: "interview" });
+    assert.equal((interview.match(/class="derivation-disclosure" open/g) ?? []).length, count);
+    assert.match(interview, /class="code-block"/);
+    assert.match(interview, /class="diagram /);
+  }
+});
+
+test("folded detail glossary does not consume a later visible definition", () => {
+  const chapter = {
+    id: "99", title: "", subtitle: "", part: "", level: "", duration: 1,
+    summary: "", objectives: [], sources: [],
+    sections: [
+      { id: "math-test", type: "derivation", title: "", body: "token。" },
+      { id: "example", type: "example", title: "", body: "token。" },
+    ],
+  };
+  const html = renderChapter(chapter, { mode: "learn" });
+  const visible = html.slice(html.indexOf('id="example"'));
+  assert.match(visible, /class="glossary-term"/);
+});
+
+test("reading guidance and individual takeaways are searchable", () => {
+  assert.ok(searchChapters("不连续刷十三套证明").some(chapter => chapter.id === "04"));
+  assert.ok(searchSections("前向在哪些位置复用参数").some(section =>
+    section.chapterId === "01" && section.sectionId === "math-broadcast-backward"));
 });

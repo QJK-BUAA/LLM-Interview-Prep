@@ -1,0 +1,37 @@
+{
+  "idsAndQuestionsPreserved": true,
+  "chapters": 31,
+  "sections": 458,
+  "typeChanges": [
+    {
+      "chapter": "30",
+      "section": "math-completion-criteria",
+      "before": "derivation",
+      "after": "comparison"
+    }
+  ],
+  "mathOccurrencesBefore": 4808,
+  "mathOccurrencesAfter": 4460,
+  "defaultVisibleMathLearn": 502,
+  "defaultVisibleMathInterview": 3930,
+  "examples": [
+    {
+      "id": "01",
+      "math": 116,
+      "visible": 35,
+      "takeaways": 5
+    },
+    {
+      "id": "02",
+      "math": 229,
+      "visible": 22,
+      "takeaways": 7
+    },
+    {
+      "id": "30",
+      "math": 14,
+      "visible": 0,
+      "takeaways": 4
+    }
+  ]
+}

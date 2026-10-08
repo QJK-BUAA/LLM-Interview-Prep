@@ -165,7 +165,18 @@ $$A_{ij}=
       title: "Attention 反向：从输出到 Q、K、V 和投影权重",
       body: String.raw`如果损失要求改变读取结果，模型应该修改所读的内容，还是修改从哪里读取的比例？两条路都可能需要。我们把误差先拆到 value 与注意力权重，再沿 softmax 和点积回到查询、键，最后回到生成它们的投影矩阵。
 
-单头中 $Q\in\mathbb R^{n_q\times d_k}$，$K\in\mathbb R^{n_k\times d_k}$，$V\in\mathbb R^{n_k\times d_v}$，其中 $n_q,n_k$ 为查询和键数，$d_k,d_v$ 为匹配和内容维度。记 $S=QK^\top/\sqrt{d_k}$，$A=\operatorname{softmax}_{row}(S+M)$，$O=AV\in\mathbb R^{n_q\times d_v}$。Cross-Attention 不要求 $n_q=n_k$。给定标量目标的上游 $G_O=\partial L/\partial O$：
+**先分开两条反馈。** 假设只读两个 value：第一份是 (2,0)，第二份是 (0,4)，读取比例分别为 1/4、3/4。输出就是 (1/2,3)。取损失为“第一维加两倍第二维”，得到 6.5，上游反馈为 (1,2)。
+
+改变 value 时，反馈按读取比例分配：第一份收到 (1/4,1/2)，第二份收到 (3/4,3/2)。改变读取比例时，则要问各份内容对损失贡献多大，答案是 2 和 8。后者还要经过 softmax，才能变成打分的梯度。
+
+**给各张表标上尺寸。** Q 每行是一条查询，K 每行是一条键；它们有相同的匹配维度。V 与 K 行数相同，每行放可取回的内容。查询数和键数可以不同。下面用 $n_q,n_k$ 表示这两个行数，$d_k,d_v$ 表示匹配和内容宽度。
+
+前向依次产生分数 S、读取比例 A、输出 O：
+
+$$S=QK^\top/\sqrt{d_k},\qquad
+A=\operatorname{softmax}_{row}(S+M),\qquad O=AV.$$
+
+M 是固定 mask。用 $G_O=\partial L/\partial O$ 表示输出收到的反馈，形状与 O 一样。
 
 由 $dO=dA\,V+A\,dV$，先得：
 
@@ -178,11 +189,11 @@ $$G_S=A\odot(G_A-c\mathbf1^\top),\quad
 G_Q=\frac{G_SK}{\sqrt{d_k}},\quad
 G_K=\frac{G_S^\top Q}{\sqrt{d_k}}.$$
 
-固定 mask 的禁止位置梯度为 0。注意缩放对 Q、K 梯度各出现一次；V 的路径不经过缩放。若 $Q=XW_Q$ 等来自同一 $X$，拆头反向先撤销 transpose/reshape，再用 $\nabla W_Q=X^\top G_Q$；输入梯度为 $G_QW_Q^\top+G_KW_K^\top+G_VW_V^\top$。多头输出投影 $Y=CW_O$ 另给 $\nabla W_O=C^\top G_Y,G_C=G_YW_O^\top$。
+固定 mask 的禁止位置梯度为 0。缩放对 Q、K 梯度各出现一次；V 的路径不经过缩放。
 
-为了让权重恰好是 1/4 与 3/4，下面将开场的向量换成产生分数 [0,log 3] 的受控例，反向步骤没有改变。
+要构造开头的 1/4、3/4 读取比例，可以让两个匹配分数分别为 0、log 3。下面补出一组满足条件的查询和键。
 
-**完整手算。** 一条 query、两个 key，$d_k=d_v=2$，$q=[1,0]$，$K=[[0,0],[\sqrt2\log3,0]]$，$V=[[2,0],[0,4]]$，无 mask，损失 $L=O_1+2O_2$：
+**补全开头的 Q/K 手算。** 一条 query、两个 key，匹配和内容宽度均为 2。取 $q=[1,0]$、$K=[[0,0],[\sqrt2\log3,0]]$，V 和损失沿用开头，无 mask：
 
 $$S=[0,\log3],\quad A=[1/4,3/4],\quad O=[1/2,3],\quad L=6.5.$$
 
@@ -196,7 +207,13 @@ G_V=\begin{bmatrix}1/4&1/2\\3/4&3/2\end{bmatrix}.$$
 
 第二份 value 对这个损失的贡献更大，所以其分数梯度为正；沿负梯度更新会降低读取它的比例。同时它仍收到较大的 value 梯度，因为当前有四分之三权重读它。两条路径回答的是不同问题。
 
-对每个 Q/K/V 元素中心差分检查 $L$，可以同时发现漏转置、漏缩放、softmax 轴和错误 mask。本推导未加 attention dropout；若 dropout 作用在 A 上，反向先按同一 mask 和保留率处理，再进入 softmax Jacobian，不能直接使用丢弃后的 A 作为原 softmax 概率。梯度路线确认后，下一节再统计这套矩阵计算随规模增加的成本。`,
+**回访：再传给投影参数。** 若 Q、K、V 来自同一输入 X 的三组投影，先撤销拆头的 transpose/reshape，再用第 01 章矩阵反传。例如 $\nabla W_Q=X^\top G_Q$，三条输入路径要相加：
+
+$$\nabla_XL=G_QW_Q^\top+G_KW_K^\top+G_VW_V^\top.$$
+
+多头拼接结果 C 还会经过输出投影 $Y=CW_O$，另有 $\nabla W_O=C^\top G_Y$ 和 $G_C=G_YW_O^\top$。
+
+对每个 Q/K/V 元素做中心差分，可以检查转置、缩放和 softmax 轴。本推导未加 attention dropout；若使用它，先按前向相同的 mask 和保留率反传，再进入 softmax，不能把丢弃后的 A 当作原 softmax 概率。下一节再统计计算成本。`,
     },
     {
       id: "math-transformer-flops",

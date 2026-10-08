@@ -53,6 +53,11 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
         .slice(0, 5).map(el => el.dataset.sectionId || el.className);
       const opener = document.querySelector('#intuition .section-body > p');
       const openerHasMath = Boolean(opener?.querySelector('[data-math]'));
+      const defaultVisibleFormulas = [...document.querySelectorAll('.math-rendered')].filter(el=>el.checkVisibility()).length;
+      const visibleTakeaways = [...document.querySelectorAll('.topic-takeaway')].filter(el=>el.checkVisibility()).length;
+      const defaultOverflow = [...document.querySelectorAll('.chapter p, .chapter .section-body, .reading-guide, .chapter h2')]
+        .filter(el=>el.checkVisibility() && !el.closest('.code-block, .table-scroll, .math-display, .katex'))
+        .filter(el=>el.scrollWidth>el.clientWidth+2).map(el=>({id:el.id,className:el.className,extra:el.scrollWidth-el.clientWidth}));
       for (const details of document.querySelectorAll('.chapter details')) details.open = true;
       await frame();
       await document.fonts.ready;
@@ -60,7 +65,7 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
       const reader = document.querySelector('#reading-pane');
       const rr = reader.getBoundingClientRect();
       const page = document.documentElement;
-      const badBounds = [...chapter.querySelectorAll('.lesson-section, .section-header, .chapter-header')]
+      const badBounds = [...chapter.querySelectorAll('.lesson-section, .section-header, .chapter-header, .reading-guide')]
         .filter(el => {const r=el.getBoundingClientRect();return r.left < rr.left - 1 || r.right > rr.right + 1;})
         .map(el => el.id || el.className);
       const badOverflow = [...chapter.querySelectorAll('p, .section-body, .lesson-section, h1, h2, .quiz-text')]
@@ -76,11 +81,15 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
       const edges = chapter.querySelectorAll('.flow-edge').length;
       const quizzes = chapter.querySelectorAll('.quiz-answer').length;
       const row = { id:record.id, rendered:chapter.dataset.chapterId, sections, edges, quizzes, openDerivations,
-        formulaIndexOpen, teachingOrder, openerHasMath,
+        formulaIndexOpen, teachingOrder, openerHasMath, defaultVisibleFormulas, visibleTakeaways, defaultOverflow,
+        readingGuideCount:chapter.querySelectorAll('.reading-guide').length,
         formulaCount:chapter.querySelectorAll('.math-rendered').length, fallback,
         pageOverflow:page.scrollWidth>page.clientWidth, readerOverflow:reader.scrollWidth>reader.clientWidth+1,
         badBounds, badOverflow, headerOverlap };
-      row.passed = row.rendered===record.id && sections===record.sections && openDerivations===record.derivations && edges===record.edges && quizzes===record.quizzes && !fallback && !row.pageOverflow && !row.readerOverflow && !badBounds.length && !badOverflow.length && !headerOverlap &&
+      row.passed = row.rendered===record.id && sections===record.sections &&
+        openDerivations===${mode === "interview" ? "record.derivations" : "0"} &&
+        visibleTakeaways===record.derivations && row.readingGuideCount===1 && !defaultOverflow.length &&
+        edges===record.edges && quizzes===record.quizzes && !fallback && !row.pageOverflow && !row.readerOverflow && !badBounds.length && !badOverflow.length && !headerOverlap &&
         formulaIndexOpen===${mode === "interview"} && !openerHasMath &&
         teachingOrder.join(',')==='intuition,chapter-objectives,example,roadmap,formula-index';
       results.push(row);
@@ -91,7 +100,7 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
   })()`);
   result.mode = mode;
   report.viewports.push(result);
-  console.log(`${width}x${height} ${mode}: ${result.results.filter(r => r.passed).length}/30 chapter layouts pass`);
+  console.log(`${width}x${height} ${mode}: ${result.results.filter(r => r.passed).length}/${CHAPTERS.length} chapter layouts pass (default + expanded)`);
   }
   run(["open", `${baseUrl}?capture=${width}#00`]);
   run(["wait", ".chapter"]);

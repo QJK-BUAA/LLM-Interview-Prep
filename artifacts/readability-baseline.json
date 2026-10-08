@@ -1,0 +1,2847 @@
+{
+  "commit": "f66109b",
+  "records": [
+    {
+      "id": "00",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-likelihood",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-generalization",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-reward",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "为什么说大语言模型仍然遵循普通机器学习的基本流程？",
+            "SFT、GRPO 和 OPD 最值得先比较的两个维度是什么？",
+            "第一次接触一个公式时，推荐按什么顺序理解？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "固定 b=40，x=(1,2,3)，y=(50,60,70)，w=8，损失为平均平方误差。求梯度，并用学习率 0.05 更新一次。",
+            "证明固定高斯噪声下 MLE 等价于最小化平方误差。残差为 (1,-1)、方差为 1 时平均 NLL 是多少？",
+            "两动作奖励为 r(1)=2、r(0)=0，正动作概率为 sigmoid(theta)。在 theta=0 推导期望奖励梯度，解释为何不能对采样到的奖励直接求导。",
+            "模型甲在场景 A/B 的损失为 0/4，乙为 1/1。训练中 A 占 90%，部署中占 50%。大量训练样本能否保证训练最优模型部署最优？"
+          ]
+        }
+      ],
+      "math": 119,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "01",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-matmul-backward",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-broadcast-backward",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-masked-mean",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-einsum-layout",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "X 的 shape 为 [4, 10, 32]，W 为 [32, 64]，X @ W 的 shape 是什么？",
+            "[2, 3, 4] 能否与 [3, 1] 相加？",
+            "为什么把 [B,S,N,D] 直接 reshape 成 [B,S,H] 前通常不需要交换轴，而 [B,N,S,D] 需要？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "X=[[1,2],[3,4]]，W=[2,-1]^T，b=1，目标 y=[0,1]^T，L=0.5*sum((XW+b-y)^2)。推导并计算 X、W、b 的梯度。",
+            "上游梯度 G=[[[1,2],[3,4]],[[5,6],[7,8]]]。分别求加到 [B,S,H] 上的 [H] 偏置和 [1,S,1] 偏置梯度。",
+            "损失为 [[1,3,99],[2,4,6]]，mask 为 [[1,1,0],[1,1,1]]。比较 token 平均、序列平均及其有效位置梯度；全空批怎么办？",
+            "在 [S,N,D]=[2,2,1] 中编号为 [[0,1],[10,11]]。为什么交换 S/N 后不能直接 reshape 回 [S,2]？"
+          ]
+        }
+      ],
+      "math": 184,
+      "expandedDerivations": 5
+    },
+    {
+      "id": "02",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-quadratic",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-eigen",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-svd",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-pca",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-ridge",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-lasso",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "若 z=wx+b，L=z²，求 dL/dw。",
+            "为什么梯度 shape 必须和参数 shape 一致？",
+            "两个没有激活函数的线性层为什么等价于一个线性层？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "q(x)=0.5*x^T*A*x+c^T*x，A=[[3,1],[1,2]]，c=(-1,0)，x=(1,2)。求梯度、Hessian 和学习率 0.1 的一步结果；一般 A 不对称时怎样改？",
+            "中心化数据为 (2,0)、(-2,0)、(0,1)、(0,-1)。推导一维 PCA 方向、解释方差比和重建误差，并连接 SVD。",
+            "X=[[1,1],[2,2]]，y=(1,2)，求全部最小二乘解、最小范数解及 lambda=1 的岭解。目标采用半平方和加 lambda/2 范数平方。",
+            "X=[[3,0],[0,2],[0,0]]，y=(3,4,5)。用 SVD 写伪逆和最小二乘结果；为什么残差不能为零？",
+            "从次梯度推导 0.5*(w-z)^2+lambda*|w| 的最优解。lambda=1、z=-3/0.5/2 时分别是多少？与 L2 比较。"
+          ]
+        }
+      ],
+      "math": 283,
+      "expandedDerivations": 7
+    },
+    {
+      "id": "03",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-bayes",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-moments",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-mle-map",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-confidence",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-importance-sampling",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "真实类别概率从 0.5 提升到 0.9，负对数似然怎样变化？",
+            "为什么 KL(p||q) 与 KL(q||p) 一般不相等？",
+            "把标准误缩小到原来的三分之一，样本量大约要变成多少倍？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "患病率 1%，敏感度 90%，假阳性率 5%。推导阳性后患病概率，并说明能否把第二次阳性的似然比直接相乘。",
+            "Bernoulli 样本正、正、反，先验 Beta(2,2)。推导 MLE、MAP 和后验均值，说明三次全正时的变化。",
+            "两组等概率，组均值为 0 和 2，组内方差均为 1。求总体均值和方差；若把同一个随机样本复制 100 次，均值方差能除以 100 吗？",
+            "10 次独立测试全部成功。Wald 区间为何失败？用 z=1.96 的 Wilson 公式计算，并解释 95% 的含义。",
+            "p=(0.75,0.25)，q=(0.5,0.5)，f=(2,0)。推导普通 IS 期望、单样本方差和单样本 SNIS 偏差；一批各出现一次的 ESS 是多少？",
+            "证明 KL 非负，并用 p=(1,0)、q=(0.5,0.5) 展示交换方向的后果。"
+          ]
+        }
+      ],
+      "math": 222,
+      "expandedDerivations": 6
+    },
+    {
+      "id": "04",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-logistic",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-naive-bayes",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-knn",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-svm",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-tree",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-rf-gbdt",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-adaboost",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-xgboost",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-kmeans",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-em",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-ranking",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-bias-variance",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "正类只占 0.1% 时，为什么 99.9% accuracy 可能毫无意义？",
+            "为什么按时间切分常比随机切分更接近线上部署？",
+            "AUC 很高是否说明模型输出的 0.9 可以解释为九成正确率？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "逻辑回归 x=(1,2)、y=(0,1)，w=b=0，无正则、平均 NLL。推导并计算梯度和 Hessian，说明凸目标为何仍可能没有有限 MLE。",
+            "软间隔 SVM 两点为 (-1,-1)、(1,+1)，C=1。由对偶求 alpha、w、b，并解释核函数的合法条件。",
+            "树节点 3 正 3 负，分裂成左侧 2 正 0 负、右侧 1 正 3 负。分别计算信息增益和 Gini 增益。",
+            "平方损失 XGBoost 旧预测均为 0，标签 (-1,-1,1,1)，分成前后两叶，lambda=1、gamma=0.1、学习率为 1。推导叶权重与 gain 并直接核对。",
+            "对点 (0,2,8,10)，K-means 初始中心为 (0,8)，做一轮。再说明 GMM 的 E 步为什么不能直接替换成最近中心。",
+            "GMM 两点为 -1、1，两个分量旧均值 -1、1，权重各半、方差均为 1。计算一轮 EM 的责任度、均值与方差。",
+            "预测排序相关性为 (2,0,1)，用指数 gain 算 NDCG@3；已校准欺诈概率为 0.2，误报成本 1、漏报成本 9，应否报警？",
+            "真函数值 2、噪声方差 0.25，模型在两个等概率训练集预测为 1 和 3；另一个模型恒预测 1.5。推导并比较期望测试平方误差。",
+            "Bernoulli 朴素 Bayes 两类各 4 条样本，两个特征的出现数分别为垃圾类 (3,4)、正常类 (1,0)。先验各半，做 Laplace 平滑后求 x=(1,1) 的 log 分数和后验。",
+            "查询 0，三个邻居为 (位置,标签)=(1,1),(2,0),(3,0)。比较均匀与倒数距离投票；100 维均匀单位立方体中覆盖 10% 质量的等边邻域要多宽？",
+            "AdaBoost 初始 4 个样本等权，弱分类器只错一个。从指数损失推 alpha 和下一轮权重，说明错率为 0、1/2 时怎么办。"
+          ]
+        }
+      ],
+      "math": 403,
+      "expandedDerivations": 13
+    },
+    {
+      "id": "05",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "math-activations",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-softmax-ce",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-gradient-check",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "z=[log 2,0,0]，标签为第二类。推导 softmax Jacobian、CE 梯度，并解释梯度和为何为 0。",
+            "X=[1,2]，W1=[[1,-1],[0,1]]，W2=I，偏置全零，ReLU，标签 [1,0]。求两层权重、偏置及输入梯度。",
+            "中心差分在 ReLU(0) 得到 0.5，autograd 给 0，能据此判定反传错误吗？如何设计可靠检查？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "若 ReLU 输入 z=-2，上游梯度为 5，传到 z 的梯度是多少？",
+            "X 为 [8,16]、W 为 [16,32]，线性层输出和 W 的梯度 shape 分别是什么？",
+            "为什么训练时要保存中间激活？"
+          ]
+        }
+      ],
+      "math": 140,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "06",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-learning-rate-schedule",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-initialization",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-normalization",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-dropout-clipping",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "theta=2、g=2、学习率 0.1、衰减 0.1，Adam 从零状态开始。求 AdamW 与 Adam 加 L2 的第一步并解释差异。",
+            "fan-in=fan-out=256、对称零均值预激活且输入二阶矩为 1。为什么 ReLU 常用 He 而非 Xavier？",
+            "LN 输入 [1,2,3]、gamma=1、beta=0、epsilon=0，上游 [1,0,0]，求输入梯度。若改为冻结统计的 BN 推理呢？",
+            "x=2、dropout 保留率 0.75；梯度 [3,4]、裁剪阈值 2。分别求 dropout 均值方差与裁剪结果，裁剪能保证 Adam 步长不超过 2 eta 吗？",
+            "线性 warmup 接单段 cosine，W=2、T=10、最高/最低学习率为 0.001/0.0001。求第 1、2、6、10 次更新的学习率。累积 4 批更新一次时如何计数？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "Momentum 为什么能降低狭长谷底中的左右震荡？",
+            "LayerNorm 为什么比 BatchNorm 更适合自回归语言模型？",
+            "训练集损失下降、验证集损失持续上升，优先怀疑什么？"
+          ]
+        }
+      ],
+      "math": 168,
+      "expandedDerivations": 5
+    },
+    {
+      "id": "07",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "math-convolution",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-lstm",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-gru-causality",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "一维互相关 x=[1,2,3]、k=[2,-1]、stride=1、无 padding、bias=0，L=y0+2y1。求 y、核/输入/bias 梯度。",
+            "线性 RNN h_t=w h_(t-1)+x_t，w=0.5、h0=0、x=[1,0,2]、L=h3。完整 BPTT 和在 h2 detach 后的 dw 是多少？",
+            "LSTM 四门权重偏置全为 0，旧 cell=2，L=h_t，求 c_t、h_t、直接旧 cell 梯度。为什么 f 接近 1 不保证无限记忆？",
+            "GRU 的 z=0.75、r=0.5、旧状态=2、候选为 tanh(r h)，求新状态；双向 GRU 能否直接做 next-token predictor？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "长度 8、核 3、padding 1、stride 2 的一维卷积输出长度是多少？",
+            "LSTM 的遗忘门接近 1 时，对旧 cell state 有什么影响？",
+            "为什么 Self-Attention 训练可并行，但自回归生成仍然串行？"
+          ]
+        }
+      ],
+      "math": 152,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "08",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "math-tokenizer-objectives",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-embedding-gradients",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-temperature",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-truncated-sampling",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-likelihood-perplexity",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "Unigram 词表 a、b、ab 的概率为 0.4、0.4、0.2。字符串 ab 的边缘概率、切分后验和一次 EM 更新分别是什么？",
+            "embedding ID=[1,1,2]，输入上游为 [1,2]、[3,-1]、[0,4]。若与输出头共享，为什么不能只更新查到的行？",
+            "正确类概率 [0.5,0.25,0.01]、mask=[1,1,0]，求 NLL/PPL；全部 mask=0 怎么办？",
+            "logits=[log 4,0]，温度从 1 改为 2，概率和第二类 CE 对原 logits 的梯度如何变化？零温是否总选唯一 token？",
+            "分布为 (0.4,0.3,0.2,0.1)，分别计算 top-k=2、top-p=0.8。为什么必须保留越过 0.8 的一项？截断后能否仅用 IS 恢复第四项？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "token ids 为 [4,128]，词表为 50,000，隐藏维为 768，查表后的 shape 是什么？",
+            "为什么 BBPE 理论上不需要未知字符 token？",
+            "attention mask 与 loss mask 分别解决什么问题？",
+            "词表从 32k 扩到 128k 一定更省算力吗？"
+          ]
+        }
+      ],
+      "math": 150,
+      "expandedDerivations": 6
+    },
+    {
+      "id": "09",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-attention-scaling-mask",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-attention-backward",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-transformer-flops",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-residual-jacobian",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "q=[1,0]，K=[[0,0],[sqrt(2) log 3,0]]，V=[[2,0],[0,4]]，缩放维度 2，L=O1+2O2。求 Q/K/V 梯度。",
+            "H=512，S=128，B=1，普通 FFN 宽度 2048。求 MHA 参数和整层主矩阵前向 FLOPs；头数 8 改 16 会翻倍吗？",
+            "一行 attention 仅有一个可见 key，或者一个都没有，对前向和 Q/K/V 梯度分别意味着什么？",
+            "证明 Pre-LN 与 Post-LN 的 Jacobian 形式，并给一个能区分它们的扰动方向。"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "X=[2,128,512]，8 个头时，拆头后的 Q 和注意力分数 shape 各是什么？",
+            "为什么因果模型训练时能一次处理整个序列，却不能一次生成整个答案？",
+            "FFN 为什么仍然重要，它是否混合不同 token？",
+            "padding mask 应该在 softmax 前还是后应用？为什么？"
+          ]
+        }
+      ],
+      "math": 189,
+      "expandedDerivations": 5
+    },
+    {
+      "id": "10",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-rope-relative",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-position-extension",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-rmsnorm-backward",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-swiglu-budget",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-kv-mla",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-moe-routing",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "证明 RoPE 内积只在位置因子上依赖 n-m。q=k=[1,0]，theta=pi/2，m=1,n=2 时内积是多少？",
+            "ALiBi 的 i=2、slope=1/2，对 j=0,1,2 的偏置是什么？YaRN 扩四倍、ramp 为 0/0.5/1 时频率怎样变化，Q/K 各乘 a 又使分数乘多少？",
+            "RMSNorm x=[1,2]、gamma=[1,1]、epsilon=0，上游 [1,0]，求输入梯度。若把分母 detach 会错在哪里？",
+            "32 个 Q 头、每头 128 维，比较 MHA、8-KV GQA、MQA，以及 dc=512、dR=64 的解耦 MLA 每 token 每层缓存。",
+            "E=4 的 top-1 辅助损失中 f=[1,0,0,0]，P=[0.7,0.1,0.1,0.1]，alpha=0.01，求损失。top-1 gate 归一化成 1 是否还能从加权输出学习 router？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "32 个 query 头、8 个 KV 头的 GQA，相对同维 MHA 的每 token KV 元素数缩小多少？",
+            "RMSNorm 与 LayerNorm 的关键公式差异是什么？",
+            "为什么 MoE 的低激活 FLOPs 不等于部署简单？",
+            "何时不能仅凭 O(S) 与 O(S²) 断言 SSM 更快？"
+          ]
+        }
+      ],
+      "math": 182,
+      "expandedDerivations": 7
+    },
+    {
+      "id": "11",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-memory-zero",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-flashattention-online",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-prefill-decode",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-speculative-decoding",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-parallel-communication",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "在线 softmax 先处理 scores=[log2,0]、values=[2,4]，再处理 score=log3、value=10，求 m、分母、分子和最终输出。",
+            "7B 参数、8 卡，每参数权重/梯度各 2B、主副本 4B、Adam 状态 8B，求 ZeRO-1/2/3 每卡状态，并说明为何不是峰值。",
+            "8 卡 ring all-reduce 同步 1 GiB 梯度，每跳 5 微秒，有效带宽 50 GiB/s；4-stage/8-microbatch 的理想流水利用率是多少？",
+            "有 FlashAttention 和 KV Cache 后，长上下文 decode 是否已变为与长度无关？",
+            "p=(0.5,0.3,0.2)、q=(0.2,0.5,0.3)，求投机接受率和拒绝分布。K=3、同率独立近似下每轮期望输出多少 token？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "10 亿参数仅以 bf16 存权重，理论下限约多少十进制 GB？",
+            "梯度检查点为什么省显存却增加计算？",
+            "KV Cache 为什么让生成更快，又为什么限制并发？",
+            "优化 tokens/s 后 TTFT 变差，是否矛盾？"
+          ]
+        }
+      ],
+      "math": 119,
+      "expandedDerivations": 6
+    },
+    {
+      "id": "12",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-lora-gradients",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-rank-scale-merge",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-quantization",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-peft-memory",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "W=I，A=[1,-1]，B=[0.5,1]^T，x=[2,1]^T，s=2，L=3y1-2y2。求 A/B/x 梯度；把 B 改成零又如何？",
+            "对 w=[-1,-0.2,0.3,1] 用 scale=max|w|/7 的对称均匀 4-bit 教学量化，求代码、反量化与最大误差。它是 NF4 吗？",
+            "32 层每层 Q/V 两个 4096 方阵都加 rank16 LoRA，训练状态按 16B/参数。求可训练参数与状态，为什么不能用这个数断言 QLoRA 总峰值？",
+            "LoRA 合并何时精确？rank1 的增量是否意味着整个 W+BA 也只有 rank1？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "4096×4096 线性层使用 rank 8 的 LoRA，需要多少可训练矩阵参数？",
+            "为什么常把 B 初始化为零而 A 随机初始化？",
+            "QLoRA 中哪些对象通常不是 4 bit？",
+            "什么时候更应选择全参数微调而不是 LoRA？"
+          ]
+        }
+      ],
+      "math": 131,
+      "expandedDerivations": 5
+    },
+    {
+      "id": "13",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-bellman-matrix",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-contraction-control",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-terminal-discount",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "奖励依次为 1、2、4，γ=0.5，时刻 0 的有限回报是多少？",
+            "Qπ(s,a)=7，Vπ(s)=5 时，Aπ(s,a) 是多少，如何解释？",
+            "Q-learning 使用 replay buffer，为什么通常称 off-policy？",
+            "时间限制导致 episode 停止时，为什么不能总把下一状态价值设为零？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "两状态交替，奖励 [1,2]、折扣 0.5。写出矩阵方程并求价值。",
+            "证明固定策略 Bellman 算子收缩。γ=0.9、residual 的无穷范数为 0.02 时，价值误差上界是多少？",
+            "为什么 γ=1 不一定有唯一有限价值？给反例并说明截断该如何 bootstrap。"
+          ]
+        }
+      ],
+      "math": 154,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "14",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-double-bias",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-dueling-huber",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "Q=3，r=2，γ=0.5，下一状态最大 Q=6，α=0.25，一步 Q-Learning 后是多少？",
+            "SARSA 为什么可能比 Q-Learning 学到更保守的危险区域路线？",
+            "目标网络能否彻底解决 DQN 发散？",
+            "为什么 LLM 的 token 动作空间让 epsilon-greedy 很低效？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "Qθ=2θ，θ=1，固定 target=4.6，用半平方损失。推导梯度并给出 α=0.1 的一步结果。",
+            "两个真实 Q 都为零，独立噪声 ±1。算 max 的期望，并说明 Double 在什么条件下去掉这个偏差。",
+            "V=3、A=[2,0,-1] 时计算 Dueling Q；e=-2.6、κ=1 时计算 Huber loss 和梯度。它们各解决什么？"
+          ]
+        }
+      ],
+      "math": 101,
+      "expandedDerivations": 3
+    },
+    {
+      "id": "15",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-baseline",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-gae-telescoping",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-actor-critic-detach",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "回报为 3、状态 baseline 为 5 时，优势符号是什么，策略会怎样更新已选动作？",
+            "为什么 baseline 不能任意依赖当前动作？",
+            "GAE 中 λ=0 与 λ 接近 1 分别更像什么？",
+            "熵奖励能否判断答案正确？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "从轨迹概率推导 reward-to-go 梯度。为什么过去奖励可以去掉，而未来奖励不能？",
+            "r=[0,0,1]、V=[0.2,0.3,0.5,0]、γ=0.9、λ=0.8。手算 GAE，并用 λ=1 检查望远镜端点。",
+            "奖励恒为零，Bernoulli 策略 p=0.5，却用 b(a)=a 作 baseline，会发生什么？",
+            "推导最小条件梯度方差的标量 baseline，并说明为什么 actor 的 advantage 要 detach。"
+          ]
+        }
+      ],
+      "math": 137,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "30",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-chat-template",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-packing",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-aggregation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-completion-criteria",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "一条样本 response 的 3 个 token 概率为 0.5、0.4、0.8。写出 seq-sum、seq-mean 两种 loss，并给出第一个 token logits 的梯度结构（词表大小 4，softmax 后 p=(0.1,0.5,0.3,0.1)，真值是第 2 个）。",
+            "batch 两条样本有效长度 2 和 8，各样本每 token NLL 恒为 1 和 3。分别计算 sample-mean、seq-sum/B、token-mean 并解释差异。",
+            "多轮对话 [sys, u1, a1, u2, a2]，长度分别为 10、15、20、18、30。写出 attention_mask 与 loss_mask，并给出有效 token 数（忽略 end token）。",
+            "packing 四条样本到一条长 1024 的序列。朴素做法用全 1 attention_mask 为什么错？正确做法是什么？用 token-mean 时分母是什么？",
+            "SFT 后训练 loss 继续下降但 MMLU 下降 4 个百分点，下一步该怎么办？为什么不能用 RLHF 后的 checkpoint 当新一轮 DPO 的 reference？"
+          ]
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "为什么 SFT 不训 prompt token？",
+            "工具调用返回的 observation 要不要进 loss？",
+            "sample-mean 和 token-mean 的梯度范数为什么不同？",
+            "SFT 与 DPO 的典型顺序？"
+          ]
+        }
+      ],
+      "math": 127,
+      "expandedDerivations": 5
+    },
+    {
+      "id": "16",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-kl-estimators",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-trpo-fisher",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-ppo-update",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "old probability=0.5，new probability=0.55，ratio 是多少？ε=0.2 时是否触发上界？",
+            "reference policy 与 old policy 为什么不是同一个概念？",
+            "奖励模型对 chosen 打 8、rejected 打 7，和打 1、0 的 Bradley-Terry 偏好概率是否相同？",
+            "PPO clip 能否替代 reference KL？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "RM 的 chosen/rejected 分数差为 1。推导两侧梯度，并说明同时加 7 会怎样。",
+            "ε=0.2，分别计算 (ratio,A)=(1.3,2),(1.3,-2),(0.7,2),(0.7,-2) 的 PPO 目标和 log-prob 导数。",
+            "g=[1,2]、F=diag(2,8)、δ=0.01。推导局部 TRPO 步，并说明 PPO 是否严格满足同一约束。",
+            "为什么 k3 非负且数值无偏，却不能直接说固定旧样本上的自动微分是 current-to-reference KL 的无偏梯度？"
+          ]
+        }
+      ],
+      "math": 121,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "17",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-normalization-rloo",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-dapo",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "一组奖励 [1,0]，只减均值不除标准差时，优势是多少？",
+            "一组八条回答全部错误，GRPO 的组相对梯度为何消失？",
+            "DAPO 的动态采样主要处理什么，又带来什么风险？",
+            "GSPO 与标准 token-ratio GRPO 的核心差异是什么？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "G=4、奖励 [1,1,0,0]。分别算中心化、总体 std 标准化与 RLOO 优势，并证明 RLOO 的缩放关系。",
+            "长度 [2,8]、优势 [1,-1]、ratio 均为 1。算序列平均、token 平均和固定分母 20 的目标，说明反例。",
+            "四条回答全错时，哪些 GRPO 项没有信号？动态采样能解决什么，不能保证什么？",
+            "证明含自身组均值 baseline 的原始 on-policy 序列梯度有 (G-1)/G 因子。G=1 能否改用 RLOO？"
+          ]
+        }
+      ],
+      "math": 105,
+      "expandedDerivations": 3
+    },
+    {
+      "id": "18",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-dpo-gradient-length",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-preference-pairs",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-kto",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "current 相对 reference 对 chosen 提高 0.4、对 rejected 提高 0.1，DPO margin 是多少？",
+            "DPO 的 pairwise accuracy 上升，能否证明 chosen 的绝对概率上升？",
+            "只有单条 desirable/undesirable 标签、没有成对回答时，哪类方法更直接？",
+            "在线 DPO 相比标准离线 DPO 多了什么闭环？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "从固定 prompt 的 KL 正则奖励最大化推导最优策略，并说明 DPO 如何消去 Z。",
+            "四个 log-prob 为 -2、-3、-2.5、-2.7，β=0.1。算 DPO loss 和两侧 log-prob 梯度。",
+            "IPO 的目标为什么是 1/(2τ)？ORPO 的 odds 能直接用原始整句概率替代吗？",
+            "KTO 能否写成好坏标签的普通 logistic cross-entropy？为什么错配 microbatch 的 KL 参考点必须单独说明？"
+          ]
+        }
+      ],
+      "math": 114,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "19",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-kl-logit-temperature",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-trajectory-gradient",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-privileged-opsd",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "GLM-5 跨阶段 OPD 为什么可以用 group size=1，它就是 OPSD 吗？",
+            "把外部教师生成的完整答案缓存后做交叉熵，为什么不是标准 OPD？",
+            "OPSD 为什么仍有额外计算，即使没有外部大教师？",
+            "Privileged information leakage 在这里具体指什么？",
+            "RLSD 为什么把 verifier 与 self-teacher 分工？",
+            "Lightning OPD 的关键适用假设是什么？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "固定教师 q，学生 p=softmax(z/τ)。推导两向 KL 的 logit 梯度，并解释 reverse 中的中心化项。",
+            "p=[0.6,0.3,0.1]、q=[0.2,0.7,0.1]、τ=1。计算两向 KL 和梯度，第三项 p=q 是否意味着梯度为零？",
+            "两步模型第一步 p=σ(h)、teacher=0.5，第二步 KL 分别为 0 和 log(3)/2。h=0 时精确轨迹与固定前缀梯度有何不同？",
+            "教师看到学生输入无法推断的公平硬币 z 并据此输出 token，学生能把平均 forward KL 降到零吗？"
+          ]
+        }
+      ],
+      "math": 117,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "20",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-gradient-units",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-update-diagnostics",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "PPO 中 A=-2、r=1.5、裁剪范围 [0.8,1.2]，对 log probability 的系数是多少？",
+            "CISPO 的 clipped ratio 为什么必须 detach？",
+            "两个 token ratio 为 0.5 和 2，GSPO 的序列 ratio 与未裁剪单 token 系数是什么？设 A=1。",
+            "SAPO 已算出 4p(1-p)，是否可以直接乘 grad logpi？",
+            "VAPO 取 alpha=0.05、T=10，直接代入长度自适应 lambda 会怎样？",
+            "R3 重放 rollout 专家选择，是否意味着 router 没有梯度、GSPO 无法使用？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "A=1、两个 token ratio=[0.5,2]、裁剪区间 [0.8,1.2]。按这条回答的 token 均值，推导 PPO、教学双侧 CISPO、GSPO 的两个系数。",
+            "两条回答长 2、6，每个 token 沿同一参数方向的 score=1，局部系数为 1、-0.5。分别算序列平均和 token 平均，再解释能否仅调学习率对齐。",
+            "SAPO 在 r=1.5、A=1、tau=2 时怎样从目标导出 log-prob 梯度？若四个动作的绝对系数是 [1,1,1,7]，活跃比例能说明更新均匀吗？"
+          ]
+        }
+      ],
+      "math": 183,
+      "expandedDerivations": 3
+    },
+    {
+      "id": "21",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-pass-k-proof",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-dynamic-selection",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-weight-verifier",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "一道题采样 8 次成功 2 次，采样成功率、pass@2 与该批次 pass@8 估计各是多少？",
+            "数学和代码各采 100 条，平均 response 长度为 1000 和 4000，是否已实现 token 1:1？",
+            "合成题改写了评估题题面、换了变量名，能加入训练吗？",
+            "SGALM、GASP、LSP、STaR 都可以写成无需外部数据吗？",
+            "FineWeb-Edu 高教育质量分或 Seed-Coder 的 LLM 质量过滤，是否保证没有 PII 和版权问题？",
+            "RL 训练分数上涨而隐藏评估下降，SFT-RL 飞轮下一步应该怎么做？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "证明组合 pass@k 估计器的无偏性，并用 n=k=2、p=1/2 说明为何不能随意代入经验成功率。",
+            "两类题均匀采样，p=[0.1,0.5]，每组四条，只留混合奖励组。算保留占比与收齐 100 组的生成预算，每条固定 1000 token。",
+            "真实正确率 20%，误接收 10%，误拒绝 5%。RS 池的真实正确率是多少？若四条样本权重 [1,1,1,7]，该如何报告数据量？"
+          ]
+        }
+      ],
+      "math": 163,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "22",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-domain-normalization",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-distillation-pipeline",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-pipeline-budget",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "奖励为 [0, 0, 0, 1] 的组，其均值、总体方差和成功样本优势约为多少？",
+            "R1-Zero 的 Zero 与 R1-Distill 的 Distill 分别意味着什么？",
+            "为什么不能把 Speciale 的竞赛结果直接写成标准 V3.2 的能力？",
+            "V3 的后训练 5K GPU-hours 占正式训练合计 2,788K 的多少？它能说明 R1 RL 成本吗？",
+            "Seed-Coder Reasoning 用 VAPO，Seed1.5 的 73/79 是最终 200B 对照，这两句话对吗？",
+            "Qwen3 的 3,995 个查询是否意味着只生成了 3,995 条回答？",
+            "从 Qwen3.5 的 MoE 架构或 Seed2.0 的产品名，能推断其训练必用 GSPO 或 VAPO 吗？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "数学和代码各一条，长 1000、4000，域平均 NLL 为 1、3。目标是两域各 50%，写 loss 与每个 token 系数；若直接平铺会怎样？",
+            "固定前缀，教师 t=[0.8,0.2]、学生 p=[0.5,0.5]。推导 forward KL 的 logits 梯度，与只取教师首选 token 的 SFT 比较。",
+            "RS 需保留一百万等长 token，通过率 0.25；每千 token 生成、验证、单遍优化成本为 1、0.2、2 CU。算总成本，并解释能否与只公开 GPU-hours 的报告直接比较。"
+          ]
+        }
+      ],
+      "math": 123,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "23",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-async-ratio",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-opd-gradient",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-agent-budget",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "12-token 轨迹切成三段，每段 4 token，是否把总生成工作量减少为三分之一？",
+            "QK-Clip 是检测 Q/K 谱范数后截断 RL 概率比吗？",
+            "CISPO 中 ratio=2、区间 [0.8,1.2]、优势=-0.5 时，未归一化的 log-prob 梯度系数是多少？",
+            "Zero-Vision SFT 是否意味着 Kimi K2.5 在训练期间从未使用图像？",
+            "Windowed FIFO 是把队列里最老的未完成任务直接丢弃吗？",
+            "为什么 GLM-5 的跨阶段蒸馏可以用一条 rollout，却不等于特权上下文 OPSD？",
+            "M2.7 比 M2.5 的某个 Agent benchmark 更高，能推出所有能力都提高吗？",
+            "安全乘积奖励在 safety=0 时为零，是否证明部署后永远安全？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "一个动作的行为概率 0.2、旧训练引擎重算概率 0.25、当前训练概率 0.30。写两层 ratio；教学 CISPO 上界 1.2、A=0.5 时梯度是多少？",
+            "固定前缀 p=[0.4,0.6]、教师 t=[0.8,0.2]，证明单条学生采样也能给出 OPD 信号，并算第一个 logit 的期望方向。",
+            "三个子任务耗时 4、6、3 秒，第三个依赖第二个，编排开销 2 秒。算延迟和加速，再说明共享 1000-token 前缀的三条 100-token 后缀轨迹能否证明固定系统加速。"
+          ]
+        }
+      ],
+      "math": 143,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "24",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-objective-gradients",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-paired-inference",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-budget-design",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "B 训练步数减半但生成 token 多一半，可以说算力减半吗？",
+            "为什么不能用两个不同论文中的 AIME 分数差推导算法演进收益？",
+            "同题成对测试 A 对 B 错 7 题、反向 10 题，McNemar 使用哪部分？",
+            "奖励没有梯度能否排除 reward hacking？",
+            "来源作者认为数据飞轮是终局，应怎样纳入课程？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "DPO 的 beta=1、相对 reference 的序列 margin=log 2。推导 chosen/rejected 的 log-likelihood 系数；为何不能把它当 SFT 的等价写法？",
+            "100 道配对题：共同对 53、共同错 30、A 对 B 错 7、A 错 B 对 10。计算效应、exact McNemar 与近似 95% 配对区间，并解释是否证明 B 更好。",
+            "三个预定比较的 exact p 值为 0.0078125、0.03857421875、0.62905883789。总体 alpha=0.05，执行 Holm 并说明能否只报告最小 p。",
+            "方法 A 用 20 GPU-hours、成功率 60%，B 用 35、成功率 63%；其配对差值区间跨零。给出成本计算与下一步实验方案。"
+          ]
+        }
+      ],
+      "math": 133,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "25",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-belief",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-action-masks",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-smdp",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "为什么说“RL 原本只能处理单步反馈”是错误的？",
+            "奖励 [-0.1,-0.1,1]、每轮折扣 0.9，第二轮和首轮回报分别是多少？",
+            "工具返回 1000 个 token，策略只生成 20 个 token，这 1000 个 token 的 actor mask 和 attention 应怎样处理？",
+            "为什么同一张网页截图可能对应不同的下一步结果？",
+            "worker 在成功提交前因切片预算停止，能否把 terminated 自动标成 true？",
+            "一个模型能输出 ReAct 格式，是否足以证明它经过 Agentic RL？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "先验为 (0.6,0.4)，转移矩阵两行为 (0.8,0.2)、(0.1,0.9)，转移后绿灯似然为 (0.9,0.2)。请推导并手算绿灯 posterior；若观测似然都是零怎么办？",
+            "来源序列为 user/assistant/assistant/tool/assistant，生成 token 概率为 0.5、0.25、0.8，优势为 1。写 actor mask、token 平均 loss，并推导独立二分类 logits 的梯度。工具信息应否被 attention 屏蔽？",
+            "两次工具调用分别耗时 2、3 秒，各在开始时付出 0.1，第 5 秒提交得 1，每秒折扣 0.9。求首轮回报；第一轮后 worker 截断时如何构造 target？"
+          ]
+        }
+      ],
+      "math": 124,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "26",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-potential-shaping",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-entropy",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-reward-noise",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-suffix-is",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "查询前后标准答案平均 log probability 从 -2 变成 -1，IG 是多少？是否表示无监督？",
+            "CM2 的七个字段是七种固定工具能力吗？检查细致是否要求每步都发奖？",
+            "权重 [1,1,1,9] 的 ESS、ESS 比例及参考比例为 1 时的学习率缩放是多少？",
+            "给组均值 baseline 加 stop-gradient，就能消除包含自身样本的偏差吗？",
+            "SeeUPO 的收敛结果为什么不能直接用于任意共享模型 POMDP？",
+            "ProRL 重置 reference policy 后，旧 rollout 的 behavior policy 分母能否一起改成新 reference？",
+            "GMPO 是否就是对环境奖励求几何平均？OTB 是否就是普通 reward 均值？",
+            "某 agent 的清单分上升但终局成功率不变，下一步应检查什么？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "证明 potential shaping 的有限轨迹差值，并用奖励 [-0.1,-0.1,1]、势 [0.2,0.5,0.8,0]、折扣 0.9 核验；末态势变成 1 会怎样？",
+            "二分类策略 p=sigmoid(z)，在 p=0.8 推导熵对 z 的导数；最大化奖励加熵时应往哪边更新？这是否就是 IGPO？",
+            "二元 judge 假阳性 0.2、假阴性 0.1，正确动作概率 p=0.5。比较真奖励和观测奖励的 logit 梯度；总体零均值噪声是否充分？",
+            "两步旧成功概率均为 0.5，新概率为 0.8 和 0.75，只有 11 得 1。列全后缀权重，求准确估计、截到 2 的估计和只校正最后一步的估计。"
+          ]
+        }
+      ],
+      "math": 164,
+      "expandedDerivations": 5
+    },
+    {
+      "id": "27",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-credit-baselines",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-neighbor-boundaries",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-exploration-sparsity",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "回报为 1、0.6、0，权重为 0.6、0.3、0.1。第一条的软基线和局部优势是多少？",
+            "GiGPO 的重复状态可在不同时间步吗？ProxMO 原式的候选也完全一样吗？",
+            "ELPO 在一个前缀上四次续写失败，能否断言此前动作不可挽回？",
+            "把 baseline detach，是否就保证优势估计无偏？",
+            "SSRL 不调用外部搜索，为什么仍不是零成本、完全离线训练？",
+            "Step-GRPO 的 StepRAR、StepRVR 与精确的步骤因果标签有何区别？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "episode 回报为 [1,0,0]，锚点后续回报为 [1,0.6,0]，只中心化，step 系数为 0.5。求组合优势；为什么第二条局部优势为正但总优势仍负？",
+            "二元策略 p=0.8、R=a、score=a-p。推导最优固定 baseline，比较 b=0.2 与 b=0.8 的梯度方差；N=2 自包含组均值有何影响？",
+            "回报 [1,0.6,0]、邻居权重 [0.6,0.3,0.1]，求第一条的优势、有效候选数及排除自身后的结果；设计一个文本相似却不应归为同状态的反例。",
+            "成功率 p=0.1，独立采四条，仅二元终局组中心化。至少一个成功和非零相对信号组各多大概率？要 95% 成功覆盖需几条？"
+          ]
+        }
+      ],
+      "math": 134,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "28",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-async-ratios",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-queue-throughput",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-prefix-reuse",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "两个 F2P 全过，三个 P2P 中一个失败，二元 SWE 奖励是多少？",
+            "训练版本是 12，轨迹由版本 9 和 11 生成，最大滞后是 2。最后一段很新就能接收吗？",
+            "旧 infer、旧 train、新 train 概率分别为 0.20、0.24、0.30，三个比率是多少？",
+            "TITO 是否就是工具 I/O？工具返回不算策略损失，能否从训练上下文删掉？",
+            "torch.topk 配合 sorted=True 是否保证所有设备上平分元素的选择一致？",
+            "PARL 中主 Agent 两步，子 Agent 并行五、三、四步，关键路径和总步骤各是多少？",
+            "只有 GEM 合成的工具轨迹，是否已经具备在线 RL 训练环境？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "旧 infer/旧 train/新 train 概率为 0.20/0.24/0.30。计算两层 ratio。若不做过滤，目标 token 二分类概率 p=0.3、A=1，比较 detached q 乘 log-prob 与未 detach 乘积的梯度。",
+            "稳定系统完成率 2 episode/s、平均在途量 40；有效率 0.9、有效轨迹内 freshness 接收率 0.75，每条 1000 token。求平均逗留时间和接收吞吐，并说明哪些数字不能混用。",
+            "四条样本共享 100-token 前缀，各有 20-token 后缀，计算理想计数节省。再用 h=2θ、两个半平方误差目标 1 和 2，在 θ=1 检查共享反向。",
+            "两次工具调用的文本前缀相同，但第一次已经扣款，第二次从未扣款。可以共享环境快照或直接续写吗？设计最低限度的验收。"
+          ]
+        }
+      ],
+      "math": 121,
+      "expandedDerivations": 4
+    },
+    {
+      "id": "29",
+      "sections": [
+        {
+          "id": "intuition",
+          "type": "intuition",
+          "questions": []
+        },
+        {
+          "id": "example",
+          "type": "example",
+          "questions": []
+        },
+        {
+          "id": "roadmap",
+          "type": "roadmap",
+          "questions": []
+        },
+        {
+          "id": "diagram",
+          "type": "diagram",
+          "questions": []
+        },
+        {
+          "id": "derivation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-training-objective",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-budget-lagrange",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "math-aggregate-evaluation",
+          "type": "derivation",
+          "questions": []
+        },
+        {
+          "id": "code",
+          "type": "code",
+          "questions": []
+        },
+        {
+          "id": "pitfall",
+          "type": "pitfall",
+          "questions": []
+        },
+        {
+          "id": "comparison",
+          "type": "comparison",
+          "questions": []
+        },
+        {
+          "id": "interview",
+          "type": "interview",
+          "questions": []
+        },
+        {
+          "id": "quiz",
+          "type": "quiz",
+          "questions": [
+            "正确率 68%、证据完整且正确 48%，研究助手主指标如何选择？",
+            "没有完整论文编码表，能否把来源的机构占比当领域统计？",
+            "为什么三条路线不能把论文提升直接相加？",
+            "Agent Swarm 并行度更高就一定延迟更低吗？",
+            "跨 episode 的记忆与 RL 参数学习有什么区别？"
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "type": "quiz",
+          "questions": [
+            "两轮轨迹奖励为 [-0.2,0.9]、γ=1，critic 为 [0.3,1.1]，每轮一个受训 token，ratio 为 [1.1,0.7]，ε=0.2。写回报、优势、actor/critic loss；再加入 cV=0.5、β=0.1、α=0.01、KL=0.02、熵=0.6。",
+            "预算为平均 10 次调用、4000 token，观测均值为 12 次、3000 token，成功率 0.6；乘子为 0.02、10^-5，步长为 0.005、10^-8。求拉格朗日值和乘子更新，并反驳“平均预算保证每条不超支”。",
+            "同一百题 A/B 都成功 40、仅 A 成功 14、仅 B 成功 8、都失败 38。求成功率差、配对标准误和 exact McNemar 的表达式；能否宣布 A 稳定优胜？",
+            "搜索 80 题成功 72，代码 20 题成功 8，求 micro 与 macro。另一评估中 A 用 800 次调用成功 54 个，B 用 1200 次成功 48 个，比较摊销成本；主指标怎样避免事后选择？"
+          ]
+        }
+      ],
+      "math": 102,
+      "expandedDerivations": 4
+    }
+  ]
+}

@@ -3,372 +3,414 @@ const chapter = {
   slug: "supervised-finetuning",
   part: "LLM 后训练",
   title: "监督微调（SFT）：从预训练到可指令模型",
-  subtitle: "token 级交叉熵、mask、packing 与数据契约",
+  subtitle: "用一条示范理解目标、mask、聚合与 packing",
   level: "核心",
   duration: 150,
   prerequisites: ["06", "08", "09", "11"],
   tags: ["SFT", "Instruction Tuning", "Chat Template", "Packing", "Prompt Mask"],
   objectives: [
-    "推导 SFT 的 token 级交叉熵损失，区分 prompt mask、response mask 与 loss mask",
-    "手算单条样本的有效 token 数、聚合分母与一次参数更新方向",
-    "比较 sample-mean、sequence-mean 与 token-mean 三种聚合，并解释长回答偏差",
-    "设计 packing、chat template 与多轮对话的 attention/loss mask",
-    "按验证集 loss、能力保留与 reward model 可用性判断 SFT 是否完成",
+    "从三个目标 token 算出一次 SFT 损失，并解释更新方向",
+    "区分可见的上下文、直接训练的标签与 label shift",
+    "比较每条回答等权和每个 token 等权，说明序列和的尺度",
+    "检查多轮模板、padding 和 packing 的样本边界",
+    "结合验证趋势、真实生成与能力保留选择 checkpoint",
   ],
   summary:
-    "SFT 把预训练好的下一 token 预测器微调成会按指令回答的模型。它仍然是最大似然，但目标分布受 prompt 条件约束，而且只对 assistant token 回传梯度；聚合方式、模板和 packing 会直接改变实际优化目标与能力迁移效果。",
+    "SFT 用示范继续训练下一 token 预测器，让它更可靠地按指令完成任务。本章采用 assistant-only 目标：用户和工具内容可被读取，助手回答作为直接标签；先算一条示范，再检查分母、模板和样本边界。",
   sections: [
     {
       id: "intuition",
       type: "intuition",
-      title: "先建立直觉：从续写器到会答题的模型",
-      body: String.raw`预训练模型看过很多文本，但遇到“请把下面这段英文翻成中文”时，它可能继续补几行英文，而不是输出中文翻译。它不是不会翻译，而是从未被告诉“当看到指令时该回答，而不是续写”。SFT 就是用一批 (prompt, response) 示范让它学会这件事。
+      title: "先建立直觉：用示范教模型怎样回答",
+      body: String.raw`给模型“把 hello 翻成中文”，我们希望它回答“你好”。预训练模型可能已经具备翻译能力，却不一定稳定遵循这种指令和对话格式。SFT 把请求与合适回答配在一起，用示范调整这种行为；它也可以教任务知识、输出结构与风格，不只是格式转换。
 
-把它当作一次性问答时，SFT 的目标非常朴素：模型在给定 prompt 条件下，最大化示范回答的概率。预训练目标 $\log p(x_t\mid x_{<t})$ 是无条件的下一 token 预测；SFT 变成 $\log p(y_t\mid x,y_{<t})$，prompt $x$ 作为固定条件，不参与 loss。两者都是 next-token，但条件集合和训练分母完全不同。
+训练时不是先让模型自由回答，再对整句话打分。我们把示范放在上下文里，让每个位置预测示范中的下一个 token。例如预测“好”时，前面的“你”来自训练数据。这叫 teacher forcing。
 
-工程细节决定实际学到的是什么。prompt 要不要进 loss？chat template 的角色标记要不要训练？工具返回要不要被模型模仿？多条样本拼成一个序列后，有效 token 的归一化分母是多少？答错任何一个，报告的 loss 曲线依然会下降，模型的实际行为却可能偏离预期。例如把工具 observation 当成目标 token 训练，等于教模型伪造环境输出。
+本章选择只将助手应输出的内容作为直接标签，称为 assistant-only。用户问题和工具返回仍然在上下文里，回答的损失可以通过注意力传回这些位置的表示。**不把某位置作为标签，不等于该位置完全没有反向传播。**
 
-SFT 也不是只学格式。它同时教会任务能力、解题模板、拒答边界和风格偏好。能力遗忘与模板漂移往往出现在同一个阶段：少量高质量 SFT 可能让模型在训练任务上得分飙升，却在 MMLU 之类的通用集上损失准确率。因此必须按能力分组保留集估计泛化，不能只看训练集 loss。
+全序列语言建模也是合法的训练目标，部分 SFT 配置会使用它；不能把“必须屏蔽 prompt”说成 SFT 的定义。选择哪种目标，要与模型在使用时负责生成的内容、数据格式及验证结果对应。
 
-本章用“英文→中文翻译”和“Python 列表求和”两类示范做手算，推导 token 级交叉熵、三种聚合分母、packing 下的 attention 边界，再接到第 16 章的 RLHF 和第 18 章的 DPO：它们都把 SFT 当成 reference policy 或起点，公式里的记号必须对得上。`,
+下面只围绕一条翻译示范展开：先算损失，再找标签位置，最后讨论同批多条回答该怎样加权。`,
     },
     {
       id: "example",
       type: "example",
-      title: "最小例子：一次翻译示范的梯度",
-      body: String.raw`取一条教学样本。prompt 是“把 hello 翻成中文：”，response 是 token 序列 “你 好 </s>” 共 3 个 token。假设当前模型对这三个 token 的条件概率分别为 $p_1=0.5,p_2=0.4,p_3=0.8$。先算这条样本的负对数似然，再看聚合分母。
+      title: "最小例子：三个目标 token，先算一笔账",
+      body: String.raw`为了手算，假设“你好”被切成“你”“好”，再加一个结束 token，共三个目标。这是教学切分，不是承诺真实 tokenizer 会这样分词。
 
-逐 token 负对数似然为 $-\log 0.5=\log 2\approx0.693$、$-\log 0.4\approx0.916$、$-\log 0.8\approx0.223$。三项加起来为 $1.832$。若按**序列和**取 loss，就是 $1.832$；若按**序列内平均**（除以 response 的有效 token 数 3），得 $0.611$；若按**全 batch token 平均**，需要和同 batch 其他样本一起分母相加。
+| 当前预测的目标 | 给定的前文 | 模型分配的概率 | 负对数损失 |
+|---|---|---|---|
+| 你 | 用户问题 | 0.5 | 约 0.693 |
+| 好 | 用户问题、你 | 0.4 | 约 0.916 |
+| 结束 | 用户问题、你、好 | 0.8 | 约 0.223 |
 
-若 batch 中还有一条样本 response 是单 token，每 token NLL 为 $\log 4\approx1.386$，长度 1。两条序列级平均 loss 分别是 $0.611$ 和 $1.386$，sample-mean 为 $0.999$；token-mean 分母 $3+1=4$，分子 $1.832+1.386=3.218$，得 $0.805$。短样本在 token-mean 下权重更大，长样本在 sample-mean 下权重更大。两者不是数值误差，是选择不同的目标。
+三项加起来约为 1.832，再除以三个有效目标，平均损失约为 **0.611**。目标概率越高，对应损失越低。这里先记住“加哪些项、除以几个”，不必先背整条似然公式。
 
-现在只看第一个 response token “你”。它的梯度与 cross-entropy 一致：$\nabla_{z}\mathrm{CE}=p-y$，其中 $y$ 是 one-hot 的真实 token。若词表只有 4 个 token、softmax 后 $p=(0.1,0.5,0.3,0.1)$、真值是第 2 个，则 logits 梯度为 $(0.1,-0.5,0.3,0.1)$，推高目标 token 的 logit，压低其它。这个局部结构和第 05、08 章完全一致。
+若只看“你”这个位置，假设四个候选的概率为 0.1、0.5、0.3、0.1，正确答案是第二个。单 token CE 对 logits 的梯度为 0.1、-0.5、0.3、0.1；负梯度更新倾向提高正确 token 的 logit。若看整条三 token 平均损失，这组直接梯度还要除以 3。
 
-prompt token 要被模型“看到”，但不参与 loss。设 prompt 共 7 个 token、response 共 3 个 token，整条序列长度 10。模型前向算全部 10 个位置的 logits，但只在后 3 个位置回传梯度；前 7 个位置的 CE 被 loss mask 乘零屏蔽。工具返回的 token 同理：它们必须在上下文里出现，才能让模型学会“读了之后再答”，但不能当作被模仿目标。
+再检查位置：假设 prompt 长度为 7，回答长度为 3，采用从 0 开始的编号。回答标签位于 7、8、9；负责预测它们的 logits 位于 **6、7、8**。第一条回答由最后一个 prompt 位置预测，不能把“最后三个标签”误写成“最后三个 logits”。
 
-这一步给三件事定了量：具体的 $0.611$ 对 $0.805$ 说明分母会改变报告 loss；$(0.1,-0.5,0.3,0.1)$ 说明单 token 的梯度结构不变；loss mask 的存在说明有效长度不是序列长度。下一节用这个具体例子把路线铺开。`,
+第一次阅读到这里，应能说清 0.611 从哪里来，以及 prompt 为什么既不作为直接标签，又能影响回答。多样本的权重留到聚合专题再算。`,
     },
     {
       id: "roadmap",
       type: "roadmap",
-      title: "知识路线：先定义有效 token，再谈聚合和模板",
-      body: String.raw`从上面两条数字出发，SFT 的学习主线可以拆成四段。首先把 prompt mask 和 response mask 写清楚，确认哪些位置回传梯度；其次推导 token-level loss 的三种聚合，并给出各自改变的是什么；再接到 chat template 与多轮对话的工程约定；最后判断 SFT 什么时候算完成、怎样和 RLHF/DPO 衔接。
+      title: "知识路线：从三个目标到可靠的数据流",
+      body: String.raw`先跟着翻译示范确认预测和标签相差一个位置，再把这个计算写成 CE。随后分两次回访：一次检查多轮模板与 packing 的边界；另一次比较不同长度回答的权重。最后用真实生成和保留集选择模型。
 
-数学部分依赖第 08 章的 tokenizer 与 cross-entropy、第 09 章的 Transformer 前向与 label shift、第 11 章的训练推理系统；本章是后训练的最简实例，RLHF（第 16 章）、DPO（第 18 章）、OPD（第 19 章）、数据工程（第 21 章）都把 SFT 作为起点或 reference policy。第 21 章的六条数据获取路线为后续内容，不作为本章先修；读完本章再回看，更容易区分 SFT 目标与 RS-SFT、OPD 等变体。
+第 08 章提供 tokenizer 与下一 token 目标，第 09 章提供因果注意力，第 06、11 章帮助理解更新与训练系统。本章位于 RLHF/DPO 之前，作为后训练起点；第 21 章的数据获取路线可在此后回看。
 
-学完这一章应该能回答：给定一条多轮对话样本，哪些 token 在训练中被预测、哪些只是上下文；长回答为何在 token-mean 下主导梯度；packing 为什么必须切断跨样本注意力；以及如果验证 loss 继续下降但 MMLU 掉点，下一步该做什么。白板题会把这些问题一次性问清。`,
+首轮完成翻译手算和 mask 检查即可；完整聚合证明、隔离 packing 代码与白板题供回访。`,
       links: [
-        { label: "SFT 的四类 mask 与数据流", sectionId: "diagram", level: "必会" },
-        { label: "token 级 CE 与三种聚合", sectionId: "derivation", level: "必会" },
-        { label: "有效 token 数的手算", sectionId: "example", level: "必会" },
+        { label: "上下文、标签与预测位置", sectionId: "diagram", level: "必会" },
+        { label: "token 级 CE", sectionId: "derivation", level: "必会" },
+        { label: "三个目标的手算", sectionId: "example", level: "必会" },
         { label: "chat template 与多轮对话", sectionId: "math-chat-template", level: "推导" },
-        { label: "packing 与跨样本注意力隔离", sectionId: "math-packing", level: "推导" },
-        { label: "聚合、长度偏差与权重", sectionId: "math-aggregation", level: "推导" },
-        { label: "完成判据与 RLHF 衔接", sectionId: "math-completion-criteria", level: "进阶" },
+        { label: "packing 与样本边界", sectionId: "math-packing", level: "推导" },
+        { label: "聚合与长度权重", sectionId: "math-aggregation", level: "推导" },
+        { label: "选择 checkpoint 与交接", sectionId: "math-completion-criteria", level: "进阶" },
         { label: "白板验收", sectionId: "whiteboard", level: "必会" },
       ],
     },
     {
       id: "diagram",
       type: "diagram",
-      title: "SFT 的数据流：从原始对话到有效梯度",
-      body: String.raw`原始数据是一条多轮对话。tokenizer 把它编码为 token id 序列，并记录每个 token 的角色（system/user/assistant/tool）。模型只看一维 token id，但训练流程需要四个并行的辅助张量：input_ids、attention_mask、position_ids、loss_mask。
+      title: "SFT 数据流：先标角色，再对齐标签",
+      body: String.raw`训练数据处理需要保留两类信息：文本如何变成 token，以及每个 token 属于哪条样本、哪个角色。不要指望普通 tokenizer 自动返回可靠的角色边界；这些信息来自模板和数据处理流程。
 
-attention_mask 控制每个 query 可见哪些 key；loss_mask 控制哪些位置回传梯度。两个 mask 维度相同，但语义不同：工具返回在 attention_mask 中是 1（模型要读），在 loss_mask 中是 0（不被模仿）。label 需要右移一位：预测位置 $t$ 的目标是 $t+1$，所以最后一个位置通常不参与 loss。
+| 信息 | 回答的问题 |
+|---|---|
+| input_ids | 每个位置输入什么 token？ |
+| attention 可见性 | 这个 query 可以读取哪些 key？ |
+| position_ids | 位置编码使用哪个编号？ |
+| assistant/loss mask | 哪些 token 是直接训练的目标？ |
+| segment IDs / 序列边界 | packing 后哪个 token 属于哪条样本？ |
 
-packing 把多条样本拼到同一个序列里以提高吞吐。此时必须构造 block-diagonal attention mask，禁止一条样本的 query 读到另一条样本的 key。常见 bug 是用全 1 的 attention_mask，让 batch 内不同样本泄漏信息，训练 loss 看起来更低，泛化却变差。`,
+attention mask 与 loss mask 的维度不必相同。前者可以是二维 padding 标记，也可以由算子表示成 query-key 可见性；后者通常逐 token 标记目标。工具返回在本章作为可读上下文，不作为助手目标。
+
+最后将位置 t 的 logits 与位置 t+1 的标签配对，mask 跟着标签走。若模型内部已经完成 shift，就不要在外面再做一次。`,
       diagram: {
         kind: "flow",
         nodes: [
-          "原始对话",
-          "chat template 渲染",
-          "tokenizer + 角色标记",
-          "input_ids / attention_mask / loss_mask",
-          "Transformer 前向",
-          "token-level CE × loss_mask",
-          "聚合与参数更新",
+          "带角色的原始对话",
+          "模板渲染与 token 编码",
+          "记录角色、padding、样本边界",
+          "因果可见性 → 模型 logits",
+          "下一 token 标签 + 对齐的 mask",
+          "有效目标 CE → 聚合 → 更新",
         ],
-        links: [
-          [0, 1],
-          [1, 2],
-          [2, 3],
-          [3, 4],
-          [4, 5],
-          [5, 6],
-        ],
+        links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]],
       },
     },
     {
       id: "derivation",
       type: "derivation",
-      title: "SFT 目标：条件最大似然与 token 级 CE",
-      body: String.raw`固定一条样本 $(x,y)$，$x$ 为 prompt token 序列、$y=(y_1,\ldots,y_T)$ 为 response token 序列。参数 $\theta$，模型给出条件概率 $\pi_\theta(y_t\mid x,y_{<t})$。loss mask $m_t\in\{0,1\}$ 指示位置 $t$ 是否计入 loss；对标准 SFT，response 对应 $m_t=1$，prompt 和工具返回 $m_t=0$。
+      title: "SFT 目标：把翻译示范写成条件似然",
+      body: String.raw`开头的三个目标分别得到概率 0.5、0.4、0.8。整条示范的条件概率是三者相乘，取负对数后就变成三项相加。这正是 token 级 CE 的来源。
 
-**条件似然。** 样本 log-likelihood 为
+**只引入必要符号。** x 表示请求，y 表示示范回答，T 表示回答的目标 token 数，模型参数为 $\theta$。teacher forcing 下每一步都给定示范前缀：
 
-$$\log P_\theta(y\mid x)=\sum_{t=1}^{T}m_t\log\pi_\theta(y_t\mid x,y_{<t}).$$
+$$\begin{aligned}
+P_\theta(y\mid x)&=\prod_{t=1}^T\pi_\theta(y_t\mid x,y_{<t}),\\
+\ell_t&=-\log\pi_\theta(y_t\mid x,y_{<t}).
+\end{aligned}$$
 
-SFT loss 的三种聚合：
+这条完整回答全部作为目标时，负对数似然就是逐项损失之和。若只选择其中一些位置，得到的是**所选 token 的训练目标**，不能仍无条件称为整条序列的对数概率。
 
-$$L_{\mathrm{seq-sum}}=-\sum_{t=1}^{T}m_t\log\pi_\theta(y_t\mid x,y_{<t}),$$
+**mask 与分母。** 在实际拼接序列上，用固定的二值 m 标记要学习的标签，用 N 表示有效标签数：
 
-$$L_{\mathrm{seq-mean}}=-\frac{1}{\sum_t m_t}\sum_{t=1}^{T}m_t\log\pi_\theta(y_t\mid x,y_{<t}),$$
+$$L=\frac{\sum_t m_t\ell_t}{N},\qquad N=\sum_t m_t>0.$$
 
-$$L_{\mathrm{token-mean}}=-\frac{\sum_{(x,y)}\sum_t m_t\log\pi_\theta}{\sum_{(x,y)}\sum_t m_t}.$$
+对翻译示范，N=3，代入得到约 0.611。被忽略标签的直接 CE 不参与目标；作为上下文的表示仍可通过被选中的预测影响损失。padding 或非法前向应正确处理，不能依赖“NaN 乘零”来消除错误。
 
-**与预训练目标的关系。** 预训练使用无条件的 $-\sum_t\log p(x_t\mid x_{<t})$，分母是全部 token；SFT 的分母是 loss mask 为 1 的 response token。前者没有 prompt 概念，所以不会出现 mask；后者为了避免模型把 prompt 当成被预测对象，必须屏蔽。若不屏蔽 prompt，模型会学会复述问题，在 chat 场景产生“先重复问题再回答”的伪影。
+**单 token 的更新。** 对该位置的 logits z，softmax 概率为 p，真实标签 one-hot 为 e：
 
-**单 token 梯度。** 对 logits $z\in\mathbb R^{|V|}$，softmax 概率 $p=\mathrm{softmax}(z)$，真值 one-hot $y$，有 $\nabla_z\mathrm{CE}=p-y$。这与第 05 章的 softmax CE 完全一致。SFT 的全部“新东西”只在于：哪些位置的 $p-y$ 被 loss_mask 保留，以及最后怎样加起来。
+$$\frac{\partial\ell}{\partial z}=p-e.$$
 
-**数值例回算。** 回到开场的 $p_1=0.5,p_2=0.4,p_3=0.8$：$L_{\mathrm{seq-sum}}=1.832$、$L_{\mathrm{seq-mean}}=0.611$。若该 batch 只有这一条样本，token-mean 与 seq-mean 相等。多条样本时三者关系由各样本有效长度决定。
+平均损失还会乘该 token 的聚合权重。第 05、08 章的梯度结构没有变，SFT 更需要明确哪些标签被选择、给定什么上下文。
 
-**与 RLHF 的接口。** 第 16 章用冻结的 SFT 模型作为 reference policy $\pi_{\mathrm{ref}}$，KL 惩罚 $\beta\log\frac{\pi_\theta}{\pi_{\mathrm{ref}}}$ 的分母正是本节的 $\pi_\theta$ 定义。第 18 章 DPO 的隐式奖励 $\beta\log\frac{\pi_\theta}{\pi_{\mathrm{ref}}}$ 同理。因此 SFT 的 chat template 一旦改动，RLHF/DPO 的 reference 也必须同步重算，否则所有 log-ratio 都偏。`,
+预训练同样是根据前缀预测下一 token，不是“无条件预测”。它也可能屏蔽 padding 或文档边界。SFT 的区别主要来自示范数据和目标位置的选择，而不是换了一套 CE。
+
+下游 RLHF/DPO 经常用 SFT checkpoint 初始化策略并构建 reference。两者比较概率时要使用约定一致的文本、tokenizer、模板和目标范围；改变这些配置后，旧的缓存 log-prob 需要重新核算。`,
     },
     {
       id: "math-chat-template",
       type: "derivation",
-      title: "chat template：角色标记与多轮对话 mask",
-      body: String.raw`现代 LLM 的 SFT 几乎都用 chat template 把多轮对话渲染成一条序列。常见格式是 ChatML：
+      title: "chat template：先确定模型需要输出哪一段",
+      body: String.raw`同一句“你好”，放在 user 角色与 assistant 角色下，训练含义不同。chat template 负责把角色、内容和结束标记串成模型熟悉的格式。模板必须来自所用模型的 tokenizer 配置，不能把一套手写标记当成所有模型都接受的标准。
+
+**真实数据先这样处理。** Transformers 中可通过 tokenizer.apply_chat_template 渲染带角色的 messages。训练完整对话通常使用 add_generation_prompt=False；推理时是否需要生成提示，取决于模板。先查看渲染文本、实际 token IDs 和目标范围，再启动训练。
+
+本章翻译例子的角色结构是：
 
 ~~~text
-<|system|>你是一名助手。<|end|>
-<|user|>把 hello 翻成中文：<|end|>
-<|assistant|>你好<|end|>
+system：你是一名助手。
+user：把 hello 翻成中文。
+assistant：你好 [该模板规定的回答结束标记]
 ~~~
 
-角色标记（$\langle\mid$system$\mid\rangle$、$\langle\mid$end$\mid\rangle$ 等）是特殊 token，由 tokenizer 单独分配 id。训练 SFT 时，有三种常见约定：
+以上只表示角色归属，不是某个真实模型的序列化格式。角色或结束标记可能对应一个或多个 token，也可能和内容分词发生交互，不能通过“找角色字符串编码的最后一个 ID”定位。
 
-1. **只训 assistant content**：loss_mask 仅在 assistant 的 content token 上为 1，不含角色起止 token。
-2. **训 assistant content + end token**：加入 $\langle\mid$end$\mid\rangle$，让模型学会何时停止生成。
-3. **全程训**：所有 token（含 system/user）都计入 loss。等于把 prompt 也当成被模仿目标，通常只在特定场景下使用。
+**多轮时逐段决定目标。** 对 sys、u1、a1、u2、a2，若长度分别为 10、15、20、18、30（题中忽略结束标记），本章选取：
 
-主流开源配方（Llama/Qwen/DeepSeek 的 instruct）采用第 2 种。原因有两个：若不训结束 token，模型永远不会主动停止，推理时必须靠外部 EOS 规则截断；若把 user token 也进 loss，模型会学会复述用户话。
+| 段 | sys | u1 | a1 | u2 | a2 |
+|---|---|---|---|---|---|
+| 作为直接标签 | 否 | 否 | 是 | 否 | 是 |
+| 目标数 | 0 | 0 | 20 | 0 | 30 |
 
-**多轮对话。** 考虑一次 user→assistant→user→assistant 的对话。两段 assistant 回答都要被模仿，但只在各自的 token 上回传梯度。loss_mask 为
+共 50 个有效目标。可选择训练全部助手轮次，也可只选最后一轮，但必须声明。全部非 padding token 都可作为本样本的前文，因果约束仍禁止读取未来。
 
-$$m = [\underbrace{0,\ldots,0}_{\text{sys+u1}},\underbrace{1,\ldots,1}_{\text{a1 content+end}},\underbrace{0,\ldots,0}_{\text{u2}},\underbrace{1,\ldots,1}_{\text{a2 content+end}}].$$
+与模型输出配对时，目标 mask 必须跟标签移动一位。本样本内，若 m 按原 token 位置记录，则预测位置使用的 mask 为：
 
-attention_mask 则对所有位置为 1：u2 要看到 a1，a2 要看到 u2 和 a1。因果 mask 保证不看未来。有效 token 数等于两段 assistant 的 content+end 长度之和。
+$$m^{\rm prediction}_t=m^{\rm target}_{t+1}.$$
 
-**工具调用的变体。** 若对话包含工具调用，格式往往形如 assistant 发出 tool_call、tool 返回 observation、assistant 根据 observation 继续回答。工具 observation 的 loss_mask 必须为 0，否则模型会学会生成虚假的工具返回。核心约定是：策略只对 agent 自己产出的 token 负责，环境返回的 token 只作为上下文；Agentic RL 章节会在此基础上再加入多轮奖励与信用分配。
+**结束与工具。** 本章将助手结束标记纳入目标，为停止行为提供直接监督。若忽略它，会缺少这部分监督，但不能据此断言模型永远不会停止：基座已有知识与推理停止规则也有作用。pad 与 EOS 共用 ID 时，应按真实 padding 位置屏蔽，不能按 ID 一刀切删掉结束标签。
 
-**模板漂移。** chat template 一经选定不能随意改动。若 SFT 用 ChatML，推理却按 Alpaca 格式拼 prompt，模型会把陌生角色标记当成普通 token，输出退化到预训练分布。模板变更应作为一次完整的重新 SFT 处理，并同步更新 RLHF 的 reference policy。`,
+工具调用由 assistant 发出，可作为目标；工具返回由环境产生，在本章只作上下文。若故意训练环境模拟器，则是另一个任务，不能沿用这里的角色契约。
+
+更换模板应做兼容性检查与生成回归；是否需要补充微调取决于变化和结果，并非每次都必须完整重训。下游缓存的 reference 概率也要与新输入重新对齐。`,
     },
     {
       id: "math-packing",
       type: "derivation",
-      title: "packing：吞吐优化与跨样本注意力隔离",
-      body: String.raw`SFT 数据集的样本长度差异大。若 batch 内按最大长度 pad，短样本的 pad token 浪费计算。packing 把多条样本拼到一条序列里，直到达到 context length。
+      title: "packing：既隔离注意力，也检查标签边界",
+      body: String.raw`短样本补齐到统一长度，会浪费 padding 位置。packing 将多条样本装入同一序列。本节的目标是：计算更紧凑，同时仍让每条示范像独立训练时一样，只依赖自己的前文。
 
-**朴素 packing 的 bug。** 若直接把样本 A（长度 300）、B（长度 500）、C（长度 200）拼成一条长度 1000 的序列，并用全 1 的 attention_mask 和标准因果 mask，则：B 的 query 可以读到 A 的 key；C 的 query 可以读到 A 和 B。这相当于用别人的 prompt 当上下文回答自己的问题。训练 loss 看起来略低，泛化却变差，推理时还可能出现样本间风格串扰。
+**先用两条样本检查。** 将 A 放前面、B 放后面，普通因果注意力只禁止看未来，因此 B 仍能读取 A。若原任务要求样本独立，这就改变了条件上下文；不能因为 loss 下降就认定优化正确。显式允许跨文档上下文是另一种目标，应单独说明。
 
-**正确做法 1：block-diagonal attention。** 构造一个 $[L,L]$ 的 attention mask，仅允许同一样本内的 query 看自己的 key：
+**注意力如何隔离？** 给每个 token 一个样本编号 segment。query 只能读取同一样本中、不晚于自己的有效 key。用 M 记录可见性：
 
-$$\mathrm{mask}[i,j]=\begin{cases}1,&\mathrm{sample}(i)=\mathrm{sample}(j)\text{ 且 }j\le i,\\0,&\text{否则}.\end{cases}$$
+$$M_{ij}=\begin{cases}
+1,&\text{有效、同段且 }j\le i,\\
+0,&\text{否则}.
+\end{cases}$$
 
-**正确做法 2：document separator + position reset。** 很多框架（FlashAttention 的 varlen 接口、Megatron 的 reset_position_ids）用一个 cu_seqlens 数组标注边界，position_id 在每个样本内从 0 重新计数。效果等价于 block-diagonal mask，但显存和算力都更友好。
+可以显式构造分块因果 mask，也可将边界交给支持独立序列的 varlen 算子。后者用累积长度等元数据描述序列。**仅插入 separator 或将 position ID 归零，都不会自动阻断注意力**；需要确认实际调用的算子确实使用了边界。
 
-**loss mask 的联动。** packing 后的 loss mask 是各样本 loss mask 的拼接。token-mean 分母是整条 packed 序列的有效 token 数，等于各样本有效 token 数之和。sample-mean 则需要单独记录每条样本边界，先在样本内取平均再在样本间取平均。这两种聚合在 packing 下的差异比 un-packed 更大，因为同一 microbatch 中样本数变多。
+**标签还有一处容易漏。** 若直接用 logits[:-1] 配 labels[1:]，A 的末位置会配到 B 的首 token。独立 packing 必须屏蔽这种跨段标签；即使 B 的第一个 token 被标为 assistant，也不能让 A 去预测它。
 
-**数值例。** 四条样本有效 token 分别为 100、50、20、30，共 200 个有效 token。假设各样本平均 token NLL 为 1、2、3、4。
-- sample-mean：$(1+2+3+4)/4=2.5$
-- token-mean：$(100\cdot1+50\cdot2+20\cdot3+30\cdot4)/200=380/200=1.9$
+在样本内重置 position IDs 能保持与独立输入相同的位置约定，但它与注意力隔离是两件事。padding query 也要有安全处理，不能让全被屏蔽的一行在 softmax 中产生 NaN。
 
-两者相差 0.6。若长样本质量较低（NLL 较高），sample-mean 会给它和其它样本相等权重，token-mean 则按长度加权。选择哪一个取决于目标：产品希望每条样本都学会（倾向 sample-mean），还是希望模型在生成长内容时更稳（倾向 token-mean）。原论文（Llama/Qwen）常用 token-mean；不少开源配方（例如 Axolotl 默认）使用 sample-mean。公布 SFT 配方时必须明确。`,
+**聚合不该因装箱方式而变。** 同一组样本若有效标签与权重不变，隔离 packing 不应改变声明的损失。token 平均的分母仍是全部有效标签数；按样本平均则必须保留原样本身份，不能把每个 packed 容器当成一个新样本。下一节单独比较这两种权重。`,
     },
     {
       id: "math-aggregation",
       type: "derivation",
-      title: "聚合的长度偏差：三种分母如何改变目标",
-      body: String.raw`固定一个 batch 的 $B$ 条样本，第 $i$ 条样本有效长度 $T_i$，逐 token NLL 为 $\ell_{i,t}$。定义三种 loss：
+      title: "聚合：每条回答等权，还是每个 token 等权？",
+      body: String.raw`给翻译示范加一条仅有一个有效目标的短回答，其 NLL 为 log 4，约 1.386。第一条的三个目标损失和约 1.832，平均约 0.611。
 
-$$L_{\mathrm{sample}}=\frac{1}{B}\sum_{i=1}^{B}\frac{1}{T_i}\sum_{t=1}^{T_i}\ell_{i,t},$$
+| 聚合口径 | 两条回答的算法 | 结果 |
+|---|---|---|
+| sequence mean（本文也称 sample mean） | 两条各自平均，再取平均 | 约 0.999 |
+| token mean | 所有损失相加，除以四个目标 | 约 0.805 |
+| sequence sum / B | 两条损失和相加，除以两条样本 | 约 1.609 |
 
-$$L_{\mathrm{seq-sum}}=\frac{1}{B}\sum_{i=1}^{B}\sum_{t=1}^{T_i}\ell_{i,t},$$
+token mean 中长回答占总权重的 3/4，短回答占 1/4；sequence mean 中两条各占 1/2。相对于 token mean，sequence mean 提高了短回答每个 token 的权重。名称在不同代码库中不统一，应以实现和分母为准。
 
-$$L_{\mathrm{token}}=\frac{\sum_{i,t}\ell_{i,t}}{\sum_i T_i}.$$
+**把权重写清楚。** 固定 B 条非空示范，第 i 条有 $T_i$ 个有效标签，损失为 $\ell_{i,t}$：
 
-**样本权重。** 把 batch 梯度写成 $\sum_i w_i\sum_t\nabla\ell_{i,t}$，$w_i$ 代表第 $i$ 条样本的权重：
-- $L_{\mathrm{sample}}$：$w_i=\frac{1}{BT_i}$。短样本每 token 权重更大。
-- $L_{\mathrm{seq-sum}}$：$w_i=\frac{1}{B}$ 乘以样本长度。长样本权重线性增大。
-- $L_{\mathrm{token}}$：$w_i=\frac{1}{\sum_j T_j}$。所有 token 权重相等，各样本按长度加权。
+$$\begin{aligned}
+L_{\rm seq}&=\frac1B\sum_i\frac1{T_i}\sum_t\ell_{i,t},\\
+L_{\rm token}&=\frac{\sum_{i,t}\ell_{i,t}}{\sum_iT_i}.
+\end{aligned}$$
 
-**具体数值。** $B=2$，$T_1=2,T_2=8$，每 token NLL 恒等于 1、3：
-- sample-mean $=(1+3)/2=2$
-- seq-sum $=(2+24)/2=13$
-- token-mean $=(2+24)/10=2.6$
+前者每个 token 的系数为 $1/(BT_i)$，后者为 $1/\sum_iT_i$。这是目标对该损失项的权重，不保证实际梯度向量的范数按同样比例变化；不同 token 的梯度还会相加或抵消。
 
-三者分别对应三种“公平”的直觉：按样本公平、按序列总负责、按 token 公平。它们在同一数据集上的最优参数并不相同；换聚合等于换目标。这与第 19 章 OPSD 的分母、第 20 章 VAPO 的正例项、第 21 章 SFT 数据契约是同一类问题，必须一次性澄清。
+**序列和与 token 平均的特殊关系。** 定义 $L_{\rm sum}=\sum_{i,t}\ell_{i,t}/B$，固定这批示范及其目标长度，则：
 
-**学习率与聚合的耦合。** 相同数据下，三种 loss 的梯度范数不同。seq-sum 的梯度范数比 sample-mean 大约 $\overline T$ 倍（$\overline T$ 为平均长度）；若直接把 sample-mean 配方的学习率搬到 seq-sum，等价于把学习率乘 $\overline T$，极易发散。公布配方时必须报告 loss 聚合与学习率的组合，不能单列一个“lr=2e-5”就完事。
+$$L_{\rm sum}=\overline T\,L_{\rm token},\qquad
+\overline T=\frac{\sum_iT_i}{B}.$$
 
-**梯度累积的坑。** 若用 K 步 microbatch 累加后再更新，各 microbatch 的 token-mean 不能简单相加后除以 K。正确做法是累加分子（$\sum\ell$）和分母（$\sum T$），最后一次相除；或在每个 microbatch 乘以 $T_{\mathrm{micro}}/T_{\mathrm{total}}$ 的权重再累加。错误的实现会让 token-mean 退化为“等 microbatch”平均，长 microbatch 被低估。
+因此这两个目标在固定批次上只差正常数，梯度也同倍缩放；不能说它们必有不同最优参数。训练中若每批平均长度变化、另有正则或不同采样，实际更新轨迹仍可能变化。sequence mean 与 token mean 通常改变相对权重，二者梯度范数没有一个通用的“平均长度倍数”。
 
-**长度惩罚和 EOS 训练。** 若 EOS 不进 loss，模型永远不学“停”，推理必须靠长度上限截断。若 EOS 进 loss 且使用 token-mean，模型会倾向于早停（因为 EOS 之后的所有位置贡献 0 梯度，不如提早结束）。实践中通常把 EOS 作为一个普通 content token 训练，并在数据分布中保留合理长度，而不是额外加 length penalty。`,
+**再做一个白板例。** 两条长度为 2、8，各自每 token 损失为 1、3。sequence mean 为 2，sequence sum/B 为 13，token mean 为 2.6；后两者相差的倍数恰好是平均长度 5。
+
+**微批次怎样累积？** 每个 microbatch 的 token 均值要按它的有效 token 数加权。累加损失总和再除以全局有效数，或给各微批均值乘相应占比；简单平均不等长微批的均值会改变目标。跨卡时再核对框架是否已经平均梯度。
+
+**不会因为自己早停就少交损失。** SFT 的示范和 EOS 位置是固定的，teacher forcing 仍计算后续标签；模型不能靠提前生成 EOS 逃避剩余 CE。实际回答长度受数据、模型和解码共同影响，不能从 token mean 单独推出必然早停。`,
     },
     {
       id: "math-completion-criteria",
-      type: "derivation",
-      title: "SFT 什么时候算完成：验证 loss、能力保留与 RLHF 起点",
-      body: String.raw`“继续训会不会更好”不能只靠 loss 曲线判断。SFT 典型过拟合信号是训练 loss 继续下降，验证 loss 先降后升；但更常见的是训练与验证 loss 同向下降，MMLU/GSM8K 等能力集先升后降。这是能力遗忘（catastrophic forgetting），仅看 loss 看不出来。
+      type: "comparison",
+      title: "怎样选择 SFT checkpoint：观察什么，再做什么",
+      body: String.raw`SFT 没有一个适用于所有任务的停止公式，也没有通用的最佳 epoch 数。先确定独立验证集、真实生成指标、能力保留要求与计算预算，再按多个 checkpoint 的趋势作选择。
 
-**三条验收线并行监控。** 把每个 checkpoint 的三类指标写成一个联合判据。记预训练模型的能力保留集准确率为 $A_0$，当前 checkpoint 为 $A_t$，验证集 token-mean loss 为 $L_t$，指令遵循集通过率为 $I_t$。阈值 $\tau_A$（允许的能力下降）、$\tau_I$（指令遵循下界）由产品确定。SFT 继续训练的条件是
+| 观察到的现象 | 优先检查与处理 |
+|---|---|
+| 训练 loss 降，验证 loss 持续升 | 检查过拟合、重复数据和分布差异，比较更早的 checkpoint |
+| 验证 loss 降，但生成格式或任务分数差 | 核对模板、标签与解码，查看真实失败样本 |
+| 指令遵循仍未达标 | 可能还需训练或补数据；并非“未达标就必须停止” |
+| 新任务改善，原有能力明显下降 | 比较预设保留要求，尝试较早 checkpoint、调整学习率或数据混合 |
+| 改善小于预设收益要求或预算耗尽 | 根据既定标准选择已有 checkpoint |
 
-$$\text{继续训}\iff L_t<L_{t-1}\ \wedge\ A_0-A_t\le\tau_A\ \wedge\ I_t\ge\tau_I.$$
+保留集应与训练数据按题目或题族隔离。单个 checkpoint 的一次波动不能自动证明遗忘；既要看多项能力，也要看样本数和不确定性。数据重复多少遍同样应由结果决定，不能把某篇论文的 epoch 数当成规律。
 
-三项任何一项不满足都应停止：验证 loss 回升是常规过拟合；$A_0-A_t>\tau_A$ 是能力遗忘；$I_t<\tau_I$ 说明格式/遵循崩坏。只跟踪 $L_t$ 会错过后两种失败。
+**与 RLHF/DPO 交接。** SFT 常用于初始化 actor，并提供冻结 reference。在一次约定的训练阶段内保持 reference 固定，便于解释相对变化。有些迭代方法会明确更新 reference；这会改变约束基准，但不等于必然无效，也不自动让原偏好数据失去意义。
 
-**和 RLHF 的接口。** SFT 产生两个产物：
-- 用于后续 RLHF 的 **reference policy**（冻结，不再更新）。
-- 用于初始化 RLHF **actor** 的 checkpoint。
-
-常见错误是用 RLHF 后 checkpoint 当作下一轮的 reference。reference KL 的作用是约束长期漂移，锚点必须稳定；每轮都换 reference 等于把约束拿掉。DPO 同理，若用 RLHF 后模型当 $\pi_{\mathrm{ref}}$ 做新一轮 DPO，隐式奖励定义就改了，离线偏好数据的意义也变了。
-
-**何时该停。** 经验规则：
-- 若验证 loss 还在下降、保留集也没掉点，继续训。
-- 若保留集开始掉点、训练 loss 还在降，考虑降学习率、减 epoch、增加通用数据回放。
-- 若保留集严重下降（> 3-5 个百分点），停止并回退到前一个 checkpoint。SFT 单轮通常 1-3 epoch；超过 5 epoch 很少带来收益，往往只在训练集上过拟合。
-
-**数据重复。** 高质量 SFT 数据重复 2-3 遍通常有收益；重复更多次会让模型记忆具体字面答案，推理时表现为“只会这种问法”。保留集必须按题族去重，否则记忆被误报为泛化。
-
-**完成后的交接。** 产出三个文件：SFT checkpoint、chat template、tokenizer。三者绑定提交，RLHF/DPO 下游必须使用同一组。模板变更或 tokenizer 词表变更都应触发一次完整的回归验证，不能只跑 loss。`,
+交接时绑定 checkpoint、tokenizer、chat template、目标 mask 规则与评测配置。若换 reference，应显式定义新阶段并重算相关概率缓存；若换模板，应重新验证输入与生成行为。不要把这些工程选择压成一个看似精确的“继续训练当且仅当”公式。`,
     },
     {
       id: "code",
       type: "code",
-      title: "代码实验：从 (prompt, response) 到一次梯度更新",
-      body: String.raw`下面用普通 Python 和 numpy 风格的伪代码展示一次 SFT 前向、loss 计算与反向传播。实际训练用 transformers + trl 的 SFTTrainer 可以省去手写细节，但面试更关心每一步在做什么。
+      title: "代码实验：可运行的 assistant mask 与隔离 packing",
+      body: String.raw`下面用一个很小的 PyTorch 注意力模型完成真实的前向、CE 与更新，只用于观察数据流。ID 是手工教学编号，不是真实 tokenizer 输出；角色和样本边界由数据明确给出。需要安装 PyTorch。
+
+A 的输入由两个 prompt token、三个 assistant 目标组成；B 由一个 prompt token、一个 assistant 目标组成，末尾有 padding。模型显式 shift 一次，展示目标 mask 如何跟着标签移动。
 
 ~~~python
-# 1. 原始数据
-example = {
-    "prompt": "把 hello 翻成中文：",
-    "response": "你好",
-}
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-# 2. chat template 渲染
-rendered = (
-    "<|user|>" + example["prompt"] + "<|end|>"
-    "<|assistant|>" + example["response"] + "<|end|>"
-)
+torch.manual_seed(7)
+ids = torch.tensor([1, 2, 3, 4, 5, 6, 7, 0])
+segment = torch.tensor([0, 0, 0, 0, 0, 1, 1, -1])
+assistant = torch.tensor([0, 0, 1, 1, 1, 0, 1, 0], dtype=torch.bool)
+position = torch.tensor([0, 1, 2, 3, 4, 0, 1, 0])
 
-# 3. tokenize + 构造 mask
-tokens = tokenizer.encode(rendered)                      # [t1, t2, ..., tN]
-prompt_end = tokenizer.encode("<|assistant|>")[-1]       # 定位 assistant 起点
-assistant_start = tokens.index(prompt_end) + 1
-loss_mask = [0] * assistant_start + [1] * (len(tokens) - assistant_start)
-# attention_mask 全 1；因果 mask 由模型内部添加
+def packed_masks(segment, assistant):
+    length = segment.numel()
+    valid = segment >= 0
+    causal = torch.ones(length, length, dtype=torch.bool).tril()
+    same = segment[:, None] == segment[None, :]
+    visible = same & causal & valid[:, None] & valid[None, :]
+    # pad query 只读自身，防止全 -inf 的 softmax；有效 query 仍看不到 pad。
+    visible |= torch.diag(~valid)
+    # logits[t] 预测 ids[t+1]：目标、前驱都有效，且不能跨样本。
+    target = assistant[1:] & valid[1:] & valid[:-1]
+    target &= segment[1:] == segment[:-1]
+    return visible, target
 
-# 4. 前向 + label shift
-logits = model(input_ids=tokens).logits                  # [L, V]
-shifted_logits = logits[:-1]                             # 预测位置 t 的目标是 t+1
-shifted_labels = tokens[1:]
-shifted_mask = loss_mask[1:]
+class TinyLM(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.token = nn.Embedding(8, 8)
+        self.pos = nn.Embedding(8, 8)
+        self.qkv = nn.Linear(8, 24, bias=False)
+        self.head = nn.Linear(8, 8, bias=False)
 
-# 5. token 级 CE，mask 后聚合
-nll_per_token = cross_entropy(shifted_logits, shifted_labels, reduction="none")
-valid = sum(shifted_mask)
-assert valid > 0, "no response token to train"
-loss = sum(nll * m for nll, m in zip(nll_per_token, shifted_mask)) / valid
+    def forward(self, ids, position, visible):
+        x = self.token(ids) + self.pos(position)
+        q, k, v = self.qkv(x).chunk(3, dim=-1)
+        scores = (q @ k.T) / q.size(-1) ** 0.5
+        weights = scores.masked_fill(~visible, float("-inf")).softmax(-1)
+        return self.head(weights @ v)
 
-# 6. 反向 + 优化器
+model = TinyLM()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
+visible, target = packed_masks(segment, assistant)
+logits = model(ids, position, visible)
+nll = F.cross_entropy(logits[:-1], ids[1:], reduction="none")
+assert target.sum().item() == 4
+assert not visible[5:7, :5].any()  # B 不读取 A
+assert torch.isfinite(logits).all()
+loss = nll[target].mean()
+optimizer.zero_grad()
 loss.backward()
 optimizer.step()
-optimizer.zero_grad()
+print("有效目标:", target.sum().item(), "loss:", loss.item())
 ~~~
 
-**关键检查点。**
-- **assistant_start** 必须严格对齐 chat template，否则 loss_mask 偏一个 token，模型会学会从结束标记开始续写。
-- **shifted_mask = loss_mask[1:]** 不是 loss_mask[:-1]。预测位置 $t$ 的 label 是 $t+1$，mask 跟随 label 平移。
-- **valid > 0** 的断言阻止 batch 中混入全 prompt（无 response）样本。packing 下这个检查变成累加整条序列的有效 token 数。
-- 替换 cross_entropy 时注意是否自带 reduction：有的实现默认 mean，再除一次 valid 会得到错误 loss。`,
+这里手工构造二维可见性适合检查逻辑，真实大模型通常需要框架支持的 attention/varlen 接口，不能把该布尔矩阵直接传给任意模型就假设语义相同。代码只有一层、没有完整残差与归一化，也不是训练配方。
+
+检查顺序是：先打印 token 与角色；再看有效目标是否含结束标记、是否排除 padding；接着验证跨样本注意力和首标签；最后确认 CE 只平均一次。实际 tokenizer 的 assistant mask 还取决于模板支持，应检查真实输出。`,
     },
     {
       id: "pitfall",
       type: "pitfall",
-      title: "常见误区：loss 曲线正常不等于 SFT 正确",
-      body: String.raw`**误区一：prompt 也进 loss。** 直接拿 $\log p(x,y)$ 作为目标，模型会学会先重述 user 问题。loss 曲线仍然下降，但推理阶段模型会把开头的用户话复述一遍，然后才回答。生产模型通常用户看不到前半段，仍然浪费 token 预算。
+      title: "常见误区：loss 下降还不能证明数据流正确",
+      body: String.raw`**把 loss mask 当成断开梯度。** 它只选择直接监督的标签；prompt 仍可经注意力影响回答并收到梯度。
 
-**误区二：工具 observation 进 loss。** 让模型模仿 tool 返回的 token，等于教它凭空生成环境输出。推理时它会在没有真实工具调用的情况下伪造 observation，继续按幻觉输出推理。SFT 对工具数据的处理必须和第 21、25 章一致：工具返回只是上下文，不是目标。
+**按 token ID 屏蔽所有 EOS/pad。** 同 ID 不代表同用途，应使用真实长度和角色边界保留回答结束目标。
 
-**误区三：packing 用全 1 attention mask。** 不同样本间的信息串扰看起来会降低 loss，但模型学到的是“查看别处的 prompt 来回答当前题”，推理时没有这个泄漏源，表现变差。所有 packing 实现都必须构造 block-diagonal mask 或等价的 varlen 接口。
+**只重置位置就以为样本隔离。** position IDs 不控制注意力可见性；label shift 还会在段边界产生另一种串联。
 
-**误区四：换聚合不换学习率。** 把配方从 sample-mean 换成 token-mean（或反之），梯度范数会按平均长度缩放。沿用旧学习率可能慢到不收敛或快到发散。
+**用聚合名称猜权重。** 先查看到底在哪个轴求和、除以什么。sample mean 不自动代表数据质量更高，token mean 也不保证长回答能力更强。
 
-**误区五：EOS 不进 loss。** 模型永远不会主动停止生成，推理必须靠外部长度上限。更隐蔽的变体是：EOS 的 token id 和 pad id 相同，loss_mask 又屏蔽 pad，于是 EOS 永远被屏蔽。应检查 tokenizer 的 EOS/pad 配置。
+**声称没训练 EOS 就永远不停。** 缺少直接监督会带来风险，但基座知识和解码配置也决定停止行为。反过来，固定示范的 SFT 也无法靠自己提前生成 EOS 来躲过后续损失。
 
-**误区六：训多了比训少了好。** 高质量 SFT 的 epoch 一般 1-3。更多 epoch 会让模型记忆具体字面答案，在换一种问法时性能下降。保留集按题族去重后观察这个现象，不要用训练集 loss 判断过拟合。
-
-**误区七：改了 chat template 不重跑 reference。** RLHF 的 KL 分母和 DPO 的 log-ratio 都依赖 $\pi_{\mathrm{ref}}$。模板一变，所有 reference 概率都偏，训练目标偷偷换了。应把 SFT checkpoint、tokenizer、chat template 作为一组产物版本化绑定。`,
+**用 epoch 或单次 loss 当完成标准。** 需要看独立验证趋势与真实生成。模板变更和 reference 变更应版本化并回归验证，不能分别概括成“必须完整重训”与“永远不能换”。`,
     },
     {
       id: "comparison",
       type: "comparison",
-      title: "SFT 与相邻方法的边界",
-      body: String.raw`| 方法 | 目标 | 数据 | 分母 | 更新信号 |
-|---|---|---|---|---|
-| 预训练 | $\log p(x_t\mid x_{<t})$ | 大规模无标签文本 | 全部 token | 下一 token |
-| SFT | $\log\pi_\theta(y_t\mid x,y_{<t})$ | (prompt, response) | response token | 下一 assistant token |
-| DPO | $\log\sigma(\beta\Delta\log\mathrm{ratio})$ | (prompt, chosen, rejected) | 偏好对 | 相对 reference 的 log-ratio |
-| RLHF/PPO | $\mathbb E[A\cdot\log\pi_\theta]$ | prompt + 自生成 response + RM | 采样回答的 token | 奖励与 KL |
-| OPD | 教师 $\pi_T$ 分布的 reverse KL | prompt + 学生 rollout | response token | 全词表教师分布差 |
-| RS-SFT | SFT loss | 自己采样 + verifier 过滤 | 通过的 response token | 通过轨迹 |
+      title: "SFT 与相邻方法：监督信号从哪里来？",
+      body: String.raw`| 方法 | 主要数据 | 学习信号 | 本章之后去哪里 |
+|---|---|---|---|
+| 预训练 | 广泛文本或多模态序列 | 根据前文预测后续内容 | 08、09 |
+| SFT | 请求与示范回答 | 所选目标 token 的 CE | 本章 |
+| DPO | 同请求下的偏好对 | 调整相对 reference 的偏好间隔 | 18 |
+| RLHF/PPO | 策略采样回答与奖励 | 优势、策略约束与价值学习 | 16 |
+| OPD | 学生轨迹与教师反馈 | 所选位置的分布差异 | 19 |
+| RS-SFT | 采样后经验证保留的回答 | 对通过轨迹再做 SFT | 21 |
 
-**SFT 与 RS-SFT 的差。** SFT 用预先准备好的示范；RS-SFT 让当前模型采样，用 verifier 保留通过的轨迹，再做 SFT。后者是一种数据获取路线（第 21 章），但训练目标还是 SFT loss，不是新算法。
+SFT 的示范可以由人工、程序或模型产生，硬标签不等于教师的 argmax：教师也可以采样回答。软标签蒸馏则需要概率分布等更丰富的反馈。
 
-**SFT 与 DPO 的差。** SFT 单边提升示范的概率，不管别的回答；DPO 同时压低 rejected 的相对概率。只有示范而没有偏好对比时用 SFT；有成对偏好时用 DPO 更直接。两者不是替代关系——DPO 几乎都需要先 SFT 到可用的 reference。
+DPO 使用偏好对，提升 chosen 相对 rejected、相对 reference 的间隔，不能无条件说每次都会降低 rejected 的绝对概率。常见流程先有可用的指令模型，再做偏好训练；若已有合适 checkpoint，未必需要额外跑一次 SFT。
 
-**SFT 与蒸馏。** 二者形式上都用 teacher 产生数据。SFT 只学 teacher 采样的 argmax token（硬标签）；OPD 学 teacher 的完整分布（软标签）。软标签信息密度高，但要求 teacher 可调用；硬标签只需要 teacher 的输出文本。
-
-**和 instruction tuning / chat tuning / alignment 的关系。** 这三个词在工业界常混用。本章说的 SFT 覆盖 instruction tuning（用指令-回答示范）和 chat tuning（用多轮对话示范）；alignment 更宽，还包含偏好学习、RLHF、宪法 AI 等。面试追问时先确认对方指的是哪一个。`,
+instruction tuning 通常强调指令示范，chat tuning 强调对话；alignment 范围更宽，还包含偏好学习和基于奖励的后训练。面试时先说明讨论哪种数据与信号，再展开公式。`,
     },
     {
       id: "interview",
       type: "interview",
-      title: "面试表达：从 SFT 到 RLHF 的一句话串联",
-      body: String.raw`**30 秒回答：** “SFT 把预训练模型微调成会按指令回答的样子。目标是对 (prompt, response) 示范做条件最大似然，只在 response token 上回传梯度，prompt 和工具返回只作上下文。实现要点在三个 mask——prompt_mask、loss_mask、packing 的 attention_mask——加上三种聚合（sample / seq / token）的选择，不同选择等于不同目标。SFT 完成后作为 RLHF 的 reference policy 和 actor 起点，chat template 必须和下游共用一套。”
+      title: "面试表达：先说监督信号，再说实现边界",
+      body: String.raw`**30 秒回答：** “SFT 用示范继续训练下一 token 预测器。我这里选择 assistant-only，用户和工具内容作为上下文，助手目标参与 CE。实现要确保标签只 shift 一次、mask 跟标签对齐、packing 同时隔离注意力和跨段标签，并声明按 token 还是按回答聚合。最终结合验证、真实生成与能力保留选 checkpoint，供后续 RLHF/DPO 使用。”
 
-**追问 1：为什么 prompt 不进 loss？** 直接训会让模型复述用户问题；条件概率 $\log p(y\mid x)$ 的 $x$ 已经作为上下文给模型看过，不需要再被预测。
+**为什么不训 prompt？** 这是本章选择的目标范围，与助手负责输出的内容一致；并非所有 SFT 都必须如此，也不表示 prompt 表示没有梯度。
 
-**追问 2：三种聚合如何选？** sample-mean 关心每条样本平等，适合样本质量高度不均；token-mean 关心每个 token 平等，适合长回答占主的任务；seq-sum 是数学上的原始形式，但梯度范数随长度变化，需要配套的学习率。生产常用 token-mean + 适配的学习率，避免长回答被淡化。
+**三种聚合怎样比较？** 先说每个 token 的系数。每条回答等权与每个 token 等权通常不同；固定批次下，sequence sum/B 与 token mean 只差平均有效长度。
 
-**追问 3：packing 为什么容易出错？** 必须构造 block-diagonal attention 或 varlen 接口，否则 batch 内样本会互相看到。推理没有这个泄漏源，表现会差。
+**packing 怎么验？** B 不能读取 A，A 的末 logits 不能预测 B 的首 token；重置 position IDs 本身不解决这两件事。
 
-**追问 4：训多少 epoch？** 高质量数据 1-3 epoch，过多会记住字面答案。判据不是训练 loss，而是能力保留集的拐点。
+**训多少 epoch？** 由数据量、重复度、任务和验证趋势决定，没有通用数值。示范目标固定，也不能从 token mean 推出必然提前结束。
 
-**追问 5：SFT 和 DPO 顺序？** 几乎总是先 SFT 到可用的 reference，再用 DPO 做偏好对齐。没有示范数据的冷启动 DPO 可能让模型漂移到任意方向。
-
-**追问 6：改了 chat template 怎么办？** 重新跑 SFT，并同步刷新所有 RLHF/DPO 用到的 reference。模板是一组产物（checkpoint + tokenizer + template）的一部分，不能单独改。`,
+**模板或 reference 能否变？** 能，但需显式定义变化、重算受影响概率缓存并做生成回归；不把版本兼容问题说成一条永远不能违反的定理。`,
     },
     {
       id: "whiteboard",
       type: "quiz",
       title: "白板练习：SFT 的 loss、mask 与聚合",
-      body: "回答时先写出假设与分母，再推导。所有题目都要包含“得分点”。",
+      body: "先独立作答，再核对结果、步骤与边界。若题目包含过强前提，也应指出。",
       questions: [
         {
           q: "一条样本 response 的 3 个 token 概率为 0.5、0.4、0.8。写出 seq-sum、seq-mean 两种 loss，并给出第一个 token logits 的梯度结构（词表大小 4，softmax 后 p=(0.1,0.5,0.3,0.1)，真值是第 2 个）。",
-          a: String.raw`逐 token NLL 为 $\log 2\approx0.693$、$\log 2.5\approx0.916$、$-\log 0.8\approx0.223$。seq-sum $=0.693+0.916+0.223=1.832$，seq-mean $=1.832/3\approx0.611$。logits 梯度 $p-y=(0.1,-0.5,0.3,0.1)$，推高目标 logit，压低其它。**得分点：** 分母声明；三值相加；mean 要除以有效 token 数；CE 梯度为 $p-y$ 而非 $p$。`,
+          a: String.raw`**结果：** 损失和约 1.832，均值约 0.611。
+
+**步骤：** 分别取负自然对数，得到约 0.693、0.916、0.223，再相加；均值除以三个有效标签。单 token CE 的 logits 梯度是 $p-e$，即 (0.1,-0.5,0.3,0.1)。若对整条序列均值求导，该组还要除以 3。
+
+**得分点：** 有效分母、自然对数、梯度方向、区分单项与聚合后梯度。`,
         },
         {
           q: "batch 两条样本有效长度 2 和 8，各样本每 token NLL 恒为 1 和 3。分别计算 sample-mean、seq-sum/B、token-mean 并解释差异。",
-          a: String.raw`sample-mean $=(1+3)/2=2$。seq-sum/B $=(2+24)/2=13$。token-mean $=(2+24)/10=2.6$。三者分别按样本、序列、token 加权。sample-mean 让短样本每 token 权重更大；token-mean 让长样本总贡献按长度加权；seq-sum 直接随长度放大梯度范数。**得分点：** 三个数值；三种权重的含义；换聚合等于换目标；学习率需要配套调整。`,
+          a: String.raw`**结果：** 依次为 2、13、2.6。
+
+**步骤：** 两条损失和是 2、24。sample mean 算 (1+3)/2；seq-sum/B 算 (2+24)/2；token mean 算 (2+24)/10。
+
+**得分点：** 前者两条回答各占一半；token mean 按 2/10、8/10 加权两条均值。固定本批长度，seq-sum/B 恰好是 token mean 的 5 倍，不能说它们必有不同最优点。`,
         },
         {
           q: "多轮对话 [sys, u1, a1, u2, a2]，长度分别为 10、15、20、18、30。写出 attention_mask 与 loss_mask，并给出有效 token 数（忽略 end token）。",
-          a: String.raw`attention_mask 全 1（因果 mask 由模型内部添加）。loss_mask 由 sys 的 10 个 0、u1 的 15 个 0、a1 的 20 个 1、u2 的 18 个 0、a2 的 30 个 1 依次拼接得到；写成分段形式为
+          a: String.raw`**结果：** 本章 assistant-only 目标有 50 个有效 token。
 
-$$m=[\underbrace{0,\ldots,0}_{\text{sys}=10},\underbrace{0,\ldots,0}_{\text{u1}=15},\underbrace{1,\ldots,1}_{\text{a1}=20},\underbrace{0,\ldots,0}_{\text{u2}=18},\underbrace{1,\ldots,1}_{\text{a2}=30}].$$
+**步骤：** 目标 mask 依次拼接 10 个 0、15 个 0、20 个 1、18 个 0、30 个 1。无 padding 时二维有效位置标记可以全为 1，但实际 attention 还要施加因果约束，不能让 a1 读取未来的 u2。
 
-有效 token 数 $=20+30=50$。a2 的 query 要看到 a1、u1、u2，因果 mask 自然满足。**得分点：** 两个 mask 作用不同；assistant content 为 1；user/system 为 0；因果性由模型内部处理；有效长度是 assistant 段之和。`,
+**得分点：** 区分有效位置、因果可见性与目标 mask；20+30=50；shift 后 mask 跟随标签，不表示 prompt 的表示没有梯度。`,
         },
         {
           q: "packing 四条样本到一条长 1024 的序列。朴素做法用全 1 attention_mask 为什么错？正确做法是什么？用 token-mean 时分母是什么？",
-          a: String.raw`朴素做法让后面样本的 query 读到前面样本的 key，等于用别人的 prompt 回答自己题；训练 loss 看似下降，推理失去该泄漏源导致泛化变差。正确做法是 block-diagonal attention 或 varlen 接口（cu_seqlens + position_id reset），让每个 query 只看同一样本内的 key。token-mean 分母是整条 packed 序列的有效 token 数之和。**得分点：** 识别跨样本泄漏；给出 block-diagonal 或 varlen 两种实现；分母是全体有效 token 之和；提到 position_id 也要 reset。`,
+          a: String.raw`**结果：** 若要求样本独立，普通因果 mask 会让后面的样本读取前面的样本，改变条件上下文。
+
+**步骤：** 用分块因果可见性或真正使用序列边界的 varlen 接口；再屏蔽跨段的 next-token 标签。position reset 仅改变位置编码，不能代替隔离。分母是所有实际参与训练的标签数，而不是 1024。
+
+**得分点：** 说明独立样本假设；同时检查 attention、label shift、padding 与有效分母。`,
         },
         {
           q: "SFT 后训练 loss 继续下降但 MMLU 下降 4 个百分点，下一步该怎么办？为什么不能用 RLHF 后的 checkpoint 当新一轮 DPO 的 reference？",
-          a: String.raw`降学习率、减 epoch 或加入通用数据回放；必要时回退到前一个 checkpoint。SFT 过多会导致能力遗忘，训练 loss 看不到。RLHF 后 checkpoint 已经偏离 SFT，若当作 reference，DPO 的隐式奖励 $\beta\log\frac{\pi_\theta}{\pi_{\mathrm{ref}}}$ 的锚点就变了：相当于拿掉长期漂移约束，离线偏好数据的方向意义也随之改变。**得分点：** 能力保留集而非训练 loss 作为判据；回退/回放/降低 lr 三种处理；reference 必须稳定；对 DPO 隐式奖励定义的影响。`,
+          a: String.raw`**先纠正前提：** 新一轮 DPO 可以显式选择 RLHF 后的 checkpoint 作为 reference；它改变约束基准，不是理论上禁止。
+
+**处理步骤：** 核对评测口径、样本误差与预设能力保留要求，再比较早期 checkpoint、学习率和数据混合；训练 loss 不能替代保留集。若开启新 reference 阶段，要记录来源并重算相关 log-prob，而不是沿用旧缓存。
+
+**得分点：** 不把 4 个百分点当通用停止阈值；理解能力保留；区分阶段内冻结和阶段间明确更新 reference。`,
         },
       ],
     },
@@ -376,23 +418,23 @@ $$m=[\underbrace{0,\ldots,0}_{\text{sys}=10},\underbrace{0,\ldots,0}_{\text{u1}=
       id: "quiz",
       type: "quiz",
       title: "自测：从一条样本走到梯度",
-      body: "每题先说出哪些 token 回传梯度、分母是什么，再回答。",
+      body: "先说明本章采用的目标，再检查问题中是否混淆了直接监督与上下文。",
       questions: [
         {
           q: "为什么 SFT 不训 prompt token？",
-          a: "prompt 是条件，不是被模仿的目标；训练它会让模型学会复述用户问题，推理时浪费 token 并偏离目标分布。",
+          a: "本章采用 assistant-only：训练目标对应助手应生成的内容，prompt 作为条件。全序列目标也是合法选择，不能把不训 prompt 当成 SFT 的普适定义；prompt 表示仍可能经注意力收到梯度。",
         },
         {
           q: "工具调用返回的 observation 要不要进 loss？",
-          a: "不进 loss。observation 是环境真实返回，必须在 attention_mask 中保留供模型阅读，但不能让模型模仿生成；否则推理时会伪造工具返回。",
+          a: "在本章训练助手的任务中不作为直接标签，但必须作为可读上下文。助手发出的工具调用可以训练；若要模拟环境输出，则是另一个需要明确定义的任务。",
         },
         {
           q: "sample-mean 和 token-mean 的梯度范数为什么不同？",
-          a: "sample-mean 对每条样本的 token 平均再在样本间平均，权重 $\\propto 1/T_i$；token-mean 对所有 token 平均，权重相等。因此 token-mean 的梯度范数大约随平均长度缩放，不改学习率可能发散或过慢。",
+          a: "二者分配给各 token 的系数不同，梯度向量相加后的方向和范数可能改变，也可能恰好一致。一般不存在固定的平均长度倍率；固定批次上具有该比例关系的是 seq-sum/B 与 token-mean。",
         },
         {
           q: "SFT 与 DPO 的典型顺序？",
-          a: "先 SFT 到可用的 reference 和初始化点，再用 DPO 做偏好对齐；没有示范的冷启动 DPO 会让模型漂移到任意方向。",
+          a: "常见流程先得到可用的指令模型，再用偏好对做 DPO。若已有合适模型，可直接从它开始，不必额外训练一轮 SFT；是否适合取决于模型与数据。",
         },
       ],
     },
@@ -401,27 +443,22 @@ $$m=[\underbrace{0,\ldots,0}_{\text{sys}=10},\underbrace{0,\ldots,0}_{\text{u1}=
     {
       label: "InstructGPT",
       url: "https://arxiv.org/abs/2203.02155",
-      evidence: "SFT + RM + PPO 三阶段原始论文；本章使用其 SFT 阶段定义",
-    },
-    {
-      label: "Llama 2 Technical Report",
-      url: "https://arxiv.org/abs/2307.09288",
-      evidence: "开源配方：chat template、SFT 数据过滤与 RLHF 衔接；超参数为报告实验",
+      evidence: "SFT、奖励模型和 PPO 的阶段划分；不把该论文配方当成通用停止规则",
     },
     {
       label: "LIMA: Less Is More for Alignment",
       url: "https://arxiv.org/abs/2305.11206",
-      evidence: "少量高质量 SFT 的能力迁移实证；不作为普适最小规模规则",
+      evidence: "少量高质量示范的实证案例，不代表普适最小数据量",
     },
     {
-      label: "FlashAttention varlen interface",
-      url: "https://arxiv.org/abs/2205.14135",
-      evidence: "packing 下 cu_seqlens 与 varlen 实现的工程参考",
+      label: "Hugging Face TRL — SFTTrainer",
+      url: "https://huggingface.co/docs/trl/sft_trainer",
+      evidence: "官方文档：数据格式、assistant/completion-only 目标、packing 与工具对话",
     },
     {
-      label: "ChatML tokenizer specification",
-      url: "https://github.com/openai/openai-python/blob/main/chatml.md",
-      evidence: "chat template 中角色标记与结束 token 的典型工业实现",
+      label: "Hugging Face Transformers — Chat templates",
+      url: "https://huggingface.co/docs/transformers/chat_templating",
+      evidence: "官方文档：模型模板、apply_chat_template 与训练时的生成提示选项",
     },
   ],
 };

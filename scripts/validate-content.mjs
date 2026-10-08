@@ -1,4 +1,5 @@
 import { CHAPTERS } from "../content/catalog.js";
+import { READING_GUIDES } from "../content/reading-guides.js";
 import { SOURCE_DOCUMENTS, validateSourceManifest } from "../content/source-manifest.js";
 import {
   REQUIRED_SECTION_TYPES,
@@ -26,6 +27,7 @@ function validateCatalog(chapters, { partial }) {
   const ids = chapters.map((chapter) => chapter.id);
   const slugs = chapters.map((chapter) => chapter.slug);
   const knownIds = new Set(CHAPTERS.map((chapter) => chapter.id));
+  const posByIndex = Object.fromEntries(CHAPTERS.map((ch, i) => [ch.id, i]));
 
   if (!partial) {
     const expected = Array.from({ length: 31 }, (_, index) =>
@@ -77,7 +79,26 @@ function validateCatalog(chapters, { partial }) {
       );
     }
 
-    const posByIndex = Object.fromEntries(chapters.map((ch, i) => [ch.id, i]));
+    const guide = READING_GUIDES[chapter.id];
+    if (!guide || ![guide.goal, guide.checkpoint, guide.later].every(value => typeof value === "string" && value.trim())) {
+      errors.push(`${chapter.id}: missing chapter reading guide`);
+    }
+    const sectionIds = new Set(chapter.sections.map(section => section.id));
+    if (!guide?.focus?.length || guide.focus.some(id => !sectionIds.has(id))) {
+      errors.push(`${chapter.id}: reading guide has missing or invalid focus links`);
+    }
+    const derivations = chapter.sections.filter(section => section.type === "derivation");
+    for (const section of derivations) {
+      if (!guide?.topics?.[section.id]?.trim()) {
+        errors.push(`${chapter.id}/${section.id}: missing plain-language takeaway`);
+      }
+    }
+    for (const id of Object.keys(guide?.topics ?? {})) {
+      if (!derivations.some(section => section.id === id)) {
+        errors.push(`${chapter.id}/${id}: reading guide points to a missing derivation`);
+      }
+    }
+
     const selfPos = posByIndex[chapter.id];
     for (const prerequisite of chapter.prerequisites) {
       if (!knownIds.has(prerequisite)) {
@@ -143,6 +164,7 @@ if (range) {
   console.log(`${sectionCount} required teaching sections present`);
   console.log("0 duplicate ids");
   console.log("0 unresolved prerequisites");
+  console.log("31 chapter reading guides and all derivation takeaways validated");
   console.log("OPD coverage: PASS");
   console.log("OPSD coverage: PASS");
   console.log(`${SOURCE_DOCUMENTS.length} frozen source documents mapped to lesson bodies`);

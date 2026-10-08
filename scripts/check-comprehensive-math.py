@@ -40,6 +40,31 @@ class ComprehensiveMath(unittest.TestCase):
         for a, b in zip(actual, expected):
             self.assertAlmostEqual(a, b, places=11)
 
+    def test_sft_probabilities_lengths_and_aggregation_weights(self):
+        nll = [-math.log(p) for p in (.5, .4, .8)]
+        self.assertAlmostEqual(sum(nll), 1.8325814637483102)
+        self.assertAlmostEqual(sum(nll) / 3, .6108604879161034)
+        short = -math.log(.25)
+        self.assertAlmostEqual((sum(nll)/3 + short)/2, .998577424518)
+        self.assertAlmostEqual((sum(nll) + short)/4, .804718956217)
+        self.assertAlmostEqual((sum(nll) + short)/2, 1.609437912434)
+        lengths, means = [2, 8], [1, 3]
+        sequence_mean = sum(means)/2
+        summed = sum(n*m for n,m in zip(lengths, means))/2
+        token_mean = sum(n*m for n,m in zip(lengths, means))/sum(lengths)
+        self.assertVector([sequence_mean, summed, token_mean], [2, 13, 2.6])
+        self.assertAlmostEqual(summed, sum(lengths)/2 * token_mean)
+        # Nonparallel per-token gradients: sequence mean and token mean cannot
+        # generally be related by one scalar, let alone average sequence length.
+        gradients = [(1, 0)]*2 + [(0, 1)]*8
+        token_grad = [sum(g[j] for g in gradients)/10 for j in range(2)]
+        seq_grad = [sum(g[j] for g in gradients[:2])/4 +
+                    sum(g[j] for g in gradients[2:])/16 for j in range(2)]
+        sum_grad = [sum(g[j] for g in gradients)/2 for j in range(2)]
+        self.assertVector(token_grad, [.2, .8])
+        self.assertVector(seq_grad, [.5, .5])
+        self.assertVector(sum_grad, [5*g for g in token_grad])
+
     def test_pca_requires_top_eigenspace(self):
         points = [(2, 0), (-2, 0), (0, 1), (0, -1)]
         def error(v):

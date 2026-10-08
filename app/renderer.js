@@ -1,17 +1,7 @@
 import { annotateGlossary, GLOSSARY } from "./glossary.js";
 import { sourcesForChapter } from "../content/source-manifest.js";
 import { SECTION_LABELS } from "../content/schema.js";
-
-const INTERVIEW_SECTION_TYPES = new Set([
-  "intuition",
-  "roadmap",
-  "example",
-  "derivation",
-  "pitfall",
-  "comparison",
-  "interview",
-  "quiz",
-]);
+import { READING_GUIDES } from "../content/reading-guides.js";
 
 export function escapeHtml(value) {
   return String(value)
@@ -305,12 +295,10 @@ export function renderDiagram(diagram) {
   );
 }
 
-export function visibleSections(chapter, mode) {
+export function visibleSections(chapter) {
   if (!Array.isArray(chapter?.sections)) return [];
-  if (mode !== "interview") return [...chapter.sections];
-  return chapter.sections.filter((section) =>
-    INTERVIEW_SECTION_TYPES.has(section.type),
-  );
+  // Modes change reading depth, not access to examples, diagrams or code.
+  return [...chapter.sections];
 }
 
 function renderQuiz(section, options) {
@@ -324,7 +312,7 @@ function renderQuiz(section, options) {
           `<span class="quiz-number">${index + 1}</span>` +
           `<span class="quiz-text">${renderInlineMarkdown(question.q, options)}</span></p>` +
           `<details class="quiz-answer"><summary>查看答案</summary>` +
-          `${renderMarkdown(question.a, options)}</details></li>`,
+          `${renderMarkdown(question.a, { ...options, seenTerms: new Set() })}</details></li>`,
       )
       .join("")}</ol>`
   );
@@ -332,7 +320,16 @@ function renderQuiz(section, options) {
 
 function renderSection(section, chapterId, completed, options) {
   const isCompleted = completed.has(section.id);
-  let content = renderMarkdown(section.body, options);
+  const takeaway = options.guide?.topics[section.id];
+  // Annotate visible text first; folded details cannot consume its definitions.
+  const takeawayHtml = section.type === "derivation" && takeaway
+    ? `<div class="topic-takeaway"><strong>先理解这一点</strong>` +
+      renderMarkdown(takeaway, options) + `</div>`
+    : "";
+  const bodyOptions = section.type === "derivation"
+    ? { ...options, seenTerms: new Set() }
+    : options;
+  let content = section.type === "quiz" ? "" : renderMarkdown(section.body, bodyOptions);
 
   if (section.type === "roadmap") {
     content += `<nav class="learning-route" aria-label="本章学习路线"><ol>` +
@@ -346,8 +343,9 @@ function renderSection(section, chapterId, completed, options) {
     content += renderDiagram(section.diagram);
   } else if (section.type === "derivation") {
     content =
-      `<details class="derivation-disclosure" open>` +
-      `<summary>公式与逐步推导</summary>${content}</details>`;
+      takeawayHtml +
+      `<details class="derivation-disclosure"${options.mode === "interview" ? " open" : ""}>` +
+      `<summary>公式、手算与证明（展开 / 收起）</summary>${content}</details>`;
   } else if (section.type === "quiz") {
     content = renderQuiz(section, options);
   }
@@ -369,12 +367,29 @@ function renderSection(section, chapterId, completed, options) {
   );
 }
 
+function renderReadingGuide(chapter, guide) {
+  if (!guide) return "";
+  return `<aside class="reading-guide" aria-labelledby="reading-guide-title">` +
+    `<h2 id="reading-guide-title">第一遍怎样学</h2>` +
+    `<p>${escapeHtml(guide.goal)}</p>` +
+    `<p><strong>读完能做到：</strong>${escapeHtml(guide.checkpoint)}</p>` +
+    `<nav aria-label="首轮重点"><ul>${guide.focus.map(id => {
+      const section = chapter.sections.find(section => section.id === id);
+      if (!section) return "";
+      return `<li><a href="#${encodeURIComponent(chapter.id)}/${encodeURIComponent(id)}" ` +
+        `data-section-link="${escapeHtml(id)}">${escapeHtml(section.title)}</a></li>`;
+    }).join("")}</ul></nav>` +
+    `<p class="reading-guide-later"><strong>之后再深入：</strong>${escapeHtml(guide.later)}</p>` +
+    `</aside>`;
+}
+
 export function renderChapter(chapter, state = {}) {
   const mode = state.mode === "interview" ? "interview" : "learn";
   const completed = new Set(state.completed?.[chapter.id] ?? []);
   const sections = visibleSections(chapter, mode);
   const seenTerms = new Set();
-  const markdownOptions = { glossary: true, seenTerms };
+  const guide = READING_GUIDES[chapter.id];
+  const markdownOptions = { glossary: true, seenTerms, mode, guide };
   const progress = Math.round((completed.size / chapter.sections.length) * 100);
   const sourceDocs = sourcesForChapter(chapter.id);
   const derivations = sections.filter(section => section.type === "derivation");
@@ -383,8 +398,8 @@ export function renderChapter(chapter, state = {}) {
     `<details class="formula-index"${mode === "interview" ? " open" : ""}>` +
     `<summary>本章公式与白板练习</summary>` +
     `<p>${mode === "interview"
-      ? "先写定义与公式，再推导、手算，最后用白板题检查薄弱点。"
-      : "按知识路线学习，也可以直接进入一个公式主题。"}公式默认展开。</p>` +
+      ? "完整推导已展开。先独立作答，再用手算、图解和代码检查。"
+      : "详细推导默认收起，要点始终可读。点击专题可直接展开，也可一次展开全部。"}题目答案需单独查看。</p>` +
     `<ul>${derivations.map(section =>
       `<li><a href="#${encodeURIComponent(chapter.id)}/${encodeURIComponent(section.id)}" ` +
       `data-section-link="${escapeHtml(section.id)}">${escapeHtml(section.title)}</a></li>`,
@@ -406,7 +421,7 @@ export function renderChapter(chapter, state = {}) {
   const lessonHtml = sections.map(section => {
     const html = renderSection(section, chapter.id, completed, markdownOptions);
     if (section.id === "intuition") return html + objectivesHtml;
-    if (section.type === "roadmap") return html + formulaIndex;
+    if (section.type === "roadmap") return html + formulaIndex + renderReadingGuide(chapter, guide);
     return html;
   }).join("");
   const readingLinks = sourceDocs.length
@@ -427,6 +442,9 @@ export function renderChapter(chapter, state = {}) {
     `<h1>${escapeHtml(chapter.title)}</h1>` +
     `<p class="chapter-subtitle">${escapeHtml(chapter.subtitle)}</p>` +
     `<p class="chapter-summary">${summaryHtml}</p>` +
+    `<p class="reading-mode-note">${mode === "interview"
+      ? "面试模式：先尝试白板，再查完整推导、图解和代码。"
+      : "学习模式：先理解要点，再按需展开公式、手算与证明。"}</p>` +
     `<div class="chapter-progress" aria-label="本章进度 ${progress}%">` +
     `<span style="width:${progress}%"></span></div>` +
     `</header>` +

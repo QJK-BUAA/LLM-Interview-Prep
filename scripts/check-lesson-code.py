@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Execute the actual 09/19/27 lesson code and test its declared behavior.
+"""Execute the actual 09/19/27/30 lesson code and test its declared behavior.
 
 Requires local PyTorch. Node imports the ES-module curriculum, avoiding regex
 parsing of JavaScript strings. Full-model checks run on tiny CPU tensors.
@@ -32,7 +32,7 @@ def load_code(chapter, index=0):
     return scope
 
 
-C09, C19, C27 = load_code("09"), load_code("19"), load_code("27")
+C09, C19, C27, C30 = (load_code(chapter) for chapter in ("09", "19", "27", "30"))
 torch.set_num_threads(1)
 
 
@@ -50,6 +50,61 @@ def tiny_model():
 
 
 class LessonCode(unittest.TestCase):
+    def test_sft_shift_matches_scalar_nll_and_prompt_gets_gradient(self):
+        torch.manual_seed(7)
+        model = C30["TinyLM"]()
+        ids, segment = C30["ids"], C30["segment"]
+        visible, target = C30["packed_masks"](segment, C30["assistant"])
+        self.assertEqual(target.tolist(), [False, True, True, True, False, True, False])
+        logits = model(ids, C30["position"], visible)
+        # Enumerate target pairs independently of mask slicing.
+        pairs = [(1, 3), (2, 4), (3, 5), (5, 7)]
+        scalar = 0
+        for pos, label in pairs:
+            values = logits[pos].detach().tolist()
+            maximum = max(values)
+            scalar += maximum + math.log(sum(math.exp(v-maximum) for v in values))-values[label]
+        loss = torch.nn.functional.cross_entropy(logits[:-1], ids[1:], reduction="none")[target].mean()
+        self.assertAlmostEqual(loss.item(), scalar / 4, places=6)
+        loss.backward()
+        # Prompt IDs are not labels, but their representations influence assistant predictions.
+        self.assertGreater(model.token.weight.grad[1:3].abs().sum().item(), 0)
+        self.assertEqual(model.token.weight.grad[0].abs().sum().item(), 0)
+        for parameter in model.parameters():
+            self.assertTrue(torch.isfinite(parameter.grad).all())
+
+    def test_sft_packed_and_independent_predictions_agree(self):
+        model = C30["TinyLM"]()
+        ids, segment, assistant = C30["ids"], C30["segment"], C30["assistant"]
+        visible, _ = C30["packed_masks"](segment, assistant)
+        packed = model(ids, C30["position"], visible)
+        for start, end in ((0, 5), (5, 7)):
+            mask, _ = C30["packed_masks"](segment[start:end], assistant[start:end])
+            separate = model(ids[start:end], C30["position"][start:end], mask)
+            torch.testing.assert_close(packed[start:end], separate)
+        changed = ids.clone()
+        changed[:5] = 7  # Change A completely: B must remain identical.
+        torch.testing.assert_close(packed[5:7], model(changed, C30["position"], visible)[5:7])
+        changed = ids.clone()
+        changed[4] = 7  # Future token cannot affect earlier predictions.
+        torch.testing.assert_close(packed[:4], model(changed, C30["position"], visible)[:4])
+        changed = ids.clone()
+        changed[-1] = 5  # Pad ID equals the real end token; position mask still distinguishes them.
+        torch.testing.assert_close(packed[:7], model(changed, C30["position"], visible)[:7])
+
+    def test_sft_segment_first_label_and_all_pad_are_safe(self):
+        segment = torch.tensor([0, 0, 1, 1, -1, -1])
+        # Deliberately mark first B token as assistant to detect cross-segment labels.
+        visible, target = C30["packed_masks"](segment, torch.ones(6, dtype=torch.bool))
+        self.assertEqual(target.tolist(), [True, False, True, False, False])
+        self.assertFalse(visible[2:4, :2].any())
+        visible, target = C30["packed_masks"](torch.full((3,), -1), torch.ones(3, dtype=torch.bool))
+        self.assertFalse(target.any())
+        logits = C30["TinyLM"]()(torch.zeros(3, dtype=torch.long), torch.zeros(3, dtype=torch.long), visible)
+        self.assertTrue(torch.isfinite(logits).all())
+        # No valid labels: the lesson assertion rejects this batch before mean/backward.
+        self.assertEqual(target.sum().item(), 0)
+
     def test_binary_padding_causal_batch_and_empty_queries(self):
         scores = torch.randn(3, 2, 4, 4, requires_grad=True)
         masks = torch.tensor([[1,1,0,0], [0,1,1,1], [0,0,0,0]], dtype=torch.bool)
