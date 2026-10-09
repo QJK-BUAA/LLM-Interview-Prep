@@ -28,9 +28,9 @@ test("every chapter has a connected learning path and worked whiteboard exercise
   }
 });
 
-test("all formulas and examples remain reachable in interview mode and by deep link", () => {
+test("all formulas and examples remain reachable in the single reading mode and by deep link", () => {
   for (const chapter of CHAPTERS) {
-    const visible = visibleSections(chapter, "interview");
+    const visible = visibleSections(chapter);
     for (const section of chapter.sections) {
       if (!["intuition", "derivation", "example", "roadmap"].includes(section.type)) continue;
       assert.ok(visible.includes(section), `${chapter.id}/${section.id}`);

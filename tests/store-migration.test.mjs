@@ -22,7 +22,7 @@ test("migrates old progress once, retaining settings and removing repurposed cha
   const state = loadState(storage);
   assert.equal(state.version, 2);
   assert.equal(state.currentChapter, "19");
-  assert.equal(state.mode, "interview");
+  assert.equal(state.mode, "learn");
   assert.equal(state.theme, "dark");
   assert.deepEqual(state.completed, { "00": ["quiz"], "19": ["derivation"] });
   assert.deepEqual(JSON.parse(storage.map.get(LEGACY_STORAGE_KEY)), old);

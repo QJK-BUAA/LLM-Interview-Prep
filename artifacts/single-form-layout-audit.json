@@ -1,0 +1,4431 @@
+{
+  "timestamp": "2026-10-09T08:51:00.114Z",
+  "viewports": [
+    {
+      "courseLabel": "31 章课程",
+      "nav": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "30",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "results": [
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 8,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 119,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "00",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "00",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 35,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 116,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "01",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "01",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 229,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "02",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "02",
+          "sections": 17,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 7
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 192,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "03",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "03",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 6,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 367,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "04",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 14,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "04",
+          "sections": 23,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 13
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 20,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 140,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "05",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "05",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 17,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 149,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "06",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "06",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 24,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 152,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "07",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "07",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 13,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 150,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "08",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "08",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 58,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 178,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "09",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "09",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 12,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 182,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "10",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "10",
+          "sections": 17,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 7
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 119,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "11",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "11",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 37,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 131,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "12",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "12",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 41,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 154,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "13",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "13",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 101,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "14",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "14",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 19,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 122,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "15",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "15",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 14,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "30",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "30",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 7,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 121,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "16",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "16",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 105,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "17",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "17",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 114,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "18",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "18",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 16,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 117,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "19",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "19",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 32,
+          "edges": 12,
+          "fallback": 0,
+          "formulaCount": 183,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "20",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "20",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 5,
+          "edges": 11,
+          "fallback": 0,
+          "formulaCount": 163,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "21",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "21",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 7,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 123,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "22",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "22",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 8,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 143,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "23",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 11,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "23",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 131,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "24",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "24",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 6,
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 124,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "25",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "25",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 17,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 164,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "26",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 12,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "26",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 5,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 134,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "27",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "27",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 1,
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 121,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "28",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 11,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "28",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 102,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "29",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "29",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        }
+      ],
+      "totalProgress": 458,
+      "viewport": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "courseLabel": "31 章课程",
+      "nav": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "30",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "results": [
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 8,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 119,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "00",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "00",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 35,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 116,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "01",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "01",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 229,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "02",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "02",
+          "sections": 17,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 7
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 192,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "03",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "03",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 6,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 367,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "04",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 14,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "04",
+          "sections": 23,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 13
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 20,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 140,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "05",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "05",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 17,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 149,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "06",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "06",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 24,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 152,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "07",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "07",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 13,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 150,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "08",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "08",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 58,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 178,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "09",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "09",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 12,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 182,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "10",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "10",
+          "sections": 17,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 7
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 119,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "11",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "11",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 37,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 131,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "12",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "12",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 41,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 154,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "13",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "13",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 101,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "14",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "14",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 19,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 122,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "15",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "15",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 14,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "30",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "30",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 7,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 121,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "16",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "16",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 105,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "17",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "17",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 114,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "18",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "18",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 16,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 117,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "19",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "19",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 32,
+          "edges": 12,
+          "fallback": 0,
+          "formulaCount": 183,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "20",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "20",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 5,
+          "edges": 11,
+          "fallback": 0,
+          "formulaCount": 163,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "21",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "21",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 7,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 123,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "22",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "22",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 8,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 143,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "23",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 11,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "23",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 131,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "24",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "24",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 6,
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 124,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "25",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "25",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 17,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 164,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "26",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 12,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "26",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 5,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 134,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "27",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "27",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 1,
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 121,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "28",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 11,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "28",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 102,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "29",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "29",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        }
+      ],
+      "totalProgress": 458,
+      "viewport": [
+        1024,
+        900
+      ]
+    },
+    {
+      "courseLabel": "31 章课程",
+      "nav": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "30",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "results": [
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 8,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 119,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "00",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "00",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 35,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 116,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "01",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "01",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 229,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "02",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "02",
+          "sections": 17,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 7
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 192,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "03",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "03",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 6,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 367,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "04",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 14,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "04",
+          "sections": 23,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 13
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 20,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 140,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "05",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 6,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "05",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 17,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 149,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "06",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "06",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 24,
+          "edges": 4,
+          "fallback": 0,
+          "formulaCount": 152,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "07",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "07",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 13,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 150,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "08",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "08",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 58,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 178,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "09",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "09",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 12,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 182,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "10",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "10",
+          "sections": 17,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 7
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 119,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "11",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "11",
+          "sections": 16,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 6
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 37,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 131,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "12",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "12",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 41,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 154,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "13",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "13",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 22,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 101,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "14",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 7,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "14",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 19,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 122,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "15",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "15",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 14,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "30",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "30",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 7,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 121,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "16",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "16",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 6,
+          "fallback": 0,
+          "formulaCount": 105,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "17",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "17",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 14,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 114,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "18",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 8,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "18",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 16,
+          "edges": 7,
+          "fallback": 0,
+          "formulaCount": 117,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "19",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "19",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 32,
+          "edges": 12,
+          "fallback": 0,
+          "formulaCount": 183,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "20",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "20",
+          "sections": 13,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 3
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 5,
+          "edges": 11,
+          "fallback": 0,
+          "formulaCount": 163,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "21",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "21",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 7,
+          "edges": 5,
+          "fallback": 0,
+          "formulaCount": 123,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "22",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "22",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 8,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 143,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "23",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 11,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "23",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 131,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "24",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "24",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 6,
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 124,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "25",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "25",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 17,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 164,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "26",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 12,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "26",
+          "sections": 15,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 5
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 5,
+          "edges": 10,
+          "fallback": 0,
+          "formulaCount": 134,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "27",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 10,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "27",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 1,
+          "edges": 9,
+          "fallback": 0,
+          "formulaCount": 121,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "28",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 11,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "28",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        },
+        {
+          "badBounds": [],
+          "badOverflow": [],
+          "defaultOverflow": [],
+          "defaultVisibleFormulas": 0,
+          "edges": 8,
+          "fallback": 0,
+          "formulaCount": 102,
+          "formulaIndexOpen": false,
+          "headerOverlap": false,
+          "id": "29",
+          "openDerivations": 0,
+          "openerHasMath": false,
+          "pageOverflow": false,
+          "passed": true,
+          "quizzes": 9,
+          "readerOverflow": false,
+          "readingGuideCount": 1,
+          "rendered": "29",
+          "sections": 14,
+          "teachingOrder": [
+            "intuition",
+            "chapter-objectives",
+            "example",
+            "roadmap",
+            "formula-index"
+          ],
+          "visibleTakeaways": 4
+        }
+      ],
+      "totalProgress": 458,
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  ],
+  "console": {
+    "success": true,
+    "data": {
+      "messages": []
+    },
+    "error": null
+  },
+  "network": [
+    {
+      "url": "http://127.0.0.1:8012/?audit=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/schema.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/reading-guides.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-30.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/?capture=1440",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/schema.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/reading-guides.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-00.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-20.js",
+      "status": 304,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-30.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/?audit=1024",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/schema.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/reading-guides.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-30.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/?capture=1024",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/schema.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/reading-guides.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-30.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/?audit=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/schema.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/reading-guides.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-30.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/?capture=390",
+      "status": 200,
+      "resourceType": "Document"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/styles.css",
+      "status": 200,
+      "resourceType": "Stylesheet"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/katex.min.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/app.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/catalog.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/schema.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/reading-guides.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/renderer.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/store.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Bold.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Main-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Math-Italic.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/vendor/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "status": 200,
+      "resourceType": "Font"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-00.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-01.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-02.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-03.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-04.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-05.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-06.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-07.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-08.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-09.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-10.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-11.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-12.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-13.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-14.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-15.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-16.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-17.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-18.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-19.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-20.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-21.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-22.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-23.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-24.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-25.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-26.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-27.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-28.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-29.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/chapter-30.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/app/glossary.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-manifest.js",
+      "status": 200,
+      "resourceType": "Script"
+    },
+    {
+      "url": "http://127.0.0.1:8012/content/source-revision.js",
+      "status": 200,
+      "resourceType": "Script"
+    }
+  ],
+  "layoutPassed": true
+}

@@ -12,7 +12,6 @@ import {
   loadState,
   saveState,
   setCurrentChapter,
-  setMode,
   setTheme,
   toggleSection,
 } from "./store.js";
@@ -143,7 +142,6 @@ function initialize() {
 
   let state = loadState();
   let renderedChapterId = null;
-  let renderedMode = null;
   let currentSectionId = null;
   let openDrawer = null;
   let drawerTrigger = null;
@@ -195,13 +193,6 @@ function initialize() {
     elements.themeToggle.title = `切换到${nextTheme}主题`;
     elements.themeColor.content =
       state.theme === "dark" ? "#181a1d" : "#ffffff";
-  }
-
-  function applyModeControls() {
-    for (const button of document.querySelectorAll("[data-mode]")) {
-      const active = button.dataset.mode === state.mode;
-      button.setAttribute("aria-pressed", String(active));
-    }
   }
 
   function renderOverallProgress() {
@@ -292,7 +283,7 @@ function initialize() {
   }
 
   function renderChapterContext(chapter) {
-    const sections = visibleSections(chapter, state.mode);
+    const sections = visibleSections(chapter);
     const completed = new Set(state.completed[chapter.id] ?? []);
     const progress = getProgress(state, chapter.id);
     const prerequisites =
@@ -322,8 +313,7 @@ function initialize() {
       `<section class="context-block"><h3>学习目标</h3><ul>${chapter.objectives
         .map((objective) => `<li>${escapeHtml(objective)}</li>`)
         .join("")}</ul></section>` +
-      `<nav class="section-toc" aria-label="章节小节"><h3>` +
-      `${state.mode === "interview" ? "面试复习目录" : "本章目录"}</h3><ol>` +
+      `<nav class="section-toc" aria-label="章节小节"><h3>本章目录</h3><ol>` +
       sections
         .map(
           (section) =>
@@ -389,12 +379,10 @@ function initialize() {
     }
 
     renderedChapterId = chapter.id;
-    renderedMode = state.mode;
     document.title = `${chapter.id} ${chapter.title} | ML Roadmap`;
     renderChapterContext(chapter);
     renderCourseNavigation();
     renderOverallProgress();
-    applyModeControls();
     scrollToSection(sectionId, restorePosition, expandSection);
 
     if (focusReader) {
@@ -419,20 +407,19 @@ function initialize() {
     }
 
     const routedChapter = getChapter(route.chapterId);
-    if (route.sectionId && !visibleSections(routedChapter, state.mode).some(
+    if (route.sectionId && !visibleSections(routedChapter).some(
       section => section.id === route.sectionId,
     )) {
-      persist(setMode(state, "learn"));
+      currentSectionId = null;
     }
     const chapterChanged = route.chapterId !== renderedChapterId;
-    const modeChanged = state.mode !== renderedMode;
     if (renderedChapterId && chapterChanged) {
       scrollPositions.set(renderedChapterId, readScrollPosition());
     }
 
     persist(setCurrentChapter(state, route.chapterId));
 
-    if (chapterChanged || modeChanged || !renderedChapterId) {
+    if (chapterChanged || !renderedChapterId) {
       const fallbackPosition = route.sectionId
         ? 0
         : (scrollPositions.get(route.chapterId) ?? 0);
@@ -652,22 +639,6 @@ function initialize() {
       elements.searchInput.value = "";
       renderCourseNavigation();
       elements.searchInput.focus();
-    } else if (action === "set-mode") {
-      const nextMode = target.dataset.mode;
-      if (nextMode === state.mode) return;
-
-      const position = readScrollPosition();
-      const anchor = visibleReadingSection();
-      persist(setMode(state, nextMode));
-      const chapter = getChapter(state.currentChapter);
-      // Folding changes page height: restore the section being read, not old pixels.
-      currentSectionId = anchor?.id ?? null;
-      replaceRoute(chapter.id, currentSectionId);
-      renderCurrentChapter({
-        sectionId: currentSectionId,
-        restorePosition: position,
-        expandSection: false,
-      });
     } else if (action === "toggle-theme") {
       persist(setTheme(state, state.theme === "dark" ? "light" : "dark"));
       applyTheme();
@@ -733,7 +704,6 @@ function initialize() {
   });
 
   applyTheme();
-  applyModeControls();
   if (!location.hash) replaceRoute("00");
   applyRoute();
 }

@@ -17,8 +17,8 @@ const evaluate = (script) => {
   if (!raw.success) throw new Error(JSON.stringify(raw));
   return typeof raw.data.result === "string" ? JSON.parse(raw.data.result) : raw.data.result;
 };
-const expectedForMode = mode => CHAPTERS.map(chapter => {
-  const sections = visibleSections(chapter, mode);
+const expected = CHAPTERS.map(chapter => {
+  const sections = visibleSections(chapter);
   return {
     id: chapter.id, sections: sections.length,
     derivations: sections.filter(s => s.type === "derivation").length,
@@ -30,11 +30,8 @@ mkdirSync(new URL("../artifacts/", import.meta.url), { recursive: true });
 const report = { timestamp: new Date().toISOString(), viewports: [] };
 for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
   run(["set", "viewport", String(width), String(height)]);
-  for (const mode of ["learn", "interview"]) {
-  const expected = expectedForMode(mode);
   run(["open", `${baseUrl}?audit=${width}#00`]);
   run(["wait", ".chapter"]);
-  run(["click", `[data-mode="${mode}"]`]);
   const result = evaluate(`(async () => {
     const expected = ${JSON.stringify(expected)};
     const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -87,10 +84,10 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
         pageOverflow:page.scrollWidth>page.clientWidth, readerOverflow:reader.scrollWidth>reader.clientWidth+1,
         badBounds, badOverflow, headerOverlap };
       row.passed = row.rendered===record.id && sections===record.sections &&
-        openDerivations===${mode === "interview" ? "record.derivations" : "0"} &&
+        openDerivations===0 && formulaIndexOpen===false &&
         visibleTakeaways===record.derivations && row.readingGuideCount===1 && !defaultOverflow.length &&
         edges===record.edges && quizzes===record.quizzes && !fallback && !row.pageOverflow && !row.readerOverflow && !badBounds.length && !badOverflow.length && !headerOverlap &&
-        formulaIndexOpen===${mode === "interview"} && !openerHasMath &&
+        !openerHasMath &&
         teachingOrder.join(',')==='intuition,chapter-objectives,example,roadmap,formula-index';
       results.push(row);
     }
@@ -98,13 +95,10 @@ for (const [width, height] of [[1440, 1000], [1024, 900], [390, 844]]) {
       nav:[...document.querySelectorAll('[data-chapter-link]')].map(a=>a.dataset.chapterLink),
       totalProgress:document.querySelector('#overall-progress').max, results};
   })()`);
-  result.mode = mode;
   report.viewports.push(result);
-  console.log(`${width}x${height} ${mode}: ${result.results.filter(r => r.passed).length}/${CHAPTERS.length} chapter layouts pass (default + expanded)`);
-  }
+  console.log(`${width}x${height}: ${result.results.filter(r => r.passed).length}/${CHAPTERS.length} chapter layouts pass (default + expanded)`);
   run(["open", `${baseUrl}?capture=${width}#00`]);
   run(["wait", ".chapter"]);
-  run(["click", '[data-mode="learn"]']);
   evaluate("(async()=>{await document.fonts.ready; await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); return {chapter:document.querySelector('.chapter').dataset.chapterId};})()");
   run(["screenshot", fileURLToPath(new URL(`../artifacts/${prefix}-opening-${width}x${height}.png`, import.meta.url))]);
 }

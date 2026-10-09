@@ -84,8 +84,8 @@ test("toggles valid sections without mutating the previous state", () => {
 test("normalizes mode and theme updates", () => {
   const initial = loadState(makeStorage());
 
-  assert.equal(setMode(initial, "interview").mode, "interview");
-  assert.equal(setMode(initial, "invalid").mode, "learn");
+  assert.equal(setMode(initial).mode, "learn");
+  assert.equal(setMode(initial).mode, "learn");
   assert.equal(setTheme(initial, "dark").theme, "dark");
   assert.equal(setTheme(initial, "invalid").theme, "light");
   assert.equal(initial.mode, "learn");

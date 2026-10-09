@@ -15,7 +15,7 @@ const decode = value => value.replace(/&(amp|lt|gt|quot|#39);/g, (_, entity) => 
 let total = 0;
 const failures = [];
 for (const chapter of CHAPTERS) {
-  const html = renderChapter(chapter, { mode: "learn" });
+  const html = renderChapter(chapter);
   const formulas = [...html.matchAll(/data-display="(true|false)" data-math="([^"]*)"/g)];
   for (const [, display, escaped] of formulas) {
     const source = decode(escaped);

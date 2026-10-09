@@ -78,7 +78,7 @@ test("annotates only the first glossary occurrence", () => {
   assert.match(html, /data-definition=/);
 });
 
-test("both modes retain diagrams and code alongside all teaching sections", () => {
+test("visibleSections returns all teaching sections in order", () => {
   const chapter = {
     sections: [
       { type: "roadmap" },
@@ -94,9 +94,9 @@ test("both modes retain diagrams and code alongside all teaching sections", () =
     ],
   };
 
-  assert.equal(visibleSections(chapter, "learn").length, 10);
+  assert.equal(visibleSections(chapter).length, 10);
   assert.deepEqual(
-    visibleSections(chapter, "interview").map((section) => section.type),
+    visibleSections(chapter).map((section) => section.type),
     ["roadmap", "intuition", "example", "derivation", "pitfall", "comparison", "interview", "quiz", "diagram", "code"],
   );
 });
@@ -126,7 +126,6 @@ test("renders completion controls and folded quiz answers", () => {
   };
 
   const html = renderChapter(chapter, {
-    mode: "learn",
     completed: { "99": ["quiz"] },
   });
 
@@ -136,7 +135,7 @@ test("renders completion controls and folded quiz answers", () => {
   assert.match(html, /<summary>查看答案<\/summary>/);
 });
 
-test("interview formulas are open, indexed and linked to folded whiteboard answers", () => {
+test("formula index is folded by default and lists derivations and whiteboard", () => {
   const chapter = {
     id: "99", title: "公式测试", subtitle: "", part: "", level: "", duration: 30,
     summary: "", objectives: [], sources: [],
@@ -148,15 +147,17 @@ test("interview formulas are open, indexed and linked to folded whiteboard answe
         questions: [{ q: "求导？", a: "$2x$。" }] },
     ],
   };
-  const html = renderChapter(chapter, { mode: "interview" });
-  assert.match(html, /class="derivation-disclosure" open/);
+  const html = renderChapter(chapter);
+  assert.doesNotMatch(html, /class="derivation-disclosure" open/);
+  assert.doesNotMatch(html, /class="formula-index" open/);
   assert.match(html, /href="#99\/math-gradient"/);
   assert.match(html, /href="#99\/whiteboard"/);
   assert.match(html, /class="quiz-answer"><summary>/);
+  assert.match(html, /data-action="set-derivations" data-open="true"/);
   assert.match(html, /data-action="set-derivations" data-open="false"/);
 });
 
-test("both reading modes introduce the problem and example before the formula index", () => {
+test("single reading mode introduces the problem and example before the formula index", () => {
   const chapter = {
     id: "99", title: "学习时长与分数", subtitle: "", part: "", level: "", duration: 30,
     summary: "先预测，再检查误差。", objectives: ["计算三个预测的误差"], sources: [],
@@ -168,26 +169,24 @@ test("both reading modes introduce the problem and example before the formula in
       { id: "derivation", type: "derivation", title: "计算误差", body: "$$L=e^2$$" },
     ],
   };
-  for (const mode of ["learn", "interview"]) {
-    const html = renderChapter(chapter, { mode });
-    const positions = [
-      'id="intuition"', 'class="chapter-objectives"', 'id="example"',
-      'id="roadmap"', 'class="formula-index"', 'id="derivation"',
-    ].map(marker => html.indexOf(marker));
-    assert.ok(positions.every(position => position >= 0), mode);
-    assert.deepEqual([...positions].sort((a, b) => a - b), positions, mode);
-    assert.equal((html.match(/class="chapter-objectives"/g) ?? []).length, 1);
-    assert.equal((html.match(/class="formula-index"/g) ?? []).length, 1);
-    assert.equal(html.includes('<details class="formula-index" open>'), mode === "interview");
-    assert.equal(html.includes('<details class="derivation-disclosure" open>'), mode === "interview");
-    assert.match(html, /L=e\^2/); // Folded math remains intact in the document.
-  }
+  const html = renderChapter(chapter);
+  const positions = [
+    'id="intuition"', 'class="chapter-objectives"', 'id="example"',
+    'id="roadmap"', 'class="formula-index"', 'id="derivation"',
+  ].map(marker => html.indexOf(marker));
+  assert.ok(positions.every(position => position >= 0));
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions);
+  assert.equal((html.match(/class="chapter-objectives"/g) ?? []).length, 1);
+  assert.equal((html.match(/class="formula-index"/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /class="formula-index" open/);
+  assert.doesNotMatch(html, /class="derivation-disclosure" open/);
+  assert.match(html, /L=e\^2/); // Folded math remains intact in the document.
 });
 
 test("all real lessons expose individually written takeaways outside folded derivations", () => {
   for (const chapter of CHAPTERS) {
     const guide = READING_GUIDES[chapter.id];
-    const html = renderChapter(chapter, { mode: "learn" });
+    const html = renderChapter(chapter);
     const count = chapter.sections.filter(section => section.type === "derivation").length;
     assert.ok(guide.goal && guide.checkpoint && guide.later, chapter.id);
     assert.equal((html.match(/class="topic-takeaway"/g) ?? []).length, count, chapter.id);
@@ -197,10 +196,8 @@ test("all real lessons expose individually written takeaways outside folded deri
     for (const id of guide.focus) {
       assert.match(html, new RegExp(`href="#${chapter.id}/${id}"`));
     }
-    const interview = renderChapter(chapter, { mode: "interview" });
-    assert.equal((interview.match(/class="derivation-disclosure" open/g) ?? []).length, count);
-    assert.match(interview, /class="code-block"/);
-    assert.match(interview, /class="diagram /);
+    assert.match(html, /class="code-block"/);
+    assert.match(html, /class="diagram /);
   }
 });
 
@@ -213,7 +210,7 @@ test("folded detail glossary does not consume a later visible definition", () =>
       { id: "example", type: "example", title: "", body: "token。" },
     ],
   };
-  const html = renderChapter(chapter, { mode: "learn" });
+  const html = renderChapter(chapter);
   const visible = html.slice(html.indexOf('id="example"'));
   assert.match(visible, /class="glossary-term"/);
 });

@@ -142,7 +142,7 @@ a {
   position: relative;
   z-index: 40;
   display: grid;
-  grid-template-columns: minmax(205px, 260px) minmax(160px, 300px) auto 40px 40px;
+  grid-template-columns: minmax(205px, 260px) minmax(160px, 1fr) 40px 40px;
   align-items: center;
   gap: 16px;
   min-height: var(--header-height);
@@ -232,34 +232,6 @@ progress::-webkit-progress-value {
 progress::-moz-progress-bar {
   border-radius: 3px;
   background: var(--green);
-}
-
-.mode-switch {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 142px;
-  height: 36px;
-  padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface-muted);
-}
-
-.mode-switch button {
-  min-width: 0;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.mode-switch button[aria-pressed="true"] {
-  background: var(--surface);
-  box-shadow: 0 1px 3px rgb(21 30 41 / 14%);
-  color: var(--brand);
 }
 
 .icon-button {
@@ -1507,7 +1479,7 @@ tbody tr:last-child td {
 
 @media (max-width: 1179px) {
   .app-header {
-    grid-template-columns: minmax(190px, 250px) minmax(150px, 1fr) auto 40px 40px;
+    grid-template-columns: minmax(190px, 250px) minmax(150px, 1fr) 40px 40px;
   }
 
   .workspace {
@@ -1560,7 +1532,7 @@ tbody tr:last-child td {
   .app-header {
     position: sticky;
     top: 0;
-    grid-template-columns: 38px minmax(48px, 1fr) auto 38px 38px;
+    grid-template-columns: 38px minmax(48px, 1fr) 38px 38px;
     gap: 6px;
     min-height: var(--header-height);
     padding: 7px 10px;
@@ -1587,16 +1559,6 @@ tbody tr:last-child td {
 
   .overall-progress {
     display: none;
-  }
-
-  .mode-switch {
-    width: 100px;
-    height: 34px;
-  }
-
-  .mode-switch button {
-    padding: 0 6px;
-    font-size: 12px;
   }
 
   .icon-button {

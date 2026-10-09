@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-10-09T08:51:34.621Z",
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "single reading form",
+        "formula index folded by default and toggleable",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "code deep link preserves fold state",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route",
+        "four new topics via native index",
+        "glossary hover/click/keyboard focus and bounds",
+        "01/02/30/24 guide links",
+        "takeaway remains visible",
+        "keyboard opens and closes derivations",
+        "folded and expanded lesson screenshots"
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "single reading form",
+        "formula index folded by default and toggleable",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "code deep link preserves fold state",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route",
+        "four new topics via native index",
+        "glossary hover/click/keyboard focus and bounds",
+        "01/02/30/24 guide links",
+        "takeaway remains visible",
+        "keyboard opens and closes derivations",
+        "folded and expanded lesson screenshots"
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "passed": true,
+      "tested": [
+        "v1 migration",
+        "default chapter/count",
+        "search directly to chapter 27 section",
+        "single reading form",
+        "formula index folded by default and toggleable",
+        "collapse/expand all",
+        "formula index reopens destination",
+        "whiteboard answer and completion persistence",
+        "code deep link preserves fold state",
+        "TOC jump",
+        "derivation disclosure",
+        "completion preserving disclosure",
+        "refresh persistence",
+        "clipboard write success",
+        "quiz answer",
+        "theme persistence",
+        "drawer close",
+        "invalid route",
+        "four new topics via native index",
+        "glossary hover/click/keyboard focus and bounds",
+        "01/02/30/24 guide links",
+        "takeaway remains visible",
+        "keyboard opens and closes derivations",
+        "folded and expanded lesson screenshots"
+      ]
+    }
+  ],
+  "console": {
+    "success": true,
+    "data": {
+      "messages": []
+    },
+    "error": null
+  },
+  "passed": true
+}

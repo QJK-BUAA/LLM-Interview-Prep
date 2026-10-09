@@ -96,19 +96,20 @@ try {
     assert.match(evaluate("location.hash"), /^#27\/.+/);
     assert.equal(evaluate("document.body.dataset.drawer || ''"), "");
 
-    clickRef(".app-header", /button "面试"/);
     const chapter = getChapter("27");
     const mathCount = chapter.sections.filter(s => s.type === "derivation").length;
     assert.equal(evaluate("document.querySelector('.lesson-section').id"), "intuition");
+    assert.equal(evaluate("document.querySelector('.formula-index').open"), false);
+    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), visibleSections(chapter).length);
+    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
+    run(["click", ".formula-index > summary"]);
     assert.equal(evaluate("document.querySelector('.formula-index').open"), true);
-    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), visibleSections(chapter, "interview").length);
+    clickRef(".formula-index", /button "展开全部推导"/);
     assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), mathCount);
     clickRef(".formula-index", /button "收起全部推导"/);
     assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
     run(["click", '.formula-index [data-section-link="derivation"]']);
     assert.equal(evaluate("document.querySelector('#derivation details').open"), true);
-    clickRef(".formula-index", /button "展开全部推导"/);
-    assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), mathCount);
     run(["click", '.formula-index [data-section-link="whiteboard"]']);
     assert.equal(evaluate("location.hash"), "#27/whiteboard");
     assert.equal(evaluate("document.querySelectorAll('#whiteboard .quiz-answer[open]').length"), 0);
@@ -119,13 +120,10 @@ try {
     run(["open", `${base}?whiteboard=${width}#27/whiteboard`]);
     assert.equal(evaluate("document.querySelector('#whiteboard button').getAttribute('aria-pressed')"), "true");
 
-    // Code is available without changing the selected interview mode.
-    run(["open", `${base}?hidden-link=${width}#27/code`]);
-    assert.equal(evaluate("document.querySelector('[data-mode=\"interview\"]').getAttribute('aria-pressed')"), "true");
+    run(["open", `${base}?deep-code=${width}#27/code`]);
     assert.ok(evaluate("Boolean(document.querySelector('#code'))"));
-    clickRef(".app-header", /button "学习"/);
-    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), chapter.sections.length);
     assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
+    assert.equal(evaluate("document.querySelectorAll('.lesson-section').length"), chapter.sections.length);
 
     if (width < 1180) clickRef(".app-header", /button "打开本章目录"/);
     run(["scroll", "down", "700", "--selector", "#chapter-sidebar"]);
@@ -176,7 +174,7 @@ try {
       ["10", "math-position-extension"], ["11", "math-speculative-decoding"],
     ]) {
       run(["open", `${base}?new-topic=${width}#${id}`]);
-      run(["click", '[data-mode="interview"]']);
+      run(["click", ".formula-index > summary"]);
       run(["click", `.formula-index [data-section-link="${section}"]`]);
       assert.equal(evaluate("location.hash"), `#${id}/${section}`);
       assert.equal(evaluate(`document.querySelector('#${section} details').open`), true);
@@ -211,26 +209,19 @@ try {
     run(["screenshot", fileURLToPath(new URL(
       `../artifacts/${prefix}-glossary-${width}x${height}.png`, import.meta.url))]);
 
-    // First-pass guide links, keyboard disclosure and mode anchors on revised lessons.
+    // First-pass guide links and keyboard disclosure on revised lessons.
     for (const id of ["01", "02", "30", "24"]) {
       run(["open", `${base}?reading-guide=${width}#${id}`]);
-      run(["click", '[data-mode="learn"]']);
       const topic = id === "24" ? "math-paired-inference" : "derivation";
       run(["click", `.reading-guide [data-section-link="${topic}"]`]);
       assert.equal(evaluate("location.hash"), `#${id}/${topic}`);
       assert.equal(evaluate(`document.querySelector('#${topic} details').open`), true);
-      run(["click", '[data-mode="interview"]']);
-      run(["click", '[data-mode="learn"]']);
-      assert.equal(evaluate("location.hash"), `#${id}/${topic}`);
-      assert.equal(evaluate("document.querySelectorAll('.derivation-disclosure[open]').length"), 0);
-      const y = evaluate(`document.querySelector('#${topic}').getBoundingClientRect().top`);
-      assert.ok(y >= 58 && y < 180, `${id}: mode anchor at ${y}`);
       assert.ok(evaluate(`document.querySelector('#${topic} .topic-takeaway').checkVisibility()`));
+      const y = evaluate(`document.querySelector('#${topic}').getBoundingClientRect().top`);
+      assert.ok(y >= 58 && y < 180, `${id}: section anchor at ${y}`);
       run(["screenshot", fileURLToPath(new URL(
         `../artifacts/${prefix}-${id}-folded-${width}x${height}.png`, import.meta.url))]);
       run(["click", `#${topic} summary`]);
-      assert.equal(evaluate(`document.querySelector('#${topic} details').open`), true);
-      run(["press", "Enter"]);
       assert.equal(evaluate(`document.querySelector('#${topic} details').open`), false);
       run(["press", "Enter"]);
       assert.equal(evaluate(`document.querySelector('#${topic} details').open`), true);
@@ -238,14 +229,14 @@ try {
         `../artifacts/${prefix}-${id}-expanded-${width}x${height}.png`, import.meta.url))]);
     }
     report.viewports.push({ width, height, passed: true, tested: [
-      "v1 migration", "default chapter/count", "search directly to chapter 27 section", "learn/interview",
-      "problem first in both modes", "index folded in learn and open in interview", "native index summary toggle",
-      "learn folded / interview open", "collapse/expand all", "formula index reopens destination",
-      "whiteboard answer and completion persistence", "code deep link retains interview mode",
+      "v1 migration", "default chapter/count", "search directly to chapter 27 section",
+      "single reading form", "formula index folded by default and toggleable",
+      "collapse/expand all", "formula index reopens destination",
+      "whiteboard answer and completion persistence", "code deep link preserves fold state",
       "TOC jump", "derivation disclosure", "completion preserving disclosure", "refresh persistence",
       "clipboard write success", "quiz answer", "theme persistence", "drawer close", "invalid route",
       "four new topics via native index", "glossary hover/click/keyboard focus and bounds",
-      "01/02/30/24 guide links", "mode switch retains visible section", "takeaway remains visible",
+      "01/02/30/24 guide links", "takeaway remains visible",
       "keyboard opens and closes derivations", "folded and expanded lesson screenshots",
     ] });
     console.log(`${width}x${height}: native interaction acceptance passed`);

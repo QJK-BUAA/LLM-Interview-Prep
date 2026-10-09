@@ -25,7 +25,7 @@ function cloneState(state) {
   return {
     version: 2,
     currentChapter: state.currentChapter,
-    mode: state.mode,
+    mode: "learn",
     theme: state.theme,
     completed: Object.fromEntries(
       Object.entries(state.completed).map(([chapterId, sectionIds]) => [
@@ -75,7 +75,7 @@ function normalizeState(candidate) {
     currentChapter: chapterById.has(candidate.currentChapter)
       ? candidate.currentChapter
       : "00",
-    mode: candidate.mode === "interview" ? "interview" : "learn",
+    mode: "learn",
     theme: candidate.theme === "dark" ? "dark" : "light",
     completed,
   };
@@ -170,11 +170,8 @@ export function toggleSection(state, chapterId, sectionId) {
   return { ...normalized, completed };
 }
 
-export function setMode(state, mode) {
-  return {
-    ...normalizeState(state),
-    mode: mode === "interview" ? "interview" : "learn",
-  };
+export function setMode(state) {
+  return normalizeState(state);
 }
 
 export function setTheme(state, theme) {

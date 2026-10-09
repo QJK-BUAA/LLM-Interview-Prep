@@ -344,7 +344,7 @@ function renderSection(section, chapterId, completed, options) {
   } else if (section.type === "derivation") {
     content =
       takeawayHtml +
-      `<details class="derivation-disclosure"${options.mode === "interview" ? " open" : ""}>` +
+      `<details class="derivation-disclosure">` +
       `<summary>公式、手算与证明（展开 / 收起）</summary>${content}</details>`;
   } else if (section.type === "quiz") {
     content = renderQuiz(section, options);
@@ -384,22 +384,19 @@ function renderReadingGuide(chapter, guide) {
 }
 
 export function renderChapter(chapter, state = {}) {
-  const mode = state.mode === "interview" ? "interview" : "learn";
   const completed = new Set(state.completed?.[chapter.id] ?? []);
-  const sections = visibleSections(chapter, mode);
+  const sections = visibleSections(chapter);
   const seenTerms = new Set();
   const guide = READING_GUIDES[chapter.id];
-  const markdownOptions = { glossary: true, seenTerms, mode, guide };
+  const markdownOptions = { glossary: true, seenTerms, guide };
   const progress = Math.round((completed.size / chapter.sections.length) * 100);
   const sourceDocs = sourcesForChapter(chapter.id);
   const derivations = sections.filter(section => section.type === "derivation");
   const whiteboard = sections.find(section => section.id === "whiteboard");
   const formulaIndex = derivations.length ? (
-    `<details class="formula-index"${mode === "interview" ? " open" : ""}>` +
+    `<details class="formula-index">` +
     `<summary>本章公式与白板练习</summary>` +
-    `<p>${mode === "interview"
-      ? "完整推导已展开。先独立作答，再用手算、图解和代码检查。"
-      : "详细推导默认收起，要点始终可读。点击专题可直接展开，也可一次展开全部。"}题目答案需单独查看。</p>` +
+    `<p>详细推导默认收起，要点始终可读。点击专题可直接展开，也可一次展开全部。题目答案需单独查看。</p>` +
     `<ul>${derivations.map(section =>
       `<li><a href="#${encodeURIComponent(chapter.id)}/${encodeURIComponent(section.id)}" ` +
       `data-section-link="${escapeHtml(section.id)}">${escapeHtml(section.title)}</a></li>`,
@@ -442,9 +439,7 @@ export function renderChapter(chapter, state = {}) {
     `<h1>${escapeHtml(chapter.title)}</h1>` +
     `<p class="chapter-subtitle">${escapeHtml(chapter.subtitle)}</p>` +
     `<p class="chapter-summary">${summaryHtml}</p>` +
-    `<p class="reading-mode-note">${mode === "interview"
-      ? "面试模式：先尝试白板，再查完整推导、图解和代码。"
-      : "学习模式：先理解要点，再按需展开公式、手算与证明。"}</p>` +
+    `<p class="reading-mode-note">先理解要点，再按需展开公式、手算与证明；代码与图解始终可见。</p>` +
     `<div class="chapter-progress" aria-label="本章进度 ${progress}%">` +
     `<span style="width:${progress}%"></span></div>` +
     `</header>` +
