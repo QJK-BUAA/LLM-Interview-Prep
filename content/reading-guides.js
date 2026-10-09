@@ -14,10 +14,10 @@ export const READING_GUIDES = {
     },
   },
   "01": {
-    goal: "先给每个轴贴上样本、位置和特征的标签，再判断一次运算是否保留了归属。",
-    checkpoint: "能解释两句话怎样从 24 个输入数变成 36 个输出数，并说明 padding 为什么不计入平均。",
-    focus: ["derivation", "math-masked-mean"],
-    later: "先做形状自测。矩阵与广播反向在学完 02 的链式法则后回算；einsum 和拆头布局可在 09 使用时复习。",
+    goal: "从三人两列的记录读懂 shape，再让 Python 按行重复预测。",
+    checkpoint: "能取出乙的时长，算出 52、56、66，并预测改一个输入后哪项输出会改变。",
+    focus: ["example", "code", "comparison", "quiz", "derivation"],
+    later: "先完成读表、索引与运算自测。矩阵反向学完 02 再读，句子 mask 学完 08 再读，注意力拆头学完 09 再读。",
     topics: {
       derivation: "矩阵乘法把输入特征汇总成新特征，广播让同一偏置服务多个位置。检查维度能否相乘之后，还要检查输出里的每个数属于谁。",
       "math-matmul-backward": "共享权重要汇总所有使用位置的反馈，输入梯度则保留各自位置。例中的权重梯度 7 和 10 都由两行样本共同贡献。",
@@ -29,8 +29,8 @@ export const READING_GUIDES = {
   "02": {
     goal: "先掌握“串联相乘、分叉相加”，能解释梯度怎样指导一次小步更新。",
     checkpoint: "能沿两步计算得到梯度 384，并说明更新量为什么是学习率乘梯度，而不是直接减 384。",
-    focus: ["example", "derivation"],
-    later: "分三次回访：梯度与步长；特征方向、SVD 与 PCA；最小二乘、岭回归与 Lasso。七个专题无需一次背完。",
+    focus: ["example", "code", "quiz", "derivation"],
+    later: "先能解释平方的增量和一步更新，再进入 03。矩阵梯度与步长、SVD/PCA、回归正则化分别回访。",
     topics: {
       derivation: "每个参数的梯度都是“各条样本的误差乘该参数的影响”再汇总。矩阵式把这些求和缩写在一起，并没有换一套学习规则。",
       "math-quadratic": "下降方向对了，步子仍可能太大。碗形目标里最陡方向的曲率限制稳定步长；这个条件不能直接保证任意神经网络全局收敛。",
@@ -43,9 +43,9 @@ export const READING_GUIDES = {
   },
   "03": {
     goal: "分清观测、假设与估计：看到了两次正面，不等于知道硬币的真实概率。",
-    checkpoint: "能说清 MLE、MAP 和后验均值回答的不同问题，并用人数解释一次阳性结果。",
-    focus: ["math-bayes", "math-mle-map"],
-    later: "先理解硬币和检测例。熵/KL 的证明、区间覆盖及重要性采样分开复习，后训练中遇到分布比率再回查。",
+    checkpoint: "能算独立两次正反的概率，解释 2/3 是估计，以及真实结果概率提高时负对数损失为何变小。",
+    focus: ["example", "code", "quiz", "math-bayes"],
+    later: "先完成硬币自测，再读检测人数与样本波动；MLE/MAP、熵/KL 证明、区间与重加权分专题回访。",
     topics: {
       derivation: "交叉熵里既有数据本身的不确定性，也有模型分错概率的额外代价。KL 描述后者；它有方向，不能交换两边还当成同一个量。",
       "math-bayes": "阳性里有真患者，也有健康人的误报。先数两类各有多少人，再算阳性中的患者比例，才能避免忽略基率。",
@@ -58,7 +58,7 @@ export const READING_GUIDES = {
   "04": {
     goal: "先确定怎样算好，再学模型怎样改进；欺诈识别不能只看准确率。",
     checkpoint: "能解释为什么准确率更低的报警模型，反而把给定业务成本从 900 降到 300。",
-    focus: ["derivation", "math-logistic"],
+    focus: ["example", "code", "quiz", "math-logistic"],
     later: "按任务分轮读：概率分类；邻居与间隔；树与集成；聚类；排序与泛化。每次选一类完成手算，不连续刷十三套证明。",
     topics: {
       derivation: "Precision 看报警中有多少真问题，Recall 看真问题中找回多少。概率排序、概率校准和行动成本是三件事，阈值应服务实际代价。",
@@ -115,9 +115,9 @@ export const READING_GUIDES = {
   },
   "08": {
     goal: "把文字切成编号、编号变向量、向量变下一 token 概率这条链连起来。",
-    checkpoint: "能按频次完成两轮 BPE，并指出 padding、真实标签和采样候选分别在哪一步处理。",
-    focus: ["derivation", "math-truncated-sampling"],
-    later: "先理解查表与标签，再学温度和截断；Unigram、共享 embedding 反向和困惑度分母按需要回访。",
+    checkpoint: "能把“机器学习”查成两行向量，写出 [1,2,2] 的轴含义，并指出下一 token 的目标。",
+    focus: ["example", "diagram", "code", "quiz"],
+    later: "查表走通后再读 BPE 两轮合并、Unigram 与温度采样；共享 embedding 反向和困惑度按需要回访。",
     topics: {
       "math-tokenizer-objectives": "BPE 每轮选当前最高频相邻对，Unigram 则考虑同一文本的多种切分概率。压缩计数和最大化切分似然是不同目标。",
       derivation: "Embedding 按 token ID 取一行向量；输出头再把隐藏状态变成下一 token 分布。位置 t 的预测必须配位置 t+1 的标签。",
@@ -291,7 +291,7 @@ export const READING_GUIDES = {
     goal: "追踪一条训练数据的来源、验证、采样与权重，而不只数数据条数。",
     checkpoint: "能解释八条中两条成功为什么不等于 pass@8 为 25%，以及等条数为什么不等于等 token。",
     focus: ["math-pass-k-proof", "math-weight-verifier"],
-    later: "先走通分页修复例，再读动态筛选与补采成本；不同通过率和有效组率不要混成一个指标。",
+    later: "先走通分页修复例，再读动态筛选与补采成本；六类获取路线在本章对比部分，按缺少的资源查阅。",
     topics: {
       derivation: "SFT 消费值得模仿的目标，RL 还需要可探索任务和可信反馈。成功率、组内差异、领域权重分别指导不同决策。",
       "math-pass-k-proof": "至少一次成功与单次成功是不同问题。有限样本用子集计数估 pass@k，还要区分有好候选和能自动选中好候选。",
@@ -302,8 +302,8 @@ export const READING_GUIDES = {
   "22": {
     goal: "读工业报告时先拆训练阶段、数据流和预算，避免只记模型缩写与分数。",
     checkpoint: "能解释教师完整答案与教师概率的区别，并分清论文数字和本章教学预算。",
-    focus: ["math-distillation-pipeline", "math-pipeline-budget"],
-    later: "先选一家报告走完整流程，再横向比较；领域分母与成本推导用于核对自己的复现条件。",
+    focus: ["example", "code", "quiz", "comparison"],
+    later: "先算选题与预算，再从对比部分选一家报告走完整流程。其他型号用于查阅，不要求背诵各版分数。",
     topics: {
       derivation: "查询优势、混合奖励与成本份额各有分母。某题有学习信号，不说明它最便宜；表内后训练费用也不包含全部研发。",
       "math-domain-normalization": "数学与代码各取一条样本，不等于两域各占一半目标。长代码平铺后占更多 token，等域训练需要显式权重。",
@@ -315,7 +315,7 @@ export const READING_GUIDES = {
     goal: "把长任务调度、概率一致性与教师监督分开，逐项解释系统收益。",
     checkpoint: "能说清 16 个 token、8 秒、0.6 系数分别衡量什么，以及异步训练该用哪个概率分母。",
     focus: ["math-async-ratio", "math-agent-budget"],
-    later: "先跟一条仓库任务走完，再深入跨阶段 OPD 的梯度；报告中的优化与调度不是同一套公式。",
+    later: "先跟一条仓库任务走完，再深入跨阶段 OPD 的梯度；各公司报告集中在对比部分，按机制查阅。",
     topics: {
       derivation: "奖励、教师差值和安全评分作用不同。CISPO 权重不等于 PPO 的目标裁剪，安全分只有为零时才完全抹去乘积奖励。",
       "math-async-ratio": "旧推理、旧训练和当前训练的概率可能都不同。实际采样分母必须反映当时的引擎、上下文与采样规则。",
@@ -351,7 +351,7 @@ export const READING_GUIDES = {
     goal: "分开判断奖励有没有意义、估计有没有偏差、更新有没有被少数样本支配。",
     checkpoint: "能解释 IG 为 1、清单分 0.7 和 ESS 比例 0.429 为什么不能当成三种成功率。",
     focus: ["math-potential-shaping", "math-reward-noise"],
-    later: "先理解三项验收，再挑奖励塑形、熵、评分噪声或后缀校正专题；方法地图用来查问题，不作背诵清单。",
+    later: "先理解三项验收，再挑奖励塑形、熵、评分噪声或后缀校正专题；完整方法说明在对比部分，带“方法专题”标记的题供回访。",
     topics: {
       derivation: "信息代理、后轮策略与基准都会改变先前动作的评价。减去基准是否无偏，取决于独立性，不能只看它是否停止梯度。",
       "math-potential-shaping": "把奖励提前分发，未必保持原任务偏好。势函数塑形的相消需要处理好起点、终点和截断残项。",

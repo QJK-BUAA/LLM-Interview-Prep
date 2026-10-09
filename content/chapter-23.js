@@ -1,36 +1,4 @@
-const chapter = {
-  id: "23",
-  slug: "industrial-kimi-minimax-glm",
-  part: "LLM 后训练",
-  title: "工业案例 II：Kimi、MiniMax、GLM 与闭源模型",
-  subtitle: "长程 Agent 的训练对象不仅是答案，还包括轨迹、工具与调度",
-  level: "进阶",
-  duration: 190,
-  prerequisites: ["16", "17", "18", "19", "20", "21", "22"],
-  tags: [
-    "Kimi K1.5", "Kimi K2", "Kimi K2.5", "Partial Rollout", "MuonClip",
-    "MiniMax-01", "MiniMax-M1", "MiniMax-M2", "MiniMax-M2.5", "MiniMax-M2.7",
-    "CISPO", "Forge", "GLM-5", "TITO", "OPD", "Deliberative Alignment",
-  ],
-  objectives: [
-    "解释 Kimi 的 partial rollout、long2short、MuonClip 与 PARL 分别解决什么",
-    "区分 MiniMax 各代的长上下文、CISPO 和 Agent 训练系统",
-    "手算被裁剪 IS 权重的梯度系数、轨迹掩码与并行关键路径",
-    "用 GLM-5 解释 interleaved thinking、TITO 和跨阶段 OPD",
-    "区分闭源公司的已公开对齐方法与未披露的完整产品配方",
-  ],
-  summary:
-    "从 Kimi 的分片与并行，到 MiniMax 的 CISPO 和 Forge，再到 GLM-5 的轨迹一致性与跨阶段蒸馏，工业 Agent RL 的关键是让反馈、生成、训练和环境相互对齐。闭源公司的公开安全方法同样值得学习，但不能据此补猜整套能力训练方案。",
-  sections: [
-    {
-      id: "intuition",
-      type: "intuition",
-      title: "先建立直觉：修复仓库时，模型更新了而任务还没结束",
-      body: String.raw`一个代码助手正在修复仓库：它先搜索文件，再编辑代码、运行测试，并根据报错继续修改。短任务已经完成，长任务还在等工具返回，而训练器可能已经更新了模型。现在的问题不只是修复是否正确，还包括这段动作是谁生成的、旧片段要不要重复训练，以及怎样缩短等待而不丢掉困难任务。
-
-第 22 章把单轮任务的阶段、数据与费用分开，本章继续把工具观察、轨迹边界和调度接进来，仍按任务、阶段、数据、奖励、系统、证据六个维度读报告。特别注意三个名字常被混为一谈：奖励 judge 判断回答或产物，价值 critic 预测前缀的未来回报，MuonClip 则属于优化器稳定化，三者不是同一种“打分与裁剪”。
-
-## Kimi K1.5：长推理能否训练，短回答如何保留能力
+const reportNotes = String.raw`## Kimi K1.5：长推理能否训练，短回答如何保留能力
 
 Kimi K1.5 从已有语言与多模态能力出发，以长 CoT 监督与长上下文 RL 扩展数学、代码等能力。报告使用 online policy mirror descent 的变体和结果反馈，并涉及 CoT RM；没有独立 value 网络不等于没有模型判分或数据筛选。
 
@@ -88,7 +56,43 @@ Forge 是这条路线的训练系统：训练、推理、Agent 解耦；Windowed
 
 OpenAI 的 Deliberative Alignment 和 Safe-Completions、Google 的 Gemini 报告、Anthropic 的 Constitutional AI 与历史 HH-RLHF，公开程度并不相同。它们提供安全规则、监督数据、AI 偏好或多模态奖励的具体证据，但不自动公开 o1/o3、Gemini 或 Claude 当前产品的全部能力训练。下方比较表只讨论原文披露的部分。
 
-回到未结束的仓库任务，可以把问题分开处理：切片与并行决定何时完成，动作记录决定用什么概率训练，教师反馈决定怎样保留能力，验收规则决定什么才算成功。下面分别用很小的数字计算这些作用，再讨论它们如何相互约束；不把不同公司的部件拼成一套声称已经部署的配方。`,
+这些案例分别改变切片调度、动作记录、训练信号和验收规则。借鉴时应逐项对照自己的系统，不能把不同公司的部件拼成一套声称已经部署的配方。`;
+
+const chapter = {
+  id: "23",
+  slug: "industrial-kimi-minimax-glm",
+  part: "LLM 后训练",
+  title: "工业案例 II：Kimi、MiniMax、GLM 与闭源模型",
+  subtitle: "长程 Agent 的训练对象不仅是答案，还包括轨迹、工具与调度",
+  level: "进阶",
+  duration: 190,
+  prerequisites: ["16", "17", "18", "19", "20", "21", "22"],
+  tags: [
+    "Kimi K1.5", "Kimi K2", "Kimi K2.5", "Partial Rollout", "MuonClip",
+    "MiniMax-01", "MiniMax-M1", "MiniMax-M2", "MiniMax-M2.5", "MiniMax-M2.7",
+    "CISPO", "Forge", "GLM-5", "TITO", "OPD", "Deliberative Alignment",
+  ],
+  objectives: [
+    "解释长任务切片如何改变等待，而不减少总生成量",
+    "手算并行关键路径，并区分延迟和总工作量",
+    "用动作掩码、行为概率与版本信息追踪一条训练轨迹",
+    "结合一个报告案例，区分调度、优化与教师监督",
+    "区分已公开机制与未披露的产品训练配方",
+  ],
+  summary:
+    "从 Kimi 的分片与并行，到 MiniMax 的 CISPO 和 Forge，再到 GLM-5 的轨迹一致性与跨阶段蒸馏，工业 Agent RL 的关键是让反馈、生成、训练和环境相互对齐。闭源公司的公开安全方法同样值得学习，但不能据此补猜整套能力训练方案。",
+  sections: [
+    {
+      id: "intuition",
+      type: "intuition",
+      title: "修复还没结束，模型已经更新了怎么办？",
+      body: String.raw`一个代码助手先搜索文件，再编辑、运行测试，根据报错继续修改。短任务已经完成，长任务还在等工具，而训练器已经更新了模型。这时既要缩短等待，又要知道每一段动作由哪个版本生成。
+
+先区分三件事。切片让长任务分几段生成，可以减少某一批次的等待；并行让互不依赖的任务同时进行，可以缩短总用时；训练目标决定哪些动作得到怎样的更新。这三种改变对应不同数字，不能统称为“效率提高”。
+
+工具返回属于助手看见的环境信息，助手发出的调用才是它选择的动作。即使旧片段不再计入当前损失，它仍是后续生成的上下文，因此需要保留 token、版本和边界。
+
+下面先用 12 与 4 个 token 计算切片，用 4、6、3 秒计算并行，再接回第 20 章的更新系数。Kimi、MiniMax、GLM 的报告细节放在后面的案例对比，先选一个机制读懂，再查对应模型。`,
     },
     {
       id: "example",
@@ -388,7 +392,11 @@ assert isclose(0.6 * 1.0, 0.6)
       id: "comparison",
       type: "comparison",
       title: "比较表：开放机制与公开对齐各学到什么",
-      body: String.raw`| 系列 | 主要阶段或数据 | 反馈与系统重点 | 必须保留的边界 |
+      body: String.raw`按问题查案例：等待长任务看切片和并行，训推不一致看版本与 token 流，能力回退看教师监督。报告中的具体收益只对应其披露的模型与条件。
+
+${reportNotes}
+
+| 系列 | 主要阶段或数据 | 反馈与系统重点 | 必须保留的边界 |
 |---|---|---|---|
 | Kimi K1.5 | 长 CoT 监督、长上下文 RL、long2short | 结果/CoT 反馈，Partial Rollout | 分片不省总 token，压短存在准确率代价 |
 | Kimi K2 | 工具规格、任务 rubric、合成轨迹、SFT/RL | 真实加合成环境，自评偏好；MuonClip 属预训练 | judge critic 不等于 value critic |
@@ -442,16 +450,16 @@ Deliberative Alignment 的“规范生成、推理、过滤”是构造 SFT 数�
           a: "没有。总生成仍为 12 token，改变的是调度与同步等待。旧片段要保留上下文、行为策略和奖励归属；它们不会自动成为当前策略的新样本。",
         },
         {
-          q: "QK-Clip 是检测 Q/K 谱范数后截断 RL 概率比吗？",
-          a: "不是。Kimi K2 的 QK-Clip 依据当前 batch 的最大 attention logit 缩放相关 Q/K 投影，属于 MuonClip 的预训练稳定措施，不是 policy ratio clipping。",
+          q: "工具返回与助手新生成的片段都在上下文中，是否都应计入助手的策略损失？",
+          a: "不应。工具返回是环境信息，要供后续动作读取；助手实际生成的动作才对应其行为概率和策略损失。上下文可见性与损失掩码是不同问题。",
         },
         {
           q: "CISPO 中 ratio=2、区间 [0.8,1.2]、优势=-0.5 时，未归一化的 log-prob 梯度系数是多少？",
           a: "冻结后的权重为 1.2，系数为 -0.6；若目标是最大化 J，会降低该 token 的倾向。不能因为权重被裁剪就断言梯度为零。",
         },
         {
-          q: "Zero-Vision SFT 是否意味着 Kimi K2.5 在训练期间从未使用图像？",
-          a: "不是。它限定视觉 SFT 样本的使用，此前有图文联合预训练，之后还有视觉 RL。early fusion 的相关消融研究视觉数据进入预训练的时间和比例。",
+          q: "三个独立任务耗时 4、6、3 秒，编排与汇总另需 2 秒。串行与理想并行各多久？若第三个依赖第二个，还能用相同公式吗？",
+          a: "串行 15 秒，独立且资源足够时并行为 max(4,6,3)+2=8 秒。若第三个依赖第二个，关键路径变成 max(4,6+3)+2=11 秒，不能把依赖任务当成同时开始。",
         },
         {
           q: "Windowed FIFO 是把队列里最老的未完成任务直接丢弃吗？",
@@ -462,8 +470,8 @@ Deliberative Alignment 的“规范生成、推理、过滤”是构造 SFT 数�
           a: "信号来自前序 checkpoint 教师与当前学生的 token log-prob 差，不依赖组内奖励均值；教师也不必读取参考答案，所以不等于同模型加 privileged context 的 OPSD。",
         },
         {
-          q: "M2.7 比 M2.5 的某个 Agent benchmark 更高，能推出所有能力都提高吗？",
-          a: "不能。系列报告 Table 4 中多个 Agent 指标提高，但 MMLU-Pro 为 85.2 到 81.8。必须按任务、脚手架和推理设置报告，并做能力回归。",
+          q: "新版本修复任务更准，但常识测试变差。下一轮评估应怎样安排？",
+          a: "保留修复任务与已有能力的独立测试，按相同设置分别报告变化。不能只展示上涨的一项；若引入教师保留旧能力，还要用保留集确认是否真正恢复。",
         },
         {
           q: "安全乘积奖励在 safety=0 时为零，是否证明部署后永远安全？",

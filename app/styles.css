@@ -1103,6 +1103,13 @@ table {
   line-height: 1.55;
 }
 
+/* These introductory examples have only three short columns. Keep the
+   sample, feature values and lookup result visible together on a phone. */
+.chapter[data-chapter-id="01"] #example table,
+.chapter[data-chapter-id="08"] #example table {
+  min-width: 0;
+}
+
 th,
 td {
   padding: 10px 12px;

@@ -262,7 +262,9 @@ $$J_N=\frac{\operatorname{diag}(\gamma)}r
       id: "code",
       type: "code",
       title: "代码实验：从二值 mask 到完整 decoder-only 前向",
-      body: String.raw`接第 08 章的 input_ids 和 0/1 attention_mask，两者都是 $[B,S]$。本例使用绝对位置 embedding 与 Pre-LN；第 10 章再讨论 RoPE 和 RMSNorm。下面省略训练循环与缓存，保留整网前向、全屏蔽行约定和一次标签错位。
+      body: String.raw`接第 08 章的 input_ids 和 0/1 attention_mask，两者都是 $[B,S]$。本例使用绝对位置 embedding 与 Pre-LN；第 10 章再讨论 RoPE 和 RMSNorm。下面包含可运行的小模型实例，省略训练循环与缓存。需要 PyTorch，可在 Python 虚拟环境中运行 python3 -m pip install torch。
+
+先读 decoder_block 中的归一化→Q/K/V→打分→加权→残差，再读 decoder_lm 的层循环。最后的小模型使用随机参数，只验证前向和损失能走通，不期待生成有意义的文字。
 
 model 持有 token_embedding、position_embedding、blocks、final_norm、lm_head。每个 block 的 norm1/norm2 是 LayerNorm，qkv 是 $H\to3H$ 线性层，wo 是 $H\to H$，ffn 是 $H\to F\to H$ 的逐位置非线性网络，num_heads 为头数；这些都是通常的 PyTorch 模块。位置表需覆盖本次有效长度。transpose 后先换回序列轴再 reshape，不能只凭元素数合并头。
 
@@ -323,10 +325,30 @@ def next_token_loss(logits, labels, attention_mask):
     return F.cross_entropy(logits[:, :-1][valid].float(),
                            targets[valid], reduction="mean")
 
-# labels = input_ids.clone()；按任务将 prompt/pad 标签设为 -100
-# logits = decoder_lm(input_ids, attention_mask, model)
-# loss = next_token_loss(logits, labels, attention_mask)
+# 构造一层、两个头的小模型，直接运行上面的前向函数。
+from types import SimpleNamespace
+from torch import nn
+
+torch.manual_seed(7)
+block = SimpleNamespace(
+    num_heads=2, norm1=nn.LayerNorm(4), norm2=nn.LayerNorm(4),
+    qkv=nn.Linear(4, 12), wo=nn.Linear(4, 4),
+    ffn=nn.Sequential(nn.Linear(4, 8), nn.ReLU(), nn.Linear(8, 4)),
+)
+model = SimpleNamespace(
+    token_embedding=nn.Embedding(6, 4),
+    position_embedding=nn.Embedding(8, 4),
+    blocks=[block], final_norm=nn.LayerNorm(4), lm_head=nn.Linear(4, 6),
+)
+input_ids = torch.tensor([[1, 2, 3, 0]])  # 三个真实 token 与一个补位
+attention_mask = torch.tensor([[1, 1, 1, 0]])
+logits = decoder_lm(input_ids, attention_mask, model)
+loss = next_token_loss(logits, input_ids.clone(), attention_mask)
+print("logits shape:", tuple(logits.shape))  # (1, 4, 6)
+print("loss finite:", bool(torch.isfinite(loss)))  # True
 ~~~
+
+输出的 (1,4,6) 表示一条输入、四个位置、每个位置给六个词表候选打分。有效预测配对只有 1→2、2→3；3→补位不计分。SimpleNamespace 只是把上面的模块按名称放在一起，实际训练通常用 nn.Module 管理模型参数。
 
 二值 mask 通过扩轴和布尔选择，把禁止分数变为负无穷；不能直接把 1/0 加到 scores。两键分数都为 0、mask=[1,0] 时，直接相加仍给 pad 约 0.269 的概率，本例则给 [1,0]。padding query 的整行权重按约定为零，避免依赖 loss mask 去“清除”前向 NaN。
 

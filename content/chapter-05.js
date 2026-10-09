@@ -39,7 +39,7 @@ const chapter = {
 
 $$z=w^\top x+b=0.5\times2+1\times(-1)+0.5=0.5$$
 
-使用 ReLU：
+使用 ReLU（Rectified Linear Unit，修正线性单元）：正数原样保留，负数变成零。max(0,z) 就是取 0 与 z 中较大的那个数：
 
 $$a=\max(0,z)=0.5$$
 
@@ -232,7 +232,9 @@ $$L(\delta)=\log(1+e^{-\delta}),\quad
       id: "code",
       type: "code",
       title: "代码实验：手写一个 ReLU 网络",
-      body: String.raw`下面只展示前向与反向核心，数组运算写成接近 NumPy 的形式。检查每个中间量的 shape，再理解公式会更稳。
+      body: String.raw`下面是可运行的 NumPy 代码，输入仍是 [2,-1]，这次并排放两个神经元，再用第二层汇总。首次使用 NumPy，可在已有 Python 虚拟环境中运行 python3 -m pip install numpy，然后保存代码并运行。
+
+np.array 把列表变成数值数组；@ 是矩阵乘法；.T 交换行列；np.maximum(z,0) 逐位置执行 ReLU；mean 求平均，size 统计元素数。以 g_ 开头的变量保存梯度。先跟随 z1、h、y_hat、loss 四个前向值，再检查反向。
 
 ~~~python
 import numpy as np
@@ -255,8 +257,11 @@ g_z1 = g_h * (z1 > 0)
 g_W1 = X.T @ g_z1
 
 print("shapes:", z1.shape, y_hat.shape, g_W1.shape, g_W2.shape)
+print("forward:", z1, h, y_hat)
 print("loss:", float(loss))
 ~~~
+
+前向应得到 z1=[[0.5,-0.7]]，ReLU 后 h=[[0.5,0]]，预测为 [[0.2]]，损失约 0.32。第二个神经元当前被 ReLU 截断；这正好对应基础自测中的负区间梯度。
 
 本例已按全部输出元素取平均，平均系数也已进入上游梯度，不能在各层再次除以 batch 大小。多输出任务需声明按样本还是按元素平均；真实训练还会处理 dtype、清空旧梯度并由优化器更新。手写一次后再用框架 autograd，可把每个 API 对应到计算图中的明确角色。`,
     },
