@@ -56,4 +56,4 @@
 - [x] Run `npm test`, `npm run validate`, KaTeX parsing, all existing Python math checks and lesson-code checks.
 - [x] Run browser layout and interaction checks at desktop, tablet and phone sizes, saving temporary artifacts outside the repository.
 - [x] Record actual modified chapters, retained calculations and validation scope; do not claim learning effectiveness without learner testing.
-- [ ] Commit only task files, push `main`, and verify GitHub Pages serves the new content.
+- [x] Commit only task files, push `main`, and verify GitHub Pages serves the new content.
