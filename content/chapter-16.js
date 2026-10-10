@@ -36,20 +36,23 @@ RLHF 与 RLVR 描述奖励来源，PPO 与 GRPO 描述更新算法。PPO 可以�
     {
       id: "example",
       type: "example",
-      title: "最小例子：一个 token 的 PPO clip",
-      body: String.raw`假设助手的一条解释已经被判为好于预期。连续训练同一批回答时，某个生成 token 的概率已经增加，还要不要继续给它同样的奖励？这里选另一个采样位置演示更新幅度，概率与优势不沿用上一章的两 token 数字。
+      title: "最小例子：好动作已经被提高很多，还要继续推吗？",
+      body: String.raw`助手生成一条回答后，优势判断其中某个动作好于预期。更新几轮后，这个动作相对 rollout 时的旧策略已经明显更常见。
 
-某 token 在 rollout 的旧策略概率为 0.20，更新后的当前策略概率为 0.26，概率比为：
+PPO 比较 current policy 与 old policy 对同一已采样动作的概率。clip 的目的不是把实际概率强行夹回区间，而是让某些已经变化过大的样本停止获得额外目标收益。
 
-$$r_t(\theta)=\frac{\pi_\theta(a_t|s_t)}
-{\pi_{\theta_{\mathrm{old}}}(a_t|s_t)}
-=\frac{0.26}{0.20}=1.3$$
+方向还取决于优势：
 
-设优势 $\hat A_t=2$，clip 范围 $\epsilon=0.2$。未截断项为 $1.3\times2=2.6$，截断比率为 1.2，对应 $1.2\times2=2.4$。PPO 最大化两者较小值，因此本样本贡献按 2.4 封顶，继续增加该动作概率不再获得额外目标收益。
+| 优势 | 动作概率变化 | PPO 的处理直觉 |
+|---|---|---|
+| 正 | 已明显提高 | 停止额外鼓励 |
+| 正 | 反而降低 | 继续纠正 |
+| 负 | 反而提高 | 继续压低 |
+| 负 | 已明显降低 | 停止额外惩罚 |
 
-若优势是 -2，策略应降低该动作概率。ratio 低于 0.8 后，min 使该样本继续降低概率不再获得额外目标收益，并不阻止实际 ratio 越界。PPO 对正负优势产生不同分支，不能简单理解为“把所有 ratio 数值夹进区间再乘”。
+因此“ratio 越界就没有梯度”并不成立，必须同时看越界方向与优势符号。
 
-2.4 是这一样本的目标贡献，不是把实际概率强制改成 0.24；共享参数上的其他样本仍可能继续改变它。再看 reference KL。即使当前策略与本轮 old policy 很接近，它们都可能已经逐轮远离最初 SFT reference。PPO clip 调整本批的更新激励；reference KL 惩罚累计行为偏移。两者比较对象与时间尺度都不同。接下来的路线会先说明这个“好于预期”的评分从哪里来，再分别处理两种距离。`,
+old policy 与 reference policy 也不是同一个对象。old policy 记录本轮数据由谁生成，用于控制局部更新；reference 通常是固定的 SFT 基准，用于限制多轮累计漂移。PPO clip 不能替代 reference KL。`,
     },
     {
       id: "roadmap",
@@ -326,16 +329,16 @@ PPO 相对 REINFORCE 的主要新增负担是 critic、old policy 逻辑与多�
       body: "回答时指出数据由谁生成、哪个模型更新。",
       questions: [
         {
-          q: "old probability=0.5，new probability=0.55，ratio 是多少？ε=0.2 时是否触发上界？",
-          a: "ratio=1.1，位于 [0.8,1.2]，不触发上界。",
+          q: "正优势动作已经相对 old policy 提高很多时，PPO clip 为什么会停止额外鼓励？",
+          a: "它希望限制同一批数据上的局部更新激励，避免少数样本持续把策略推远；这不是把实际概率硬性截断。",
         },
         {
           q: "reference policy 与 old policy 为什么不是同一个概念？",
           a: "reference 通常是固定 SFT 基准，约束长期漂移；old policy 是本轮 rollout 行为策略，用于 importance ratio，随迭代更新。",
         },
         {
-          q: "奖励模型对 chosen 打 8、rejected 打 7，和打 1、0 的 Bradley-Terry 偏好概率是否相同？",
-          a: "相同，因为都只看差值 1，概率均为 σ(1)。这说明奖励绝对平移不影响该偏好模型。",
+          q: "Bradley-Terry 偏好模型为什么主要关心 chosen 与 rejected 的分数差，而不是绝对分数平移？",
+          a: "偏好概率由两者的相对差决定；同时给两边加相同常数不会改变排序证据。这也说明奖励绝对零点未被该损失固定。",
         },
         {
           q: "PPO clip 能否替代 reference KL？",

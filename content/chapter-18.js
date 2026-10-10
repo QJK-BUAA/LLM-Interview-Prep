@@ -34,22 +34,22 @@ reference 很重要。若 chosen 本来就在基座中概率很高，当前策�
     {
       id: "example",
       type: "example",
-      title: "最小例子：四个 log 概率决定一对偏好",
-      body: String.raw`从助手的历史记录中取出同题两份解释，把标注者偏好的那份记为 chosen，另一份记为 rejected。我们不重新让它们比赛，而是分别询问当前模型和冻结基准：生成这份完整回答有多大可能？
+      title: "最小例子：偏好学习比较相对变化",
+      body: String.raw`同一个 prompt 有两份回答：标注者偏好 chosen，拒绝 rejected。DPO 同时让当前策略和冻结 reference 计算两份回答的序列概率。
 
-对某 prompt，当前策略给 chosen 与 rejected 的序列 log 概率分别为 -2.0 与 -3.0；reference 对应为 -2.5 与 -2.7。当前策略相对 reference 的变化：
+它比较的不是 chosen 绝对概率，而是两条回答相对 reference 的变化：
 
-$$\log\frac{\pi_\theta(y_w|x)}{\pi_{\mathrm{ref}}(y_w|x)}
-=-2.0-(-2.5)=0.5$$
+| 变化 | 偏好间隔是否改善 |
+|---|---|
+| chosen 相对提高更多 | 改善 |
+| rejected 相对下降更多 | 改善 |
+| 两边以相同比例一起变化 | 不变 |
 
-$$\log\frac{\pi_\theta(y_l|x)}{\pi_{\mathrm{ref}}(y_l|x)}
-=-3.0-(-2.7)=-0.3$$
+reference 提供起点：它告诉我们每条回答在训练前已经多容易生成。这样目标关注“当前策略相对基准是否更偏向 chosen”，而不是无条件提高所有偏好答案。
 
-用 $\Delta$ 记两种相对增幅之差，$\beta$ 为把差值映射成偏好 logit 的正系数，$\sigma$ 为 sigmoid。偏好 margin 为 $\Delta=0.5-(-0.3)=0.8$。若 $\beta=0.1$，DPO 分类 logit 为 0.08，模型认为 chosen 胜出的概率为 $\sigma(0.08)\approx0.52$，仍有继续学习空间。
+序列 log 概率来自 response token 的累加，因此回答长度会影响数值。若 chosen 与 rejected 长度系统性不同，需要单独检查长度偏差。
 
-注意序列 log 概率是 token log 概率之和。长回答自然累加更多负数，因此长度分布会影响 margin。使用相同 prompt 的成对数据可部分抵消，但 chosen 与 rejected 长度系统不同仍会形成偏差。
-
-若当前策略同时把两条回答都提高相同的相对 log-ratio，$\Delta$ 不变，DPO 不认为偏好改善。这体现了成对目标，也说明单看 chosen loss 不能诊断 DPO。约 0.52 是偏好模型的胜出概率，不是算术答案正确率，更不是生成 chosen 的概率。接下来要解释为什么这个分类 logit 恰好使用相对 reference 的差，而不是任意拼接四个数。`,
+DPO 的 pairwise accuracy 上升也不能证明 chosen 的绝对概率一定上升；可能是 rejected 下降得更快。诊断时必须分别记录两侧概率、相对间隔和真实生成质量。`,
     },
     {
       id: "roadmap",
@@ -331,8 +331,8 @@ IPO 的动机之一是避免 logistic 目标在可分数据上持续扩大 margi
       body: "先写出 current 与 reference 的四个序列 log 概率。",
       questions: [
         {
-          q: "current 相对 reference 对 chosen 提高 0.4、对 rejected 提高 0.1，DPO margin 是多少？",
-          a: "margin 为 0.4-0.1=0.3，再乘 β 后进入 sigmoid。",
+          q: "current 相对 reference 更偏向 chosen 时，DPO 的偏好间隔应朝什么方向变化？",
+          a: "应增大。它比较 chosen 与 rejected 的相对 log-ratio 差，而不是只观察 chosen 的绝对概率。",
         },
         {
           q: "DPO 的 pairwise accuracy 上升，能否证明 chosen 的绝对概率上升？",
